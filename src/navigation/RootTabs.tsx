@@ -1,3 +1,4 @@
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from 'react-native-paper';
@@ -13,6 +14,7 @@ import { ProfileScreen } from '../screens/ProfileScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 
 const Tab = createBottomTabNavigator<any>();
+const Stack = createNativeStackNavigator<any>();
 
 const TAB_ICONS: Record<string, { focused: keyof typeof Ionicons.glyphMap; default: keyof typeof Ionicons.glyphMap }> = {
   HomeTab: { focused: 'train', default: 'train-outline' },
@@ -24,7 +26,7 @@ const TAB_ICONS: Record<string, { focused: keyof typeof Ionicons.glyphMap; defau
   SettingsTab: { focused: 'cog', default: 'cog-outline' },
 };
 
-export function RootTabs() {
+function TabNavigator() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -34,41 +36,34 @@ export function RootTabs() {
         headerShown: false,
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
+        tabBarShowLabel: true,
         tabBarStyle: {
-          backgroundColor: theme.colors.elevation.level2,
+          height: 70,
+          paddingBottom: 10,
+          paddingTop: 8,
           borderTopWidth: 0,
           elevation: 0,
-          height: Platform.OS === 'ios' ? 88 : 72 + insets.bottom,
-          paddingTop: 8,
-          paddingBottom: Platform.OS === 'ios' ? 28 : insets.bottom + 18,
+          backgroundColor: theme.colors.elevation.level2,
+        },
+        tabBarItemStyle: {
+          paddingVertical: 8,
         },
         tabBarLabelStyle: {
           fontSize: 12,
-          fontWeight: '500',
-          marginTop: 2,
+          fontWeight: '600',
         },
         tabBarIcon: ({ focused, color }) => {
           const icons = TAB_ICONS[route.name];
           const iconName = focused ? icons.focused : icons.default;
           return (
             <View
-              style={
-                focused
-                  ? {
-                    backgroundColor: theme.colors.primaryContainer,
-                    borderRadius: 999,
-                    width: 64,
-                    height: 32,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }
-                  : {
-                    width: 64,
-                    height: 32,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }
-              }
+              style={{
+                width: 64,
+                height: 32,
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: 'transparent',
+              }}
             >
               <Ionicons
                 name={iconName}
@@ -81,12 +76,20 @@ export function RootTabs() {
       })}
     >
       <Tab.Screen name="HomeTab" component={HomeStack} options={{ tabBarLabel: 'Home' }} />
-      <Tab.Screen name="SearchTab" component={ExploreStack} options={{ tabBarLabel: 'Explore' }} />
       <Tab.Screen name="MapTab" component={MapStack} options={{ tabBarLabel: 'Map' }} />
-      <Tab.Screen name="LinesTab" component={LinesStack} options={{ tabBarLabel: 'Lines' }} />
       <Tab.Screen name="AlertsTab" component={AlertsStack} options={{ tabBarLabel: 'Alerts' }} />
       <Tab.Screen name="ProfileTab" component={ProfileScreen} options={{ tabBarLabel: 'Profile' }} />
       <Tab.Screen name="SettingsTab" component={SettingsScreen} options={{ tabBarLabel: 'Settings' }} />
     </Tab.Navigator>
+  );
+}
+
+export function RootTabs() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="MainTabs" component={TabNavigator} />
+      <Stack.Screen name="ExploreStack" component={ExploreStack} />
+      <Stack.Screen name="LinesStack" component={LinesStack} />
+    </Stack.Navigator>
   );
 }

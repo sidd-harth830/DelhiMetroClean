@@ -1,11 +1,13 @@
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Avatar, List, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 import { spacing } from '../theme';
 
 export function ProfileScreen() {
     const theme = useTheme();
     const insets = useSafeAreaInsets();
+    const navigation = useNavigation<any>();
 
     return (
         <ScrollView
@@ -18,6 +20,20 @@ export function ProfileScreen() {
                     Guest User
                 </Text>
             </View>
+
+            <List.Section>
+                <List.Subheader>Metro Features</List.Subheader>
+                <List.Item
+                    title="Metro Lines & Stations"
+                    left={(props) => <List.Icon {...props} icon="transit-connection" />}
+                    onPress={() => navigation.navigate('LinesStack')}
+                />
+                <List.Item
+                    title="Explore Delhi"
+                    left={(props) => <List.Icon {...props} icon="map-marker-radius" />}
+                    onPress={() => navigation.navigate('ExploreStack')}
+                />
+            </List.Section>
 
             <List.Section>
                 <List.Subheader>Preferences</List.Subheader>

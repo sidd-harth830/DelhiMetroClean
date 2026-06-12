@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Appbar, Button, Card, List, Surface, Text, useTheme } from 'react-native-paper';
+import { Appbar, Button, Card, List, SegmentedButtons, Surface, Text, useTheme } from 'react-native-paper';
 import { usePopularRoutesQuery, useNotificationsQuery, useStationPicker, useMetroLinesQuery } from '../hooks';
 import type { SelectedStation } from '../hooks/useStationPicker';
 import { StationPicker } from '../components/StationPicker';
@@ -79,196 +79,185 @@ export function HomeScreen() {
         keyboardShouldPersistTaps="handled"
       >
 
-      {/* Journey Planner Card */}
-      <View style={styles.plannerSection}>
-        {/* Station inputs with connecting line */}
-        <View style={styles.stationsBlock}>
-          {/* Vertical connector on the left */}
-          <View style={styles.connectorColumn}>
-            <View style={[styles.connectorDot, { backgroundColor: semantic.success }]} />
-            <View style={[styles.connectorLine, { backgroundColor: theme.colors.outlineVariant, opacity: 0.4 }]} />
-            <View style={[styles.connectorDot, { backgroundColor: theme.colors.error }]} />
-          </View>
-
-          {/* Input fields */}
-          <View style={styles.inputsColumn}>
-            <Pressable
-              style={[styles.stationInput, { backgroundColor: isDark ? theme.colors.elevation.level2 : theme.colors.surfaceVariant }]}
-              onPress={fromPicker.open}
-            >
-              <Text
-                variant="bodyLarge"
-                style={{ flex: 1, color: fromPicker.station ? theme.colors.onSurface : theme.colors.outline, fontWeight: fromPicker.station ? '600' : '400' }}
-                numberOfLines={1}
-              >
-                {fromPicker.station?.name ?? 'Where from?'}
-              </Text>
-              <Ionicons name="chevron-forward" size={16} color={theme.colors.outline} />
-            </Pressable>
-
-            <Pressable
-              style={[styles.stationInput, { backgroundColor: isDark ? theme.colors.elevation.level2 : theme.colors.surfaceVariant }]}
-              onPress={toPicker.open}
-            >
-              <Text
-                variant="bodyLarge"
-                style={{ flex: 1, color: toPicker.station ? theme.colors.onSurface : theme.colors.outline, fontWeight: toPicker.station ? '600' : '400' }}
-                numberOfLines={1}
-              >
-                {toPicker.station?.name ?? 'Where to?'}
-              </Text>
-              <Ionicons name="chevron-forward" size={16} color={theme.colors.outline} />
-            </Pressable>
-          </View>
-
-          {/* Swap button on the right */}
-          <Pressable
-            style={[styles.swapBtn, { backgroundColor: isDark ? theme.colors.elevation.level3 : theme.colors.surfaceVariant }]}
-            onPress={handleSwap}
-          >
-            <Ionicons name="swap-vertical" size={20} color={theme.colors.primary} />
-          </Pressable>
-        </View>
-
-        {/* Time chips row */}
-        <View style={styles.timeRow}>
-          <Ionicons name="time-outline" size={16} color={theme.colors.onSurfaceVariant} />
-          <View style={styles.timeChips}>
-            {[
-              { label: 'Now', value: 0 },
-              { label: '+15m', value: 15 },
-              { label: '+30m', value: 30 },
-              { label: '+1h', value: 60 },
-            ].map((option) => {
-              const isActive = departureOffsetMinutes === option.value;
-              return (
-                <Pressable
-                  key={option.label}
-                  style={[
-                    styles.timeChip,
-                    {
-                      backgroundColor: isActive
-                        ? theme.colors.primary
-                        : isDark ? theme.colors.elevation.level2 : theme.colors.surfaceVariant,
-                    },
-                  ]}
-                  onPress={() => setDepartureOffsetMinutes(option.value)}
-                >
-                  <Text
-                    variant="labelMedium"
-                    style={{
-                      color: isActive ? theme.colors.onPrimary : theme.colors.onSurfaceVariant,
-                      fontWeight: isActive ? '700' : '500',
-                    }}
-                  >
-                    {option.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
-
-        {/* Find Route button */}
-        <Button
-          mode="contained"
-          onPress={handleFindRoute}
-          disabled={!canSearch}
-          icon="navigation"
-          style={styles.findButton}
-          contentStyle={{ paddingVertical: 8 }}
-          labelStyle={{ fontSize: 16, fontWeight: '700' }}
-        >
-          Find Route
-        </Button>
-      </View>
-
-      {/* Disruption banner — only shown when lines have issues */}
-      {disruptedLines.length > 0 && (
-        <Pressable
-          style={[
-            styles.disruptionBanner,
-            { backgroundColor: isDark ? theme.colors.elevation.level2 : '#FFF8EC' },
-          ]}
-          onPress={() => navigation.getParent()?.navigate('AlertsTab' as never)}
-        >
-          <View style={styles.disruptionLeft}>
-            <View style={[styles.disruptionIconWrap, { backgroundColor: isDark ? 'rgba(255,185,70,0.15)' : 'rgba(255,185,70,0.25)' }]}>
-              <Ionicons name="warning" size={16} color="#FFB946" />
+        {/* Journey Planner Card */}
+        <View style={styles.plannerSection}>
+          {/* Station inputs with connecting line */}
+          <View style={styles.stationsBlock}>
+            {/* Vertical connector on the left */}
+            <View style={styles.connectorColumn}>
+              <View style={[styles.connectorDot, { backgroundColor: semantic.success }]} />
+              <View style={[styles.connectorLine, { backgroundColor: theme.colors.outlineVariant, opacity: 0.4 }]} />
+              <View style={[styles.connectorDot, { backgroundColor: theme.colors.error }]} />
             </View>
-            <View style={styles.disruptionText}>
-              <Text variant="labelLarge" style={{ color: isDark ? '#FFB946' : '#7A4F00', fontWeight: '700' }}>
-                Service Disruptions
-              </Text>
-              <View style={styles.disruptionChips}>
-                {disruptedLines.map((line) => (
-                  <View
-                    key={line.id}
-                    style={[styles.disruptionChip, { backgroundColor: line.primary_color_code }]}
-                  >
-                    <Text style={styles.disruptionChipText}>{line.line_code}</Text>
-                  </View>
-                ))}
+
+            {/* Input fields */}
+            <View style={styles.inputsColumn}>
+              <Pressable
+                style={[styles.stationInput, { backgroundColor: isDark ? theme.colors.elevation.level2 : theme.colors.surfaceVariant }]}
+                onPress={fromPicker.open}
+              >
+                <Text
+                  variant="bodyLarge"
+                  style={{ flex: 1, color: fromPicker.station ? theme.colors.onSurface : theme.colors.outline, fontWeight: fromPicker.station ? '600' : '400' }}
+                  numberOfLines={1}
+                >
+                  {fromPicker.station?.name ?? 'Where from?'}
+                </Text>
+                <Ionicons name="chevron-forward" size={16} color={theme.colors.outline} />
+              </Pressable>
+
+              <Pressable
+                style={[styles.stationInput, { backgroundColor: isDark ? theme.colors.elevation.level2 : theme.colors.surfaceVariant }]}
+                onPress={toPicker.open}
+              >
+                <Text
+                  variant="bodyLarge"
+                  style={{ flex: 1, color: toPicker.station ? theme.colors.onSurface : theme.colors.outline, fontWeight: toPicker.station ? '600' : '400' }}
+                  numberOfLines={1}
+                >
+                  {toPicker.station?.name ?? 'Where to?'}
+                </Text>
+                <Ionicons name="chevron-forward" size={16} color={theme.colors.outline} />
+              </Pressable>
+            </View>
+
+            {/* Swap button on the right */}
+            <Pressable
+              style={[styles.swapBtn, { backgroundColor: isDark ? theme.colors.elevation.level3 : theme.colors.surfaceVariant }]}
+              onPress={handleSwap}
+            >
+              <Ionicons name="swap-vertical" size={20} color={theme.colors.primary} />
+            </Pressable>
+          </View>
+
+          {/* Time chips row */}
+          <View style={styles.timeRow}>
+            <Ionicons name="time-outline" size={16} color={theme.colors.onSurfaceVariant} />
+            <View style={{ flex: 1 }}>
+              <SegmentedButtons
+                value={String(departureOffsetMinutes)}
+                onValueChange={(val) => setDepartureOffsetMinutes(Number(val))}
+                density={0}
+                // @ts-expect-error - Hide selection checkmark to prevent text overflow
+                showSelectedCheck={false}
+                buttons={[
+                  { label: 'Now', value: '0' },
+                  { label: '+15m', value: '15' },
+                  { label: '+30m', value: '30' },
+                  { label: '+1h', value: '60' },
+                ].map((btn) => ({
+                  ...btn,
+                  showSelectedCheck: false,
+                  // @ts-expect-error - Inject Text props
+                  numberOfLines: 1,
+                  adjustsFontSizeToFit: true,
+                  minimumFontScale: 0.8,
+                  labelStyle: { flexWrap: 'nowrap', letterSpacing: 0 },
+                }))}
+              />
+            </View>
+          </View>
+
+          {/* Find Route button */}
+          <Button
+            mode="contained"
+            onPress={handleFindRoute}
+            disabled={!canSearch}
+            icon="navigation"
+            style={styles.findButton}
+            contentStyle={{ paddingVertical: 8 }}
+            labelStyle={{ fontSize: 16, fontWeight: '700' }}
+          >
+            Find Route
+          </Button>
+        </View>
+
+        {/* Disruption banner — only shown when lines have issues */}
+        {disruptedLines.length > 0 && (
+          <Pressable
+            style={[
+              styles.disruptionBanner,
+              { backgroundColor: isDark ? theme.colors.elevation.level2 : '#FFF8EC' },
+            ]}
+            onPress={() => navigation.getParent()?.navigate('AlertsTab' as never)}
+          >
+            <View style={styles.disruptionLeft}>
+              <View style={[styles.disruptionIconWrap, { backgroundColor: isDark ? 'rgba(255,185,70,0.15)' : 'rgba(255,185,70,0.25)' }]}>
+                <Ionicons name="warning" size={16} color="#FFB946" />
+              </View>
+              <View style={styles.disruptionText}>
+                <Text variant="labelLarge" style={{ color: isDark ? '#FFB946' : '#7A4F00', fontWeight: '700' }}>
+                  Service Disruptions
+                </Text>
+                <View style={styles.disruptionChips}>
+                  {disruptedLines.map((line) => (
+                    <View
+                      key={line.id}
+                      style={[styles.disruptionChip, { backgroundColor: line.primary_color_code }]}
+                    >
+                      <Text style={styles.disruptionChipText}>{line.line_code}</Text>
+                    </View>
+                  ))}
+                </View>
               </View>
             </View>
-          </View>
-          <Ionicons name="chevron-forward" size={16} color={isDark ? '#FFB946' : '#7A4F00'} />
-        </Pressable>
-      )}
+            <Ionicons name="chevron-forward" size={16} color={isDark ? '#FFB946' : '#7A4F00'} />
+          </Pressable>
+        )}
 
-      {/* Popular Routes */}
-      {(popularRoutes.data?.length ?? 0) > 0 && (
-        <>
-          <SectionHeader title="Popular Routes" />
-          <View style={styles.popularList}>
-            <Card mode="elevated" style={styles.popularCardContainer}>
-              {popularRoutes.data!.map((route, index) => (
-                <List.Item
-                  key={route.routeKey}
-                  title={`${route.fromStationCode} → ${route.toStationCode}`}
-                  titleStyle={{ fontWeight: '600' }}
-                  left={props => <List.Icon {...props} icon="train" color={theme.colors.primary} />}
-                  right={() => (
-                    <View style={[styles.hitsBadge, { backgroundColor: theme.colors.primaryContainer }]}>
-                      <Text variant="labelSmall" style={{ color: theme.colors.onPrimaryContainer, fontWeight: '700' }}>
-                        {route.hitCount}x
-                      </Text>
-                    </View>
-                  )}
-                  onPress={() => handlePopularRoute(route.fromStationCode, route.toStationCode)}
-                  style={index < popularRoutes.data!.length - 1 ? { borderBottomWidth: 1, borderBottomColor: theme.colors.surfaceVariant } : {}}
-                />
+        {/* Popular Routes */}
+        {(popularRoutes.data?.length ?? 0) > 0 && (
+          <>
+            <SectionHeader title="Popular Routes" />
+            <View style={styles.popularList}>
+              <Card mode="elevated" style={styles.popularCardContainer}>
+                {popularRoutes.data!.map((route, index) => (
+                  <List.Item
+                    key={route.routeKey}
+                    title={`${route.fromStationCode} → ${route.toStationCode}`}
+                    titleStyle={{ fontWeight: '600' }}
+                    left={props => <List.Icon {...props} icon="train" color={theme.colors.primary} />}
+                    right={() => (
+                      <View style={[styles.hitsBadge, { backgroundColor: theme.colors.primaryContainer }]}>
+                        <Text variant="labelSmall" style={{ color: theme.colors.onPrimaryContainer, fontWeight: '700' }}>
+                          {route.hitCount}x
+                        </Text>
+                      </View>
+                    )}
+                    onPress={() => handlePopularRoute(route.fromStationCode, route.toStationCode)}
+                    style={index < popularRoutes.data!.length - 1 ? { borderBottomWidth: 1, borderBottomColor: theme.colors.surfaceVariant } : {}}
+                  />
+                ))}
+              </Card>
+            </View>
+          </>
+        )}
+
+        {/* Recent Notifications */}
+        {(notifications.data?.length ?? 0) > 0 && (
+          <>
+            <SectionHeader title="Recent Alerts" />
+            <View style={styles.notifList}>
+              {notifications.data!.slice(0, 3).map((notif) => (
+                <NotificationCard key={notif.id} notification={notif} />
               ))}
-            </Card>
-          </View>
-        </>
-      )}
+            </View>
+          </>
+        )}
 
-      {/* Recent Notifications */}
-      {(notifications.data?.length ?? 0) > 0 && (
-        <>
-          <SectionHeader title="Recent Alerts" />
-          <View style={styles.notifList}>
-            {notifications.data!.slice(0, 3).map((notif) => (
-              <NotificationCard key={notif.id} notification={notif} />
-            ))}
-          </View>
-        </>
-      )}
-
-      <StationPicker
-        visible={fromPicker.visible}
-        onSelect={fromPicker.select as (s: { code: string; name: string }) => void}
-        onClose={fromPicker.close}
-        title="Departure Station"
-      />
-      <StationPicker
-        visible={toPicker.visible}
-        onSelect={toPicker.select as (s: { code: string; name: string }) => void}
-        onClose={toPicker.close}
-        title="Destination Station"
-      />
-    </ScrollView>
+        <StationPicker
+          visible={fromPicker.visible}
+          onSelect={fromPicker.select as (s: { code: string; name: string }) => void}
+          onClose={fromPicker.close}
+          title="Departure Station"
+        />
+        <StationPicker
+          visible={toPicker.visible}
+          onSelect={toPicker.select as (s: { code: string; name: string }) => void}
+          onClose={toPicker.close}
+          title="Destination Station"
+        />
+      </ScrollView>
     </View>
   );
 }
@@ -339,6 +328,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 999,
+    minWidth: 90,
+    paddingHorizontal: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+    flexWrap: 'nowrap',
   },
   // Find button
   findButton: {
@@ -357,6 +352,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 999,
+    flexDirection: 'row',
+    flexWrap: 'nowrap',
+    minWidth: 56,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   notifList: {
     gap: spacing.sm,

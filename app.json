@@ -2,7 +2,7 @@
   "expo": {
     "name": "Delhi Metro App",
     "slug": "DelhiMetroApp",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -13,6 +13,7 @@
     },
     "android": {
       "package": "com.siddharth.dmrc",
+      "usesCleartextTraffic": true,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -29,6 +30,12 @@
         "projectId": "d5a9f98e-de44-445e-a448-a26619eb91e6"
       }
     },
-    "owner": "siddharth-28"
+    "owner": "siddharth-28",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/d5a9f98e-de44-445e-a448-a26619eb91e6"
+    }
   }
 }
