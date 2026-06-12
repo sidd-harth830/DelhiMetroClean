@@ -1,20 +1,41 @@
+import { NavigationContainer } from '@react-navigation/native';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { PaperProvider } from 'react-native-paper';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-export default function App() {
+import { apiClient } from './src/api/client';
+import { queryClient } from './src/api/queryClient';
+import { DIProvider } from './src/di/DIContext';
+import { createServiceContainer } from './src/di/container';
+import { ThemeProvider, useAppTheme } from './src/theme';
+import { RootTabs } from './src/navigation/RootTabs';
+
+const container = createServiceContainer(apiClient);
+
+function AppInner() {
+  const { paperTheme, navTheme } = useAppTheme();
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <PaperProvider theme={paperTheme}>
+      <NavigationContainer theme={navTheme}>
+        <StatusBar style="auto" />
+        <RootTabs />
+      </NavigationContainer>
+    </PaperProvider>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <DIProvider container={container}>
+          <QueryClientProvider client={queryClient}>
+            <AppInner />
+          </QueryClientProvider>
+        </DIProvider>
+      </ThemeProvider>
+    </SafeAreaProvider>
+  );
+}
