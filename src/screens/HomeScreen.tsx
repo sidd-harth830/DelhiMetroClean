@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Surface, Text, useTheme } from 'react-native-paper';
+import { Appbar, Button, Card, List, Surface, Text, useTheme } from 'react-native-paper';
 import { usePopularRoutesQuery, useNotificationsQuery, useStationPicker, useMetroLinesQuery } from '../hooks';
 import type { SelectedStation } from '../hooks/useStationPicker';
 import { StationPicker } from '../components/StationPicker';
@@ -69,25 +69,15 @@ export function HomeScreen() {
   };
 
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: theme.colors.background }}
-      contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.lg }]}
-      keyboardShouldPersistTaps="handled"
-    >
-      {/* Hero */}
-      <View style={styles.hero}>
-        <View style={[styles.heroIcon, { backgroundColor: theme.colors.primaryContainer }]}>
-          <Ionicons name="train" size={28} color={theme.colors.onPrimaryContainer} />
-        </View>
-        <View>
-          <Text variant="headlineMedium" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
-            Delhi Metro
-          </Text>
-          <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-            Plan your journey
-          </Text>
-        </View>
-      </View>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <Appbar.Header elevated={false} style={{ backgroundColor: theme.colors.background }}>
+        <Appbar.Content title="Delhi Metro" subtitle="Plan your journey" titleStyle={{ fontWeight: '700' }} />
+      </Appbar.Header>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + spacing['4xl'] }]}
+        keyboardShouldPersistTaps="handled"
+      >
 
       {/* Journey Planner Card */}
       <View style={styles.plannerSection}>
@@ -180,31 +170,17 @@ export function HomeScreen() {
         </View>
 
         {/* Find Route button */}
-        <Pressable
-          style={[
-            styles.findButton,
-            {
-              backgroundColor: canSearch ? theme.colors.primary : (isDark ? theme.colors.elevation.level2 : theme.colors.surfaceVariant),
-            },
-          ]}
+        <Button
+          mode="contained"
           onPress={handleFindRoute}
           disabled={!canSearch}
+          icon="navigation"
+          style={styles.findButton}
+          contentStyle={{ paddingVertical: 8 }}
+          labelStyle={{ fontSize: 16, fontWeight: '700' }}
         >
-          <Ionicons
-            name="navigate"
-            size={20}
-            color={canSearch ? theme.colors.onPrimary : theme.colors.outline}
-          />
-          <Text
-            variant="titleSmall"
-            style={{
-              color: canSearch ? theme.colors.onPrimary : theme.colors.outline,
-              fontWeight: '700',
-            }}
-          >
-            Find Route
-          </Text>
-        </Pressable>
+          Find Route
+        </Button>
       </View>
 
       {/* Disruption banner — only shown when lines have issues */}
@@ -245,31 +221,25 @@ export function HomeScreen() {
         <>
           <SectionHeader title="Popular Routes" />
           <View style={styles.popularList}>
-            {popularRoutes.data!.map((route) => (
-              <Pressable
-                key={route.routeKey}
-                onPress={() => handlePopularRoute(route.fromStationCode, route.toStationCode)}
-              >
-                <Surface style={styles.popularCard} elevation={1}>
-                  <View style={styles.popularRoute}>
-                    <View style={[styles.popularDot, { backgroundColor: semantic.success }]} />
-                    <Text variant="labelLarge" style={{ color: theme.colors.onSurface }}>
-                      {route.fromStationCode}
-                    </Text>
-                    <Ionicons name="arrow-forward" size={14} color={theme.colors.outline} />
-                    <View style={[styles.popularDot, { backgroundColor: theme.colors.error }]} />
-                    <Text variant="labelLarge" style={{ color: theme.colors.onSurface }}>
-                      {route.toStationCode}
-                    </Text>
-                  </View>
-                  <View style={[styles.hitsBadge, { backgroundColor: theme.colors.primaryContainer }]}>
-                    <Text variant="labelSmall" style={{ color: theme.colors.onPrimaryContainer, fontWeight: '700' }}>
-                      {route.hitCount}x
-                    </Text>
-                  </View>
-                </Surface>
-              </Pressable>
-            ))}
+            <Card mode="elevated" style={styles.popularCardContainer}>
+              {popularRoutes.data!.map((route, index) => (
+                <List.Item
+                  key={route.routeKey}
+                  title={`${route.fromStationCode} → ${route.toStationCode}`}
+                  titleStyle={{ fontWeight: '600' }}
+                  left={props => <List.Icon {...props} icon="train" color={theme.colors.primary} />}
+                  right={() => (
+                    <View style={[styles.hitsBadge, { backgroundColor: theme.colors.primaryContainer }]}>
+                      <Text variant="labelSmall" style={{ color: theme.colors.onPrimaryContainer, fontWeight: '700' }}>
+                        {route.hitCount}x
+                      </Text>
+                    </View>
+                  )}
+                  onPress={() => handlePopularRoute(route.fromStationCode, route.toStationCode)}
+                  style={index < popularRoutes.data!.length - 1 ? { borderBottomWidth: 1, borderBottomColor: theme.colors.surfaceVariant } : {}}
+                />
+              ))}
+            </Card>
           </View>
         </>
       )}
@@ -299,6 +269,7 @@ export function HomeScreen() {
         title="Destination Station"
       />
     </ScrollView>
+    </View>
   );
 }
 
@@ -307,19 +278,6 @@ const styles = StyleSheet.create({
     padding: spacing.base,
     gap: spacing.lg,
     paddingBottom: spacing['4xl'],
-  },
-  // Hero
-  hero: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  heroIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   // Planner
   plannerSection: {
@@ -384,33 +342,16 @@ const styles = StyleSheet.create({
   },
   // Find button
   findButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    paddingVertical: 16,
+    marginTop: spacing.sm,
     borderRadius: 999,
   },
   // Popular
   popularList: {
     gap: spacing.sm,
   },
-  popularCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: spacing.md,
+  popularCardContainer: {
     borderRadius: 16,
-  },
-  popularRoute: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  popularDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    overflow: 'hidden',
   },
   hitsBadge: {
     paddingHorizontal: 8,

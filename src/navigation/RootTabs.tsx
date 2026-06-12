@@ -9,16 +9,19 @@ import { ExploreStack } from './ExploreStack';
 import { LinesStack } from './LinesStack';
 import { MapStack } from './MapStack';
 import { AlertsStack } from './AlertsStack';
-import type { RootTabParamList } from './types';
+import { ProfileScreen } from '../screens/ProfileScreen';
+import { SettingsScreen } from '../screens/SettingsScreen';
 
-const Tab = createBottomTabNavigator<RootTabParamList>();
+const Tab = createBottomTabNavigator<any>();
 
-const TAB_ICONS: Record<keyof RootTabParamList, { focused: keyof typeof Ionicons.glyphMap; default: keyof typeof Ionicons.glyphMap }> = {
+const TAB_ICONS: Record<string, { focused: keyof typeof Ionicons.glyphMap; default: keyof typeof Ionicons.glyphMap }> = {
   HomeTab: { focused: 'train', default: 'train-outline' },
   SearchTab: { focused: 'search', default: 'search-outline' },
   LinesTab: { focused: 'git-branch', default: 'git-branch-outline' },
   MapTab: { focused: 'map', default: 'map-outline' },
   AlertsTab: { focused: 'notifications', default: 'notifications-outline' },
+  ProfileTab: { focused: 'person-circle', default: 'person-circle-outline' },
+  SettingsTab: { focused: 'cog', default: 'cog-outline' },
 };
 
 export function RootTabs() {
@@ -29,7 +32,7 @@ export function RootTabs() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: theme.colors.onSecondaryContainer,
+        tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
         tabBarStyle: {
           backgroundColor: theme.colors.elevation.level2,
@@ -52,36 +55,38 @@ export function RootTabs() {
               style={
                 focused
                   ? {
-                      backgroundColor: theme.colors.secondaryContainer,
-                      borderRadius: 999,
-                      width: 64,
-                      height: 32,
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }
+                    backgroundColor: theme.colors.primaryContainer,
+                    borderRadius: 999,
+                    width: 64,
+                    height: 32,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }
                   : {
-                      width: 64,
-                      height: 32,
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }
+                    width: 64,
+                    height: 32,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }
               }
             >
               <Ionicons
                 name={iconName}
                 size={22}
-                color={focused ? theme.colors.onSecondaryContainer : color}
+                color={focused ? theme.colors.primary : color}
               />
             </View>
           );
         },
       })}
     >
-      <Tab.Screen name="HomeTab" component={HomeStack} options={{ tabBarLabel: 'Plan' }} />
-      <Tab.Screen name="SearchTab" component={ExploreStack} options={{ tabBarLabel: 'Search' }} />
-      <Tab.Screen name="LinesTab" component={LinesStack} options={{ tabBarLabel: 'Lines' }} />
+      <Tab.Screen name="HomeTab" component={HomeStack} options={{ tabBarLabel: 'Home' }} />
+      <Tab.Screen name="SearchTab" component={ExploreStack} options={{ tabBarLabel: 'Explore' }} />
       <Tab.Screen name="MapTab" component={MapStack} options={{ tabBarLabel: 'Map' }} />
+      <Tab.Screen name="LinesTab" component={LinesStack} options={{ tabBarLabel: 'Lines' }} />
       <Tab.Screen name="AlertsTab" component={AlertsStack} options={{ tabBarLabel: 'Alerts' }} />
+      <Tab.Screen name="ProfileTab" component={ProfileScreen} options={{ tabBarLabel: 'Profile' }} />
+      <Tab.Screen name="SettingsTab" component={SettingsScreen} options={{ tabBarLabel: 'Settings' }} />
     </Tab.Navigator>
   );
 }

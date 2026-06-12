@@ -1,5 +1,6 @@
-import { createContext, useContext, useMemo, type ReactNode } from 'react';
+import { createContext, useContext, useMemo, useState, useEffect, useCallback, type ReactNode } from 'react';
 import { Platform, useColorScheme } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   isDynamicThemeSupported,
   useMaterial3Theme,
@@ -23,6 +24,9 @@ const IS_ANDROID_12_PLUS =
   Platform.Version >= 31;
 const SHOULD_USE_DYNAMIC_THEME = IS_ANDROID_12_PLUS && isDynamicThemeSupported;
 const FALLBACK_SOURCE_COLOR = '#005FAF';
+const THEME_STORAGE_KEY = '@app_theme_mode';
+
+export type ThemeMode = 'system' | 'light' | 'dark' | 'amoled';
 
 function createPaperTheme(
   isDark: boolean,
@@ -101,6 +105,8 @@ interface AppTheme {
   navTheme: NavigationTheme;
   isDark: boolean;
   semantic: SemanticColors;
+  themeMode: ThemeMode;
+  setThemeMode: (mode: ThemeMode) => void;
 }
 
 const ThemeContext = createContext<AppTheme>({
@@ -108,6 +114,8 @@ const ThemeContext = createContext<AppTheme>({
   navTheme: NavigationDefaultTheme,
   isDark: false,
   semantic: lightScheme,
+  themeMode: 'system',
+  setThemeMode: () => { },
 });
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
@@ -116,12 +124,44 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     fallbackSourceColor: FALLBACK_SOURCE_COLOR,
   });
 
+  const [themeMode, setThemeModeState] = useState<ThemeMode>('system');
+
+  useEffect(() => {
+    AsyncStorage.getItem(THEME_STORAGE_KEY).then((mode) => {
+      if (mode === 'light' || mode === 'dark' || mode === 'amoled' || mode === 'system') {
+        setThemeModeState(mode as ThemeMode);
+      }
+    });
+  }, []);
+
+  const setThemeMode = useCallback((mode: ThemeMode) => {
+    setThemeModeState(mode);
+    AsyncStorage.setItem(THEME_STORAGE_KEY, mode).catch(() => { });
+  }, []);
+
   const value = useMemo<AppTheme>(() => {
-    const isDark = scheme === 'dark';
+    const isDark = themeMode === 'dark' || themeMode === 'amoled' || (themeMode === 'system' && scheme === 'dark');
+
     const lightMaterialScheme: Partial<MD3Theme['colors']> =
       SHOULD_USE_DYNAMIC_THEME ? materialTheme.light : lightScheme;
-    const darkMaterialScheme: Partial<MD3Theme['colors']> =
+    let darkMaterialScheme: Partial<MD3Theme['colors']> =
       SHOULD_USE_DYNAMIC_THEME ? materialTheme.dark : darkScheme;
+
+    if (themeMode === 'amoled') {
+      darkMaterialScheme = {
+        ...darkMaterialScheme,
+        background: '#000000',
+        surface: '#000000',
+        elevation: {
+          ...MD3DarkTheme.colors.elevation,
+          level1: '#111111',
+          level2: '#1a1a1a',
+          level3: '#222222',
+          level4: '#2a2a2a',
+          level5: '#333333',
+        },
+      };
+    }
 
     const materialLightTheme = createPaperTheme(false, lightMaterialScheme);
     const materialDarkTheme = createPaperTheme(true, darkMaterialScheme);
@@ -162,8 +202,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       navTheme: isDark ? navigationDarkTheme : navigationLightTheme,
       isDark,
       semantic: isDark ? darkScheme : lightScheme,
+      themeMode,
+      setThemeMode,
     };
-  }, [materialTheme.dark, materialTheme.light, scheme]);
+  }, [materialTheme.dark, materialTheme.light, scheme, themeMode, setThemeMode]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
