@@ -9,6 +9,7 @@ import { usePopularRoutesQuery, useNotificationsQuery, useStationPicker, useMetr
 import type { SelectedStation } from '../hooks/useStationPicker';
 import { StationPicker } from '../components/StationPicker';
 import { SectionHeader } from '../components/SectionHeader';
+import { TimeToggle } from '../components/TimeToggle';
 import { NotificationCard } from '../components/NotificationCard';
 import { useAppTheme } from '../theme/ThemeContext';
 import type { HomeStackParamList } from '../navigation/types';
@@ -131,32 +132,10 @@ export function HomeScreen() {
           </View>
 
           {/* Time chips row */}
-          <View style={styles.timeRow}>
-            <Ionicons name="time-outline" size={16} color={theme.colors.onSurfaceVariant} />
-            <View style={{ flex: 1 }}>
-              <SegmentedButtons
-                value={String(departureOffsetMinutes)}
-                onValueChange={(val) => setDepartureOffsetMinutes(Number(val))}
-                density={0}
-                // @ts-expect-error - Hide selection checkmark to prevent text overflow
-                showSelectedCheck={false}
-                buttons={[
-                  { label: 'Now', value: '0' },
-                  { label: '+15m', value: '15' },
-                  { label: '+30m', value: '30' },
-                  { label: '+1h', value: '60' },
-                ].map((btn) => ({
-                  ...btn,
-                  showSelectedCheck: false,
-                  // @ts-expect-error - Inject Text props
-                  numberOfLines: 1,
-                  adjustsFontSizeToFit: true,
-                  minimumFontScale: 0.8,
-                  labelStyle: { flexWrap: 'nowrap', letterSpacing: 0 },
-                }))}
-              />
-            </View>
-          </View>
+          <TimeToggle
+            value={departureOffsetMinutes}
+            onChange={setDepartureOffsetMinutes}
+          />
 
           {/* Find Route button */}
           <Button
@@ -312,28 +291,6 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  // Time
-  timeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  timeChips: {
-    flexDirection: 'row',
-    gap: spacing.xs,
-    flex: 1,
-  },
-  timeChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 999,
-    minWidth: 90,
-    paddingHorizontal: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'row',
-    flexWrap: 'nowrap',
   },
   // Find button
   findButton: {

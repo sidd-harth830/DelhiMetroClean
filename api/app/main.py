@@ -8,6 +8,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.dependencies import get_dmrc_client
 from app.api.dependencies import get_dmrc_frontend_client
@@ -43,6 +44,14 @@ app = FastAPI(
     ],
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.exception_handler(UpstreamApiError)
 async def handle_upstream_error(
@@ -62,6 +71,11 @@ async def handle_upstream_error(
             "upstream_status_code": exc.status_code,
         },
     )
+
+
+@app.get("/api/v1")
+def health_check():
+    return {"status": "healthy", "message": "Delhi Metro API is Live 24/7!"}
 
 
 app.include_router(api_router, prefix="/api/v1")

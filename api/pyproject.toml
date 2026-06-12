@@ -1,7 +1,7 @@
 [project]
 name = "api"
 version = "0.1.0"
-description = "Add your description here"
+description = "Delhi Metro Details Fetcher From Official Endpoints of DMRC."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
