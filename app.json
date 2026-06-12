@@ -1,15 +1,18 @@
 {
   "expo": {
-    "name": "DelhiMetroClean",
-    "slug": "DelhiMetroClean",
+    "name": "Delhi Metro App",
+    "slug": "DelhiMetroApp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "main": "index.ts",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.siddharth.dmrc"
     },
     "android": {
+      "package": "com.siddharth.dmrc",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -20,6 +23,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "d5a9f98e-de44-445e-a448-a26619eb91e6"
+      }
+    },
+    "owner": "siddharth-28"
   }
 }
