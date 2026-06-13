@@ -3,7 +3,9 @@ name: Automated Cloud Deployment
 on:
   push:
     branches:
-      - main # Triggers automatically when you push to the main branch
+      - main
+      - master # Added master just in case your git uses the older naming!
+  workflow_dispatch: # THIS ADDS A MANUAL "RUN" BUTTON ON GITHUB!
 
 permissions:
   contents: write # Allows the GitHub bot to create Releases
