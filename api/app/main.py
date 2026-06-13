@@ -7,7 +7,7 @@ errors to HTTP errors suitable for client integrations.
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.dependencies import get_dmrc_client
@@ -71,6 +71,11 @@ async def handle_upstream_error(
             "upstream_status_code": exc.status_code,
         },
     )
+
+
+@app.get("/", include_in_schema=False)
+def root_redirect():
+    return RedirectResponse(url='/docs')
 
 
 @app.get("/api/v1")
