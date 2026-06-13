@@ -1,0 +1,90 @@
+name: Automated Cloud Deployment
+
+on:
+  push:
+    branches:
+      - main # Triggers automatically when you push to the main branch
+
+permissions:
+  contents: write # Allows the GitHub bot to create Releases
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Java (Required for Android Build)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Install Project Dependencies
+        run: npm install
+
+      - name: Setup Expo CLI
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build APK Locally on GitHub Servers (Free)
+        run: eas build --local --platform android --profile preview --non-interactive
+        
+      - name: Find and Rename APK
+        id: apk-setup
+        run: |
+          APK_FILE=$(ls *.apk | head -n 1)
+          VERSION=$(node -p "require('./package.json').version")
+          NEW_NAME="DelhiMetro-v${VERSION}.apk"
+          mv $APK_FILE $NEW_NAME
+          echo "apk_name=$NEW_NAME" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create v${{ env.version }} "${{ env.apk_name }}" --title "Release v${{ env.version }}" --notes "Automated CI/CD Deployment"
+
+      - name: Update Appwrite Database
+        env:
+          APPWRITE_API_KEY: ${{ secrets.APPWRITE_API_KEY }}
+        run: |
+          node -e "
+            const version = '${{ env.version }}';
+            const apkName = '${{ env.apk_name }}';
+            const repo = '${{ github.repository }}';
+            const publicUrl = \`https://github.com/\${repo}/releases/download/v\${version}/\${apkName}\`;
+            
+            fetch('https://cloud.appwrite.io/v1/databases/6a2ce492003a18046d9b/collections/releases/documents', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Appwrite-Project': '6a2ce46a003230dcf661',
+                'X-Appwrite-Key': process.env.APPWRITE_API_KEY
+              },
+              body: JSON.stringify({
+                documentId: 'unique()',
+                data: {
+                  version_number: version,
+                  is_mandatory: true,
+                  apk_url: publicUrl
+                }
+              })
+            }).then(async res => {
+              if(!res.ok) throw new Error(await res.text());
+              console.log('Appwrite Updated Successfully!');
+            }).catch(err => {
+              console.error(err);
+              process.exit(1);
+            });
+          "
