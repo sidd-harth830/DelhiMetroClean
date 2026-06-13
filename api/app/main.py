@@ -16,6 +16,27 @@ from app.api.router import api_router
 from app.core.config import settings
 from app.core.errors import UpstreamApiError
 
+# --- PREMIUM DOCUMENTATION CONTENT ---
+API_DESCRIPTION = """
+# 🚇 Delhi Metro Network API
+
+Welcome to the official developer documentation for the **Delhi Metro Clean API**. This premium RESTful API provides lightning-fast access to Delhi Metro Rail Corporation (DMRC) network data, optimized for modern web and mobile applications.
+
+## 🚀 Core Capabilities
+* **Network Topology**: Fetch comprehensive data on all metro lines, colors, and station coordinates.
+* **Journey Planning**: Calculate optimal routes between any two stations, including exact interchanges and transit times.
+* **Fare Calculation**: Get accurate pricing for any journey across the NCR.
+
+## 💻 Using the Client Libraries (SDKs)
+The code snippets generated on the right side of this dashboard are **100% production-ready**. 
+1. Click on any endpoint from the sidebar (e.g., `GET /stations`).
+2. On the right panel, select your preferred environment (e.g., select **JavaScript -> Fetch** for React Native/Web, or **Python -> Requests** for backend scripts).
+3. The generated code automatically targets the live cloud server. Simply copy and paste the snippet directly into your application!
+
+## 🔐 Authentication & Limits
+This API is currently open for public access. No API keys are required for `v1` endpoints. Please ensure your applications cache responses (like station lists) locally to minimize unnecessary network requests.
+"""
+
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
@@ -27,28 +48,24 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(
-    title=settings.app_name,
-    version=settings.app_version,
-    description=settings.app_description,
+    title="Delhi Metro Premium API",
+    version="1.0.0",
+    description=API_DESCRIPTION,
     debug=settings.debug,
     lifespan=lifespan,
     servers=[
-        {"url": "https://siddharth7307-delhi-metro-api.hf.space", "description": "Production Cloud"}
+        {"url": "https://siddharth7307-delhi-metro-api.hf.space", "description": "Production Cloud Server"}
     ],
     contact={
-        "name": "Delhi Metro API Support",
+        "name": "API Support",
         "email": "app.details@zohomail.in",
     },
     license_info={
         "name": "MIT License",
         "url": "https://opensource.org/licenses/MIT",
     },
-    swagger_ui_parameters={
-        "defaultModelsExpandDepth": -1,  # Hides the verbose schemas section at the bottom
-        "displayRequestDuration": True,  # Shows request execution time
-    },
-    docs_url=None,  # Disabled to mount the custom Swagger UI below
-    redoc_url=None,  # Disabled to mount the custom ReDoc UI below
+    docs_url=None,  
+    redoc_url=None, 
     openapi_tags=[
         {
             "name": "health",
@@ -56,7 +73,7 @@ app = FastAPI(
         },
         {
             "name": "dmrc",
-            "description": "Delhi Metro resource and journey planning endpoints.",
+            "description": "Core routing, fare, and station endpoints.",
         },
     ],
 )
@@ -118,44 +135,6 @@ async def custom_scalar_ui_html():
         ></script>
         <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
       </body>
-    </html>
-    """)
-
-
-@app.get("/redoc", include_in_schema=False)
-async def custom_redoc_ui_html():
-    """Custom ReDoc UI dynamically injected with a dark theme."""
-    return HTMLResponse(f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>{app.title} - ReDoc</title>
-        <meta charset="utf-8"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="shortcut icon" href="https://delhimetrorail.com/favicon.ico">
-        <style>body {{ margin: 0; padding: 0; background-color: #1a1a1a; }}</style>
-    </head>
-    <body>
-        <div id="redoc-container"></div>
-        <script src="https://cdn.jsdelivr.net/npm/redoc@latest/bundles/redoc.standalone.js"></script>
-        <script>
-            Redoc.init(
-                "{app.openapi_url}",
-                {{
-                    theme: {{
-                        colors: {{
-                            text: {{ primary: "#ffffff", secondary: "#cccccc" }},
-                            primary: {{ main: "#90caf9" }}
-                        }},
-                        typography: {{ color: "#ffffff" }},
-                        sidebar: {{ backgroundColor: "#2d2d2d", textColor: "#ffffff" }},
-                        rightPanel: {{ backgroundColor: "#1e1e1e" }}
-                    }}
-                }},
-                document.getElementById('redoc-container')
-            );
-        </script>
-    </body>
     </html>
     """)
 
