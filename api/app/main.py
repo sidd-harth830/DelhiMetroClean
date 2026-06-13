@@ -7,8 +7,7 @@ errors to HTTP errors suitable for client integrations.
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse, RedirectResponse
-from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.dependencies import get_dmrc_client
@@ -49,6 +48,7 @@ app = FastAPI(
         "displayRequestDuration": True,  # Shows request execution time
     },
     docs_url=None,  # Disabled to mount the custom Swagger UI below
+    redoc_url=None,  # Disabled to mount the custom ReDoc UI below
     openapi_tags=[
         {
             "name": "health",
@@ -96,17 +96,68 @@ def root_redirect():
 
 
 @app.get("/docs", include_in_schema=False)
-async def custom_swagger_ui_html():
-    """Custom Swagger UI with a customized favicon and logo."""
-    return get_swagger_ui_html(
-        openapi_url=app.openapi_url,
-        title=f"{app.title} - Swagger UI",
-        swagger_favicon_url="https://delhimetrorail.com/favicon.ico",
-        swagger_css_url="https://cdn.jsdelivr.net/gh/Itz-fork/Fastapi-Swagger-UI-Dark/assets/swagger_ui_dark.min.css",
-        swagger_ui_parameters={
-            "defaultModelsExpandDepth": -1,
-        },
-    )
+async def custom_scalar_ui_html():
+    """Custom Scalar UI for premium API documentation."""
+    return HTMLResponse("""
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Delhi Metro API - Documentation</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style>
+          body { margin: 0; padding: 0; background-color: #0f0f11; }
+        </style>
+      </head>
+      <body>
+        <script
+          id="api-reference"
+          data-url="/openapi.json"
+          data-theme="deepSpace"
+          data-proxy-url=""
+        ></script>
+        <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+      </body>
+    </html>
+    """)
+
+
+@app.get("/redoc", include_in_schema=False)
+async def custom_redoc_ui_html():
+    """Custom ReDoc UI dynamically injected with a dark theme."""
+    return HTMLResponse(f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>{app.title} - ReDoc</title>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="shortcut icon" href="https://delhimetrorail.com/favicon.ico">
+        <style>body {{ margin: 0; padding: 0; background-color: #1a1a1a; }}</style>
+    </head>
+    <body>
+        <div id="redoc-container"></div>
+        <script src="https://cdn.jsdelivr.net/npm/redoc@latest/bundles/redoc.standalone.js"></script>
+        <script>
+            Redoc.init(
+                "{app.openapi_url}",
+                {{
+                    theme: {{
+                        colors: {{
+                            text: {{ primary: "#ffffff", secondary: "#cccccc" }},
+                            primary: {{ main: "#90caf9" }}
+                        }},
+                        typography: {{ color: "#ffffff" }},
+                        sidebar: {{ backgroundColor: "#2d2d2d", textColor: "#ffffff" }},
+                        rightPanel: {{ backgroundColor: "#1e1e1e" }}
+                    }}
+                }},
+                document.getElementById('redoc-container')
+            );
+        </script>
+    </body>
+    </html>
+    """)
 
 
 @app.get("/api/v1")
