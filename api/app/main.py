@@ -8,6 +8,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.dependencies import get_dmrc_client
@@ -32,6 +33,22 @@ app = FastAPI(
     description=settings.app_description,
     debug=settings.debug,
     lifespan=lifespan,
+    servers=[
+        {"url": "https://siddharth7307-delhi-metro-api.hf.space", "description": "Production Cloud"}
+    ],
+    contact={
+        "name": "Delhi Metro API Support",
+        "email": "app.details@zohomail.in",
+    },
+    license_info={
+        "name": "MIT License",
+        "url": "https://opensource.org/licenses/MIT",
+    },
+    swagger_ui_parameters={
+        "defaultModelsExpandDepth": -1,  # Hides the verbose schemas section at the bottom
+        "displayRequestDuration": True,  # Shows request execution time
+    },
+    docs_url=None,  # Disabled to mount the custom Swagger UI below
     openapi_tags=[
         {
             "name": "health",
@@ -76,6 +93,20 @@ async def handle_upstream_error(
 @app.get("/", include_in_schema=False)
 def root_redirect():
     return RedirectResponse(url='/docs')
+
+
+@app.get("/docs", include_in_schema=False)
+async def custom_swagger_ui_html():
+    """Custom Swagger UI with a customized favicon and logo."""
+    return get_swagger_ui_html(
+        openapi_url=app.openapi_url,
+        title=f"{app.title} - Swagger UI",
+        swagger_favicon_url="https://delhimetrorail.com/favicon.ico",
+        swagger_css_url="https://cdn.jsdelivr.net/gh/Itz-fork/Fastapi-Swagger-UI-Dark/assets/swagger_ui_dark.min.css",
+        swagger_ui_parameters={
+            "defaultModelsExpandDepth": -1,
+        },
+    )
 
 
 @app.get("/api/v1")
