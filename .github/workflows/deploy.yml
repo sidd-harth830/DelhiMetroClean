@@ -4,11 +4,11 @@ on:
   push:
     branches:
       - main
-      - master # Added master just in case your git uses the older naming!
-  workflow_dispatch: # THIS ADDS A MANUAL "RUN" BUTTON ON GITHUB!
+      - master
+  workflow_dispatch:
 
 permissions:
-  contents: write # Allows the GitHub bot to create Releases
+  contents: write
 
 jobs:
   build-and-deploy:
@@ -21,30 +21,34 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22 # Updated to fix the Node 20 deprecation warning
 
       - name: Setup Java (Required for Android Build)
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
+          cache: 'gradle' # Safely caches gradle to speed up future builds
 
       - name: Install Project Dependencies
         run: npm install
 
-      - name: Setup Expo CLI
-        uses: expo/expo-github-action@v8
-        with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
+      # Bypasses EAS and uses standard Expo native compilation
+      - name: Generate Android Native Project
+        run: npx expo prebuild --platform android --clean
 
-      - name: Build APK Locally on GitHub Servers (Free)
-        run: eas build --local --platform android --profile preview --non-interactive
-        
+      # The foolproof, standard way to build Android apps without hanging
+      - name: Build Release APK via Gradle
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease
+
       - name: Find and Rename APK
         id: apk-setup
         run: |
-          APK_FILE=$(ls *.apk | head -n 1)
+          # Grab the APK directly from the Gradle output folder
+          APK_FILE="android/app/build/outputs/apk/release/app-release.apk"
           VERSION=$(node -p "require('./package.json').version")
           NEW_NAME="DelhiMetro-v${VERSION}.apk"
           mv $APK_FILE $NEW_NAME
@@ -71,15 +75,17 @@ jobs:
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'X-Appwrite-Project': '6a2ce46a003230dcf661',
+                'X-Appwrite-Project': 'sgp-6a2ce46a003230dcf661',
                 'X-Appwrite-Key': process.env.APPWRITE_API_KEY
               },
               body: JSON.stringify({
                 documentId: 'unique()',
                 data: {
-                  version_number: version,
-                  is_mandatory: true,
-                  apk_url: publicUrl
+                  versionNumber: version,
+                  isMandatory: true,
+                  apkUrl: publicUrl,
+                  status: 'released',
+                  releaseDate: new Date().toISOString()
                 }
               })
             }).then(async res => {
