@@ -10,6 +10,10 @@ on:
 permissions:
   contents: write
 
+# This completely disables the annoying Node 20 deprecation warnings
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -21,23 +25,21 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22 # Updated to fix the Node 20 deprecation warning
+          node-version: 22
 
       - name: Setup Java (Required for Android Build)
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
-          cache: 'gradle' # Safely caches gradle to speed up future builds
+          # Removed the cache: 'gradle' line that was causing the crash!
 
       - name: Install Project Dependencies
         run: npm install
 
-      # Bypasses EAS and uses standard Expo native compilation
       - name: Generate Android Native Project
         run: npx expo prebuild --platform android --clean
 
-      # The foolproof, standard way to build Android apps without hanging
       - name: Build Release APK via Gradle
         run: |
           cd android
@@ -47,7 +49,6 @@ jobs:
       - name: Find and Rename APK
         id: apk-setup
         run: |
-          # Grab the APK directly from the Gradle output folder
           APK_FILE="android/app/build/outputs/apk/release/app-release.apk"
           VERSION=$(node -p "require('./package.json').version")
           NEW_NAME="DelhiMetro-v${VERSION}.apk"
