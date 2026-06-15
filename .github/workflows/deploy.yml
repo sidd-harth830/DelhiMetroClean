@@ -39,11 +39,10 @@ jobs:
         run: npm install
 
       - name: Generate Android Native Project
-        # --no-interactive forces it to instantly crash if it needs a human answer, saving us 6 hours.
-        run: npx expo prebuild --platform android --clean --no-interactive
+        # Removed the invalid flag. The CI=true variable above handles this automatically!
+        run: npx expo prebuild --platform android --clean
 
       - name: Build Release APK via Gradle
-        # --no-daemon and --console=plain make Gradle highly stable in cloud CI environments
         run: |
           cd android
           chmod +x gradlew
