@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { StyleSheet, View, Animated, LayoutAnimation } from 'react-native';
-import { Surface, Text, useTheme, TouchableRipple } from 'react-native-paper';
+import { Text, useTheme, TouchableRipple } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import type { PassengerNotification } from '../types';
 import { spacing } from '../theme';
@@ -30,35 +30,71 @@ export function NotificationCard({ notification }: Props) {
   });
 
   return (
-    <Surface style={styles.container} elevation={1}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: theme.colors.elevation.level2,
+          borderColor: '#FFFFFF',
+        },
+      ]}
+    >
       <TouchableRipple onPress={toggleExpand} style={styles.touchable}>
         <View style={styles.inner}>
-          <View style={[styles.iconWrap, { backgroundColor: theme.colors.primaryContainer }]}>
-            <Ionicons name="megaphone-outline" size={18} color={theme.colors.onPrimaryContainer} />
+          <View
+            style={[
+              styles.iconWrap,
+              {
+                backgroundColor: theme.colors.secondary,
+                borderColor: '#000000',
+              },
+            ]}
+          >
+            <Ionicons name="megaphone-outline" size={18} color="#000000" />
           </View>
           <View style={styles.content}>
-            <Text variant="bodyMedium" numberOfLines={expanded ? 0 : 2} style={{ color: theme.colors.onSurface }}>
+            <Text
+              variant="bodyMedium"
+              numberOfLines={expanded ? 0 : 2}
+              style={{
+                color: theme.colors.onSurface,
+                fontWeight: '700',
+              }}
+            >
               {notification.title}
             </Text>
-            <Text variant="labelSmall" style={{ color: theme.colors.outline }}>
+            <Text
+              variant="labelSmall"
+              style={{
+                color: theme.colors.outline,
+                fontWeight: '600',
+                letterSpacing: 0.2,
+              }}
+            >
               {notification.date}
             </Text>
           </View>
           <View style={styles.chevronWrap}>
             <Animated.View style={{ transform: [{ rotate: spin }] }}>
-              <Ionicons name="chevron-down" size={20} color={theme.colors.outline} />
+              <Ionicons name="chevron-down" size={20} color={theme.colors.primary} />
             </Animated.View>
           </View>
         </View>
       </TouchableRipple>
-    </Surface>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 16,
+    borderRadius: 0,
+    borderWidth: 2,
     overflow: 'hidden',
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 1,
+    shadowColor: '#000000',
+    shadowRadius: 0,
+    elevation: 6,
   },
   touchable: {
     padding: spacing.base,
@@ -71,7 +107,8 @@ const styles = StyleSheet.create({
   iconWrap: {
     width: 40,
     height: 40,
-    borderRadius: 12,
+    borderRadius: 0,
+    borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
   },

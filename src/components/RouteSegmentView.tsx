@@ -13,22 +13,45 @@ interface Props {
   onStationPress?: (stationCode: string, stationName: string) => void;
 }
 
-export function RouteSegmentView({ segment, lineColor, isLast, stationCodeMap, onStationPress }: Props) {
+export function RouteSegmentView({
+  segment,
+  lineColor,
+  isLast,
+  stationCodeMap,
+  onStationPress,
+}: Props) {
   const theme = useTheme();
   const { semantic, isDark } = useAppTheme();
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        { borderColor: lineColor },
+      ]}
+    >
       {/* Line header with colored pill */}
-      <View style={styles.header}>
-        <View style={[styles.linePill, { backgroundColor: lineColor }]}>
+      <View
+        style={[
+          styles.header,
+          { backgroundColor: lineColor, borderColor: '#000000' },
+        ]}
+      >
+        <View style={styles.linePill}>
           <View style={styles.linePillDot} />
-          <Text variant="labelMedium" style={{ color: '#fff', fontWeight: '700' }}>
+          <Text variant="labelMedium" style={{ color: '#000000', fontWeight: '900', letterSpacing: 0.3 }}>
             {segment.line}
           </Text>
         </View>
         {segment.path_time ? (
-          <Text variant="labelSmall" style={{ color: theme.colors.outline }}>
+          <Text
+            variant="labelSmall"
+            style={{
+              color: '#000000',
+              fontWeight: '800',
+              letterSpacing: 0.2,
+            }}
+          >
             {segment.path_time}
           </Text>
         ) : null}
@@ -36,7 +59,7 @@ export function RouteSegmentView({ segment, lineColor, isLast, stationCodeMap, o
 
       {/* Station list */}
       <View style={styles.stationsContainer}>
-        <View style={[styles.lineBar, { backgroundColor: lineColor, opacity: isDark ? 0.6 : 0.4 }]} />
+        <View style={[styles.lineBar, { backgroundColor: lineColor }]} />
         <View style={styles.stations}>
           {segment.path.map((point, index) => {
             const isBold = index === 0 || index === segment.path.length - 1;
@@ -58,7 +81,8 @@ export function RouteSegmentView({ segment, lineColor, isLast, stationCodeMap, o
                   style={{
                     flex: 1,
                     color: isBold ? theme.colors.onSurface : theme.colors.onSurfaceVariant,
-                    fontWeight: isBold ? '600' : '400',
+                    fontWeight: isBold ? '800' : '500',
+                    letterSpacing: isBold ? 0.2 : 0,
                   }}
                 >
                   {point.name}
@@ -67,9 +91,15 @@ export function RouteSegmentView({ segment, lineColor, isLast, stationCodeMap, o
                   <Pressable
                     onPress={() => onStationPress?.(code, point.name)}
                     hitSlop={8}
-                    style={[styles.infoBtn, { backgroundColor: isDark ? theme.colors.elevation.level3 : theme.colors.surfaceVariant }]}
+                    style={[
+                      styles.infoBtn,
+                      {
+                        backgroundColor: lineColor,
+                        borderColor: '#000000',
+                      },
+                    ]}
                   >
-                    <Ionicons name="information-circle-outline" size={15} color={theme.colors.primary} />
+                    <Ionicons name="information-circle-outline" size={14} color="#000000" />
                   </Pressable>
                 ) : null}
               </View>
@@ -80,9 +110,24 @@ export function RouteSegmentView({ segment, lineColor, isLast, stationCodeMap, o
 
       {/* Interchange indicator */}
       {!isLast && segment.station_interchange_time > 0 ? (
-        <View style={[styles.interchange, { backgroundColor: semantic.warningContainer, opacity: isDark ? 1 : 0.5 }]}>
-          <Ionicons name="git-compare" size={16} color={semantic.interchange} />
-          <Text variant="labelMedium" style={{ color: semantic.interchange, fontWeight: '600' }}>
+        <View
+          style={[
+            styles.interchange,
+            {
+              backgroundColor: semantic.interchange,
+              borderColor: '#FFFFFF',
+            },
+          ]}
+        >
+          <Ionicons name="git-compare" size={16} color="#000000" />
+          <Text
+            variant="labelMedium"
+            style={{
+              color: '#000000',
+              fontWeight: '900',
+              letterSpacing: 0.2,
+            }}
+          >
             Change here ({segment.station_interchange_time} min)
           </Text>
         </View>
@@ -94,34 +139,36 @@ export function RouteSegmentView({ segment, lineColor, isLast, stationCodeMap, o
 const styles = StyleSheet.create({
   container: {
     gap: spacing.sm,
+    borderLeftWidth: 3,
+    paddingLeft: spacing.md,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingHorizontal: spacing.md,
+    paddingVertical: 8,
+    borderWidth: 2,
+    borderRadius: 0,
   },
   linePill: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 6,
-    borderRadius: 999,
   },
   linePillDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: 'rgba(255,255,255,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   stationsContainer: {
     flexDirection: 'row',
-    marginLeft: 14,
     gap: spacing.md,
   },
   lineBar: {
-    width: 3,
-    borderRadius: 1.5,
+    width: 4,
+    borderRadius: 0,
   },
   stations: {
     flex: 1,
@@ -137,7 +184,8 @@ const styles = StyleSheet.create({
   infoBtn: {
     width: 24,
     height: 24,
-    borderRadius: 8,
+    borderRadius: 0,
+    borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -160,7 +208,13 @@ const styles = StyleSheet.create({
     marginLeft: spacing.sm,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    borderRadius: 12,
+    borderRadius: 0,
+    borderWidth: 2,
     alignSelf: 'flex-start',
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 1,
+    shadowColor: '#000000',
+    shadowRadius: 0,
+    elevation: 4,
   },
 });

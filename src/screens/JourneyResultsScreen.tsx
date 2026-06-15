@@ -112,20 +112,27 @@ export function JourneyResultsScreen() {
       style={{ flex: 1, backgroundColor: theme.colors.background }}
       contentContainerStyle={styles.content}
     >
-      {/* Journey header — big hero card */}
-      <Surface
+      {/* Journey header — bold hero card */}
+      <View
         style={[
           styles.heroCard,
-          { backgroundColor: isDark ? theme.colors.elevation.level3 : theme.colors.primaryContainer },
+          {
+            backgroundColor: theme.colors.primary,
+            borderColor: '#FFFFFF',
+          },
         ]}
-        elevation={0}
       >
         <View style={styles.heroStations}>
           <View style={styles.heroStationRow}>
             <View style={[styles.heroDot, { backgroundColor: semantic.success }]} />
             <Text
               variant="titleMedium"
-              style={{ flex: 1, color: isDark ? theme.colors.onSurface : theme.colors.onPrimaryContainer, fontWeight: '700' }}
+              style={{
+                flex: 1,
+                color: '#000000',
+                fontWeight: '900',
+                letterSpacing: 0.3,
+              }}
               numberOfLines={1}
             >
               {fromName}
@@ -133,25 +140,30 @@ export function JourneyResultsScreen() {
             <Pressable
               onPress={() => navigation.navigate('StationDetail', { stationCode: fromCode, stationName: fromName })}
               hitSlop={8}
-              style={[styles.heroInfoBtn, { backgroundColor: isDark ? theme.colors.elevation.level5 : 'rgba(255,255,255,0.5)' }]}
+              style={[styles.heroInfoBtn, { backgroundColor: 'rgba(0,0,0,0.2)', borderColor: '#000000' }]}
             >
-              <Ionicons name="information-circle-outline" size={18} color={theme.colors.primary} />
+              <Ionicons name="information-circle-outline" size={18} color="#000000" />
             </Pressable>
           </View>
 
           <View style={styles.heroConnector}>
-            <View style={[styles.heroLine, { backgroundColor: isDark ? theme.colors.outlineVariant : theme.colors.primary, opacity: 0.3 }]} />
-            <View style={[styles.heroArrowCircle, { backgroundColor: isDark ? theme.colors.elevation.level5 : theme.colors.surface }]}>
+            <View style={[styles.heroLine, { backgroundColor: '#000000' }]} />
+            <View style={[styles.heroArrowCircle, { backgroundColor: '#000000' }]}>
               <Ionicons name="arrow-down" size={18} color={theme.colors.primary} />
             </View>
-            <View style={[styles.heroLine, { backgroundColor: isDark ? theme.colors.outlineVariant : theme.colors.primary, opacity: 0.3 }]} />
+            <View style={[styles.heroLine, { backgroundColor: '#000000' }]} />
           </View>
 
           <View style={styles.heroStationRow}>
             <View style={[styles.heroDot, { backgroundColor: theme.colors.error }]} />
             <Text
               variant="titleMedium"
-              style={{ flex: 1, color: isDark ? theme.colors.onSurface : theme.colors.onPrimaryContainer, fontWeight: '700' }}
+              style={{
+                flex: 1,
+                color: '#000000',
+                fontWeight: '900',
+                letterSpacing: 0.3,
+              }}
               numberOfLines={1}
             >
               {toName}
@@ -159,29 +171,29 @@ export function JourneyResultsScreen() {
             <Pressable
               onPress={() => navigation.navigate('StationDetail', { stationCode: toCode, stationName: toName })}
               hitSlop={8}
-              style={[styles.heroInfoBtn, { backgroundColor: isDark ? theme.colors.elevation.level5 : 'rgba(255,255,255,0.5)' }]}
+              style={[styles.heroInfoBtn, { backgroundColor: 'rgba(0,0,0,0.2)', borderColor: '#000000' }]}
             >
-              <Ionicons name="information-circle-outline" size={18} color={theme.colors.primary} />
+              <Ionicons name="information-circle-outline" size={18} color="#000000" />
             </Pressable>
           </View>
         </View>
 
         {/* Inline stats row */}
         <View style={styles.heroStats}>
-          <View style={[styles.heroStat, { backgroundColor: isDark ? theme.colors.elevation.level5 : 'rgba(255,255,255,0.7)' }]}>
-            <Ionicons name="git-commit-outline" size={16} color={theme.colors.primary} />
-            <Text variant="labelLarge" style={{ color: theme.colors.primary, fontWeight: '700' }}>
+          <View style={[styles.heroStat, { backgroundColor: 'rgba(0,0,0,0.2)', borderColor: '#000000' }]}>
+            <Ionicons name="git-commit-outline" size={16} color="#000000" />
+            <Text variant="labelLarge" style={{ color: '#000000', fontWeight: '900' }}>
               {fare.stations} stops
             </Text>
           </View>
-          <View style={[styles.heroStat, { backgroundColor: isDark ? theme.colors.elevation.level5 : 'rgba(255,255,255,0.7)' }]}>
-            <Ionicons name="time-outline" size={16} color={theme.colors.primary} />
-            <Text variant="labelLarge" style={{ color: theme.colors.primary, fontWeight: '700' }}>
+          <View style={[styles.heroStat, { backgroundColor: 'rgba(0,0,0,0.2)', borderColor: '#000000' }]}>
+            <Ionicons name="time-outline" size={16} color="#000000" />
+            <Text variant="labelLarge" style={{ color: '#000000', fontWeight: '900' }}>
               {fare.total_time}
             </Text>
           </View>
         </View>
-      </Surface>
+      </View>
 
       {/* Strategy toggle */}
       <Animated.View style={{ transform: [{ translateX: swipeHint }] }}>
@@ -203,29 +215,39 @@ export function JourneyResultsScreen() {
       </Animated.View>
 
       {/* Departure time */}
-      <Surface style={styles.timePill} elevation={1}>
+      <View
+        style={[
+          styles.timePill,
+          { backgroundColor: theme.colors.elevation.level2, borderColor: '#FFFFFF' },
+        ]}
+      >
         <Ionicons name="time-outline" size={18} color={theme.colors.primary} />
-        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, flex: 1 }}>
+        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, flex: 1, fontWeight: '700' }}>
           Departure
         </Text>
-        <View style={[styles.timeValue, { backgroundColor: theme.colors.primaryContainer }]}>
-          <Text variant="labelLarge" style={{ color: theme.colors.onPrimaryContainer, fontWeight: '600' }}>
+        <View style={[styles.timeValue, { backgroundColor: theme.colors.secondary, borderColor: '#FFFFFF' }]}>
+          <Text variant="labelLarge" style={{ color: '#000000', fontWeight: '900' }}>
             {selectedTimeLabel}
           </Text>
         </View>
-      </Surface>
+      </View>
 
       {/* Fare cards */}
       <JourneyFareSummary fare={fare} />
 
       {/* Route visualization */}
-      <Surface style={styles.routeCard} elevation={1}>
+      <View
+        style={[
+          styles.routeCard,
+          { backgroundColor: theme.colors.elevation.level2, borderColor: '#FFFFFF' },
+        ]}
+      >
         <View style={styles.routeHeader}>
           <Ionicons name="navigate-outline" size={18} color={theme.colors.primary} />
-          <Text variant="titleSmall" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
-            Route
+          <Text variant="titleSmall" style={{ color: theme.colors.onSurface, fontWeight: '900' }}>
+            ROUTE
           </Text>
-          <Text variant="labelSmall" style={{ color: theme.colors.outline, marginLeft: 'auto' }}>
+          <Text variant="labelSmall" style={{ color: theme.colors.primary, marginLeft: 'auto', fontWeight: '800' }}>
             {fare.route.length} {fare.route.length === 1 ? 'line' : 'lines'}
           </Text>
         </View>
@@ -243,13 +265,14 @@ export function JourneyResultsScreen() {
             />
           ))}
         </View>
-      </Surface>
+      </View>
 
       {/* First/Last train */}
       <FirstLastTrainCard data={trainTimes} />
     </ScrollView>
     </View>
   );
+}
 }
 
 const styles = StyleSheet.create({
@@ -259,9 +282,15 @@ const styles = StyleSheet.create({
     paddingBottom: spacing['3xl'],
   },
   heroCard: {
-    borderRadius: 28,
+    borderRadius: 0,
     padding: spacing.lg,
     gap: spacing.base,
+    borderWidth: 2,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowColor: '#000000',
+    shadowRadius: 0,
+    elevation: 8,
   },
   heroStations: {
     gap: 0,
@@ -280,7 +309,8 @@ const styles = StyleSheet.create({
   heroInfoBtn: {
     width: 30,
     height: 30,
-    borderRadius: 10,
+    borderRadius: 0,
+    borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -293,12 +323,14 @@ const styles = StyleSheet.create({
   },
   heroLine: {
     flex: 1,
-    height: 2,
+    height: 3,
   },
   heroArrowCircle: {
     width: 32,
     height: 32,
-    borderRadius: 16,
+    borderRadius: 0,
+    borderWidth: 2,
+    borderColor: '#000000',
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: spacing.sm,
@@ -314,26 +346,40 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.xs,
     paddingVertical: 10,
-    borderRadius: 14,
+    borderRadius: 0,
+    borderWidth: 2,
   },
   timePill: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    borderRadius: 16,
+    borderRadius: 0,
+    borderWidth: 2,
     paddingLeft: spacing.base,
     paddingRight: spacing.xs,
     paddingVertical: spacing.sm,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowColor: '#000000',
+    shadowRadius: 0,
+    elevation: 8,
   },
   timeValue: {
     paddingHorizontal: spacing.md,
     paddingVertical: 6,
-    borderRadius: 999,
+    borderRadius: 0,
+    borderWidth: 2,
   },
   routeCard: {
-    borderRadius: 24,
+    borderRadius: 0,
+    borderWidth: 2,
     padding: spacing.base,
     gap: spacing.md,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowColor: '#000000',
+    shadowRadius: 0,
+    elevation: 8,
   },
   routeHeader: {
     flexDirection: 'row',

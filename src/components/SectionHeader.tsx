@@ -13,12 +13,26 @@ export function SectionHeader({ title, action, onAction }: Props) {
 
   return (
     <View style={styles.container}>
-      <Text variant="titleMedium" style={{ color: theme.colors.onSurface }}>
+      <Text
+        variant="titleMedium"
+        style={{
+          color: theme.colors.onSurface,
+          fontWeight: '900',
+          letterSpacing: 0.5,
+        }}
+      >
         {title}
       </Text>
       {action && onAction ? (
         <Pressable onPress={onAction} hitSlop={8}>
-          <Text variant="labelLarge" style={{ color: theme.colors.primary }}>
+          <Text
+            variant="labelLarge"
+            style={{
+              color: theme.colors.primary,
+              fontWeight: '900',
+              letterSpacing: 0.3,
+            }}
+          >
             {action}
           </Text>
         </Pressable>

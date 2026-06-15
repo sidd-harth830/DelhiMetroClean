@@ -15,5 +15,7 @@ export const typography = {
     medium: '500' as const,
     semibold: '600' as const,
     bold: '700' as const,
+    extrabold: '800' as const,
+    black: '900' as const,
   },
 } as const;

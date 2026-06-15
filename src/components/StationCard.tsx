@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import { Surface, TouchableRipple, Text, useTheme } from 'react-native-paper';
+import { TouchableRipple, Text, useTheme } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { LineBadge } from './LineBadge';
 import { useAppTheme } from '../theme/ThemeContext';
@@ -23,37 +23,50 @@ export function StationCard({ station, onPress, showChevron = true }: Props) {
   const theme = useTheme();
   const { isDark, semantic } = useAppTheme();
 
-  // API line colors are hex — safe to append hex alpha
-  const primaryLineColor = station.metro_lines?.[0]?.primary_color_code;
-  const iconBg = primaryLineColor?.startsWith('#')
-    ? primaryLineColor + '20'
-    : theme.colors.primaryContainer;
+  const primaryLineColor = station.metro_lines?.[0]?.primary_color_code ?? theme.colors.primary;
 
   return (
     <View style={styles.wrapper}>
-      <Surface
-        style={styles.card}
-        elevation={isDark ? 2 : 1}
+      <TouchableRipple
+        onPress={onPress}
+        disabled={!onPress}
+        rippleColor={theme.colors.primaryContainer}
+        borderless
+        style={styles.ripple}
       >
-        <TouchableRipple
-          onPress={onPress}
-          disabled={!onPress}
-          rippleColor={theme.colors.primaryContainer}
-          borderless
-          style={styles.ripple}
+        <View
+          style={[
+            styles.card,
+            {
+              backgroundColor: theme.colors.elevation.level2,
+              borderColor: '#FFFFFF',
+            },
+          ]}
         >
+          {/* Left accent tab */}
+          <View
+            style={[
+              styles.accentTab,
+              { backgroundColor: primaryLineColor },
+            ]}
+          />
+
+          {/* Main content */}
           <View style={styles.container}>
-            {/* Line color icon */}
+            {/* Line icon */}
             <View
               style={[
-                styles.iconCircle,
-                { backgroundColor: iconBg },
+                styles.iconBox,
+                {
+                  backgroundColor: primaryLineColor,
+                  borderColor: '#000000',
+                },
               ]}
             >
               {station.interchange ? (
-                <Ionicons name="git-compare" size={18} color={semantic.interchange} />
+                <Ionicons name="git-compare" size={18} color="#000000" />
               ) : (
-                <Ionicons name="train" size={18} color={primaryLineColor ?? theme.colors.onSurfaceVariant} />
+                <Ionicons name="train" size={18} color="#000000" />
               )}
             </View>
 
@@ -62,13 +75,33 @@ export function StationCard({ station, onPress, showChevron = true }: Props) {
               <View style={styles.nameRow}>
                 <Text
                   variant="titleSmall"
-                  style={{ color: theme.colors.onSurface, fontWeight: '600', flex: 1 }}
+                  style={{
+                    color: theme.colors.onSurface,
+                    fontWeight: '800',
+                    flex: 1,
+                  }}
                   numberOfLines={1}
                 >
                   {station.station_name}
                 </Text>
-                <View style={[styles.codeBadge, { backgroundColor: isDark ? theme.colors.elevation.level5 : theme.colors.surfaceVariant }]}>
-                  <Text variant="labelSmall" style={{ color: theme.colors.primary, fontWeight: '700', fontVariant: ['tabular-nums'] }}>
+                <View
+                  style={[
+                    styles.codeBadge,
+                    {
+                      backgroundColor: primaryLineColor,
+                      borderColor: '#FFFFFF',
+                    },
+                  ]}
+                >
+                  <Text
+                    variant="labelSmall"
+                    style={{
+                      color: '#000000',
+                      fontWeight: '800',
+                      fontVariant: ['tabular-nums'],
+                      letterSpacing: 0.5,
+                    }}
+                  >
                     {station.station_code}
                   </Text>
                 </View>
@@ -79,15 +112,28 @@ export function StationCard({ station, onPress, showChevron = true }: Props) {
                   {station.metro_lines.map((line) => (
                     <LineBadge
                       key={`${station.station_code}-${line.line_code}`}
-                      name={line.line_color}
+                      name={line.line_code}
                       color={line.primary_color_code}
                       compact
                     />
                   ))}
                   {station.interchange && (
-                    <View style={[styles.interchangeTag, { backgroundColor: semantic.warningContainer }]}>
-                      <Ionicons name="git-compare" size={10} color={semantic.interchange} />
-                      <Text variant="labelSmall" style={{ color: semantic.interchange, fontWeight: '600', fontSize: 10 }}>
+                    <View
+                      style={[
+                        styles.interchangeTag,
+                        { backgroundColor: semantic.interchange, borderColor: '#FFFFFF' },
+                      ]}
+                    >
+                      <Ionicons name="git-compare" size={10} color="#000000" />
+                      <Text
+                        variant="labelSmall"
+                        style={{
+                          color: '#000000',
+                          fontWeight: '800',
+                          fontSize: 10,
+                          letterSpacing: 0.3,
+                        }}
+                      >
                         Interchange
                       </Text>
                     </View>
@@ -97,11 +143,11 @@ export function StationCard({ station, onPress, showChevron = true }: Props) {
             </View>
 
             {showChevron && onPress ? (
-              <Ionicons name="chevron-forward" size={16} color={theme.colors.outline} />
+              <Ionicons name="chevron-forward" size={16} color={theme.colors.primary} />
             ) : null}
           </View>
-        </TouchableRipple>
-      </Surface>
+        </View>
+      </TouchableRipple>
     </View>
   );
 }
@@ -111,25 +157,38 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.xs,
   },
-  card: {
-    borderRadius: 18,
-    overflow: 'hidden',
-  },
   ripple: {
-    borderRadius: 18,
+    borderRadius: 0,
+  },
+  card: {
+    borderRadius: 0,
+    borderWidth: 2,
+    overflow: 'hidden',
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowColor: '#000000',
+    shadowRadius: 0,
+    elevation: 8,
+    flexDirection: 'row',
+  },
+  accentTab: {
+    width: 6,
+    alignSelf: 'stretch',
   },
   container: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     padding: spacing.md,
     gap: spacing.md,
   },
-  iconCircle: {
+  iconBox: {
     width: 44,
     height: 44,
-    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 2,
+    borderRadius: 0,
   },
   content: {
     flex: 1,
@@ -143,7 +202,8 @@ const styles = StyleSheet.create({
   codeBadge: {
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 8,
+    borderRadius: 0,
+    borderWidth: 2,
   },
   badgesRow: {
     flexDirection: 'row',
@@ -157,6 +217,7 @@ const styles = StyleSheet.create({
     gap: 3,
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 999,
+    borderRadius: 0,
+    borderWidth: 2,
   },
 });

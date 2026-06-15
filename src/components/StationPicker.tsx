@@ -1,7 +1,7 @@
 import { FlatList, Modal, StyleSheet, View } from 'react-native';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ActivityIndicator, IconButton, Searchbar, Surface, Text, TouchableRipple, useTheme } from 'react-native-paper';
+import { ActivityIndicator, IconButton, Searchbar, Text, TouchableRipple, useTheme } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { LineBadge } from './LineBadge';
 import { useDebounce, useStationSearchQuery } from '../hooks';
@@ -38,45 +38,55 @@ export function StationPicker({ visible, onSelect, onClose, title = 'Select Stat
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={handleClose}>
       <View style={[styles.container, { paddingTop: insets.top, backgroundColor: theme.colors.background }]}>
         <View style={styles.header}>
-          <Text variant="headlineSmall" style={{ color: theme.colors.onSurface }}>
+          <Text
+            variant="headlineSmall"
+            style={{ color: theme.colors.onSurface, fontWeight: '800' }}
+          >
             {title}
           </Text>
           <IconButton icon="close" onPress={handleClose} iconColor={theme.colors.onSurface} />
         </View>
 
-        <Searchbar
-          placeholder="Search station name..."
-          value={searchText}
-          onChangeText={setSearchText}
-          autoFocus
-          autoCapitalize="characters"
-          style={[styles.searchbar, { backgroundColor: theme.colors.elevation.level3 }]}
-          inputStyle={{ color: theme.colors.onSurface }}
-          placeholderTextColor={theme.colors.outline}
-          elevation={0}
-        />
+        <View style={[styles.searchbarWrapper, { borderColor: '#FFFFFF' }]}>
+          <Searchbar
+            placeholder="Search station..."
+            value={searchText}
+            onChangeText={setSearchText}
+            autoFocus
+            autoCapitalize="characters"
+            style={[
+              styles.searchbar,
+              {
+                backgroundColor: theme.colors.elevation.level2,
+                borderColor: '#FFFFFF',
+              },
+            ]}
+            inputStyle={{ color: theme.colors.onSurface }}
+            placeholderTextColor={theme.colors.onSurfaceVariant}
+            elevation={0}
+          />
+        </View>
 
         {isLoading ? (
           <View style={styles.loadingContainer}>
-            <View style={[styles.loadingCard, { backgroundColor: isDark ? theme.colors.elevation.level2 : theme.colors.surfaceVariant }]}>
-              <View style={[styles.loadingIcon, { backgroundColor: isDark ? theme.colors.elevation.level4 : theme.colors.primaryContainer }]}>
-                <Ionicons name="train-outline" size={22} color={theme.colors.primary} />
-              </View>
+            <View
+              style={[
+                styles.loadingCard,
+                {
+                  backgroundColor: theme.colors.elevation.level2,
+                  borderColor: '#FFFFFF',
+                },
+              ]}
+            >
+              <Ionicons name="train-outline" size={28} color={theme.colors.primary} />
               <ActivityIndicator size="small" color={theme.colors.primary} />
-              <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '500' }}>
+              <Text
+                variant="bodyMedium"
+                style={{ color: theme.colors.onSurfaceVariant, fontWeight: '700' }}
+              >
                 Searching stations...
               </Text>
             </View>
-            {/* Skeleton rows */}
-            {[0.6, 0.4, 0.25].map((opacity, i) => (
-              <View key={i} style={[styles.skeletonRow, { opacity }]}>
-                <View style={[styles.skeletonCircle, { backgroundColor: isDark ? theme.colors.elevation.level3 : theme.colors.surfaceVariant }]} />
-                <View style={{ flex: 1, gap: 8 }}>
-                  <View style={[styles.skeletonBar, { backgroundColor: isDark ? theme.colors.elevation.level3 : theme.colors.surfaceVariant, width: '70%' }]} />
-                  <View style={[styles.skeletonBar, { backgroundColor: isDark ? theme.colors.elevation.level3 : theme.colors.surfaceVariant, width: '40%', height: 10 }]} />
-                </View>
-              </View>
-            ))}
           </View>
         ) : (
           <FlatList
@@ -85,70 +95,115 @@ export function StationPicker({ visible, onSelect, onClose, title = 'Select Stat
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={styles.list}
             renderItem={({ item }) => {
-              const lineColor = item.metro_lines?.[0]?.primary_color_code;
-              const iconBg = lineColor?.startsWith('#')
-                ? lineColor + '20'
-                : theme.colors.primaryContainer;
+              const lineColor = item.metro_lines?.[0]?.primary_color_code ?? theme.colors.primary;
               return (
                 <View style={styles.resultWrapper}>
-                  <Surface
-                    style={styles.resultCard}
-                    elevation={isDark ? 2 : 1}
+                  <TouchableRipple
+                    onPress={() => handleSelect(item)}
+                    rippleColor={theme.colors.primaryContainer}
+                    borderless
+                    style={styles.resultRipple}
                   >
-                    <TouchableRipple
-                      onPress={() => handleSelect(item)}
-                      rippleColor={theme.colors.primaryContainer}
-                      borderless
-                      style={styles.resultRipple}
+                    <View
+                      style={[
+                        styles.resultCard,
+                        {
+                          backgroundColor: theme.colors.elevation.level2,
+                          borderColor: '#FFFFFF',
+                        },
+                      ]}
                     >
-                      <View style={styles.resultRow}>
-                        <View style={[styles.resultIcon, { backgroundColor: iconBg }]}>
-                          <Ionicons name="train" size={18} color={lineColor ?? theme.colors.onSurfaceVariant} />
-                        </View>
-                        <View style={styles.resultContent}>
-                          <View style={styles.resultNameRow}>
-                            <Text
-                              variant="titleSmall"
-                              style={{ color: theme.colors.onSurface, fontWeight: '600', flex: 1 }}
-                              numberOfLines={1}
-                            >
-                              {item.station_name}
-                            </Text>
-                            <View style={[styles.resultCodeBadge, { backgroundColor: isDark ? theme.colors.elevation.level5 : theme.colors.background }]}>
-                              <Text variant="labelSmall" style={{ color: theme.colors.primary, fontWeight: '700', fontVariant: ['tabular-nums'] }}>
-                                {item.station_code}
-                              </Text>
-                            </View>
-                          </View>
-                          {!!item.metro_lines?.length && (
-                            <View style={styles.badgesRow}>
-                              {item.metro_lines.map((line) => (
-                                <LineBadge
-                                  key={`${item.station_code}-${line.line_code}`}
-                                  name={line.line_color}
-                                  color={line.primary_color_code}
-                                  compact
-                                />
-                              ))}
-                            </View>
-                          )}
-                        </View>
+                      <View
+                        style={[
+                          styles.resultIcon,
+                          {
+                            backgroundColor: lineColor,
+                            borderColor: '#000000',
+                          },
+                        ]}
+                      >
+                        <Ionicons name="train" size={18} color="#000000" />
                       </View>
-                    </TouchableRipple>
-                  </Surface>
+                      <View style={styles.resultContent}>
+                        <View style={styles.resultNameRow}>
+                          <Text
+                            variant="titleSmall"
+                            style={{
+                              color: theme.colors.onSurface,
+                              fontWeight: '800',
+                              flex: 1,
+                            }}
+                            numberOfLines={1}
+                          >
+                            {item.station_name}
+                          </Text>
+                          <View
+                            style={[
+                              styles.resultCodeBadge,
+                              {
+                                backgroundColor: lineColor,
+                                borderColor: '#FFFFFF',
+                              },
+                            ]}
+                          >
+                            <Text
+                              variant="labelSmall"
+                              style={{
+                                color: '#000000',
+                                fontWeight: '800',
+                                fontVariant: ['tabular-nums'],
+                                letterSpacing: 0.3,
+                              }}
+                            >
+                              {item.station_code}
+                            </Text>
+                          </View>
+                        </View>
+                        {!!item.metro_lines?.length && (
+                          <View style={styles.badgesRow}>
+                            {item.metro_lines.slice(0, 2).map((line) => (
+                              <LineBadge
+                                key={`${item.station_code}-${line.line_code}`}
+                                name={line.line_code}
+                                color={line.primary_color_code}
+                                compact
+                              />
+                            ))}
+                          </View>
+                        )}
+                      </View>
+                    </View>
+                  </TouchableRipple>
                 </View>
               );
             }}
             ListEmptyComponent={
               isLoading ? null : (
                 <View style={styles.emptyContainer}>
-                  <View style={[styles.emptyIcon, { backgroundColor: isDark ? theme.colors.elevation.level3 : theme.colors.surfaceVariant }]}>
-                    <Ionicons name="search-outline" size={28} color={theme.colors.outline} />
+                  <View
+                    style={[
+                      styles.emptyIcon,
+                      {
+                        backgroundColor: theme.colors.elevation.level3,
+                        borderColor: '#FFFFFF',
+                      },
+                    ]}
+                  >
+                    <Ionicons name="search-outline" size={32} color={theme.colors.primary} />
                   </View>
-                  <Text variant="titleSmall" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '600' }}>
+                  <Text
+                    variant="titleSmall"
+                    style={{
+                      color: theme.colors.onSurfaceVariant,
+                      fontWeight: '800',
+                    }}
+                  >
                     No stations found
                   </Text>
-                  <Text variant="bodySmall" style={{ color: theme.colors.outline, textAlign: 'center' }}>
+                  <Text
+                    variant="bodySmall"
+                    style={{ color: theme.colors.outline, textAlign: 'center' }}
+                  >
                     Try a different station name or code
                   </Text>
                 </View>
@@ -172,10 +227,17 @@ const styles = StyleSheet.create({
     paddingLeft: spacing.base,
     paddingTop: spacing.md,
   },
-  searchbar: {
+  searchbarWrapper: {
     marginHorizontal: spacing.base,
-    marginBottom: spacing.sm,
-    borderRadius: 999,
+    marginBottom: spacing.base,
+    borderWidth: 2,
+    borderRadius: 0,
+    overflow: 'hidden',
+  },
+  searchbar: {
+    marginHorizontal: 0,
+    borderRadius: 0,
+    borderWidth: 0,
   },
   list: {
     paddingTop: spacing.xs,
@@ -185,29 +247,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.xs,
   },
-  resultCard: {
-    borderRadius: 18,
-    overflow: 'hidden',
-  },
-  resultCardLight: {
-    borderRadius: 18,
-    overflow: 'hidden',
-  },
   resultRipple: {
-    borderRadius: 18,
+    borderRadius: 0,
   },
-  resultRow: {
+  resultCard: {
+    borderRadius: 0,
+    borderWidth: 2,
+    overflow: 'hidden',
     flexDirection: 'row',
     alignItems: 'center',
     padding: spacing.md,
     gap: spacing.md,
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 1,
+    shadowColor: '#000000',
+    shadowRadius: 0,
+    elevation: 6,
   },
   resultIcon: {
     width: 44,
     height: 44,
-    borderRadius: 14,
+    borderRadius: 0,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 2,
   },
   resultContent: {
     flex: 1,
@@ -221,7 +284,8 @@ const styles = StyleSheet.create({
   resultCodeBadge: {
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 8,
+    borderRadius: 0,
+    borderWidth: 2,
   },
   badgesRow: {
     flexDirection: 'row',
@@ -233,34 +297,21 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: spacing.lg,
     gap: spacing.lg,
-  },
-  loadingCard: {
-    borderRadius: 20,
-    padding: spacing.lg,
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  loadingIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  skeletonRow: {
-    flexDirection: 'row',
+  loadingCard: {
+    borderRadius: 0,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    padding: spacing.lg,
     alignItems: 'center',
-    paddingHorizontal: spacing.base,
     gap: spacing.md,
-  },
-  skeletonCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-  },
-  skeletonBar: {
-    height: 14,
-    borderRadius: 7,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowColor: '#000000',
+    shadowRadius: 0,
+    elevation: 8,
   },
   emptyContainer: {
     flex: 1,
@@ -270,9 +321,10 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   emptyIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: 20,
+    width: 72,
+    height: 72,
+    borderRadius: 0,
+    borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: spacing.sm,

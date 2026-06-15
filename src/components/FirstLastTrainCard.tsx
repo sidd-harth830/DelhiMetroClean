@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import { Surface, Text, useTheme, type MD3Theme } from 'react-native-paper';
+import { Text, useTheme, type MD3Theme } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import type { FirstLastTrainResponse } from '../types';
 import { useAppTheme } from '../theme/ThemeContext';
@@ -9,7 +9,13 @@ interface Props {
   data: FirstLastTrainResponse;
 }
 
-function TrainRow({ label, time, icon, iconBg, theme }: {
+function TrainRow({
+  label,
+  time,
+  icon,
+  iconBg,
+  theme,
+}: {
   label: string;
   time: string;
   icon: keyof typeof Ionicons.glyphMap;
@@ -18,13 +24,28 @@ function TrainRow({ label, time, icon, iconBg, theme }: {
 }) {
   return (
     <View style={styles.trainRow}>
-      <View style={[styles.trainIcon, { backgroundColor: iconBg }]}>
-        <Ionicons name={icon} size={18} color={theme.colors.primary} />
+      <View style={[styles.trainIcon, { backgroundColor: iconBg, borderColor: '#FFFFFF' }]}>
+        <Ionicons name={icon} size={18} color="#000000" />
       </View>
-      <Text variant="bodyMedium" style={{ color: theme.colors.onSurface, flex: 1 }}>
+      <Text
+        variant="bodyMedium"
+        style={{
+          color: theme.colors.onSurface,
+          flex: 1,
+          fontWeight: '700',
+        }}
+      >
         {label}
       </Text>
-      <Text variant="titleMedium" style={{ color: theme.colors.primary, fontWeight: '800', fontVariant: ['tabular-nums'] }}>
+      <Text
+        variant="titleMedium"
+        style={{
+          color: theme.colors.primary,
+          fontWeight: '900',
+          fontVariant: ['tabular-nums'],
+          letterSpacing: 0.3,
+        }}
+      >
         {time}
       </Text>
     </View>
@@ -37,28 +58,56 @@ export function FirstLastTrainCard({ data }: Props) {
 
   const firstTime = data.first_train?.endstation_from_first_train_estimated_time ?? '—';
   const lastTime = data.last_train?.endstation_from_last_train_estimated_time ?? '—';
-  const iconBg = isDark ? theme.colors.elevation.level5 : theme.colors.primaryContainer;
+  const iconBg = theme.colors.secondary;
 
   return (
-    <Surface style={styles.container} elevation={1}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: theme.colors.elevation.level2,
+          borderColor: '#FFFFFF',
+        },
+      ]}
+    >
       <View style={styles.headerRow}>
         <Ionicons name="train-outline" size={18} color={theme.colors.primary} />
-        <Text variant="titleSmall" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
-          Train Timings
+        <Text
+          variant="titleSmall"
+          style={{
+            color: theme.colors.onSurface,
+            fontWeight: '900',
+            letterSpacing: 0.3,
+          }}
+        >
+          TRAIN TIMINGS
         </Text>
       </View>
       <TrainRow label="First Train" time={firstTime} icon="sunny-outline" iconBg={iconBg} theme={theme} />
-      <View style={[styles.divider, { backgroundColor: theme.colors.outlineVariant }]} />
+      <View
+        style={[
+          styles.divider,
+          {
+            backgroundColor: theme.colors.outlineVariant,
+          },
+        ]}
+      />
       <TrainRow label="Last Train" time={lastTime} icon="moon-outline" iconBg={iconBg} theme={theme} />
-    </Surface>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 24,
+    borderRadius: 0,
+    borderWidth: 2,
     padding: spacing.base,
     gap: spacing.md,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowColor: '#000000',
+    shadowRadius: 0,
+    elevation: 8,
   },
   headerRow: {
     flexDirection: 'row',
@@ -73,13 +122,14 @@ const styles = StyleSheet.create({
   trainIcon: {
     width: 36,
     height: 36,
-    borderRadius: 12,
+    borderRadius: 0,
+    borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
   },
   divider: {
-    height: 1,
+    height: 2,
     marginLeft: 48,
-    opacity: 0.3,
+    opacity: 0.5,
   },
 });
