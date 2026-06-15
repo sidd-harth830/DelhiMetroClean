@@ -24,13 +24,16 @@ export function StationCard({ station, onPress, showChevron = true }: Props) {
   const { isDark, semantic } = useAppTheme();
 
   const primaryLineColor = station.metro_lines?.[0]?.primary_color_code ?? theme.colors.primary;
+  const cardBgColor = isDark
+    ? `${primaryLineColor}15`
+    : `${primaryLineColor}10`;
 
   return (
     <View style={styles.wrapper}>
       <TouchableRipple
         onPress={onPress}
         disabled={!onPress}
-        rippleColor={theme.colors.primaryContainer}
+        rippleColor={theme.colors.primary}
         borderless
         style={styles.ripple}
       >
@@ -38,114 +41,93 @@ export function StationCard({ station, onPress, showChevron = true }: Props) {
           style={[
             styles.card,
             {
-              backgroundColor: theme.colors.elevation.level2,
-              borderColor: '#FFFFFF',
+              backgroundColor: cardBgColor,
             },
           ]}
         >
-          {/* Left accent tab */}
+          {/* Icon container with line color */}
           <View
             style={[
-              styles.accentTab,
-              { backgroundColor: primaryLineColor },
+              styles.iconContainer,
+              {
+                backgroundColor: primaryLineColor,
+              },
             ]}
-          />
-
-          {/* Main content */}
-          <View style={styles.container}>
-            {/* Line icon */}
-            <View
-              style={[
-                styles.iconBox,
-                {
-                  backgroundColor: primaryLineColor,
-                  borderColor: '#000000',
-                },
-              ]}
-            >
-              {station.interchange ? (
-                <Ionicons name="git-compare" size={18} color="#000000" />
-              ) : (
-                <Ionicons name="train" size={18} color="#000000" />
-              )}
-            </View>
-
-            {/* Content */}
-            <View style={styles.content}>
-              <View style={styles.nameRow}>
-                <Text
-                  variant="titleSmall"
-                  style={{
-                    color: theme.colors.onSurface,
-                    fontWeight: '800',
-                    flex: 1,
-                  }}
-                  numberOfLines={1}
-                >
-                  {station.station_name}
-                </Text>
-                <View
-                  style={[
-                    styles.codeBadge,
-                    {
-                      backgroundColor: primaryLineColor,
-                      borderColor: '#FFFFFF',
-                    },
-                  ]}
-                >
-                  <Text
-                    variant="labelSmall"
-                    style={{
-                      color: '#000000',
-                      fontWeight: '800',
-                      fontVariant: ['tabular-nums'],
-                      letterSpacing: 0.5,
-                    }}
-                  >
-                    {station.station_code}
-                  </Text>
-                </View>
-              </View>
-
-              {!!station.metro_lines?.length && (
-                <View style={styles.badgesRow}>
-                  {station.metro_lines.map((line) => (
-                    <LineBadge
-                      key={`${station.station_code}-${line.line_code}`}
-                      name={line.line_code}
-                      color={line.primary_color_code}
-                      compact
-                    />
-                  ))}
-                  {station.interchange && (
-                    <View
-                      style={[
-                        styles.interchangeTag,
-                        { backgroundColor: semantic.interchange, borderColor: '#FFFFFF' },
-                      ]}
-                    >
-                      <Ionicons name="git-compare" size={10} color="#000000" />
-                      <Text
-                        variant="labelSmall"
-                        style={{
-                          color: '#000000',
-                          fontWeight: '800',
-                          fontSize: 10,
-                          letterSpacing: 0.3,
-                        }}
-                      >
-                        Interchange
-                      </Text>
-                    </View>
-                  )}
-                </View>
-              )}
-            </View>
-
-            {showChevron && onPress ? (
-              <Ionicons name="chevron-forward" size={16} color={theme.colors.primary} />
-            ) : null}
+          >
+            {station.interchange ? (
+              <Ionicons name="git-compare" size={18} color="#FFFFFF" />
+            ) : (
+              <Ionicons name="train" size={18} color="#FFFFFF" />
+            )}
           </View>
+
+          {/* Content */}
+          <View style={styles.content}>
+            <View style={styles.nameRow}>
+              <Text
+                variant="titleSmall"
+                style={{
+                  color: theme.colors.onSurface,
+                  fontWeight: '600',
+                  flex: 1,
+                }}
+                numberOfLines={1}
+              >
+                {station.station_name}
+              </Text>
+              <View
+                style={[
+                  styles.codeBadge,
+                  {
+                    backgroundColor: primaryLineColor,
+                  },
+                ]}
+              >
+                <Text
+                  variant="labelSmall"
+                  style={{
+                    color: '#FFFFFF',
+                    fontWeight: '700',
+                    fontVariant: ['tabular-nums'],
+                  }}
+                >
+                  {station.station_code}
+                </Text>
+              </View>
+            </View>
+
+            {!!station.metro_lines?.length && (
+              <View style={styles.badgesRow}>
+                {station.metro_lines.slice(0, 2).map((line) => (
+                  <LineBadge
+                    key={`${station.station_code}-${line.line_code}`}
+                    name={line.line_code}
+                    color={line.primary_color_code}
+                    compact
+                  />
+                ))}
+                {station.interchange && (
+                  <View style={[styles.interchangeTag]}>
+                    <Ionicons name="git-compare" size={10} color={theme.colors.primary} />
+                    <Text
+                      variant="labelSmall"
+                      style={{
+                        color: theme.colors.primary,
+                        fontWeight: '700',
+                        fontSize: 10,
+                      }}
+                    >
+                      Interchange
+                    </Text>
+                  </View>
+                )}
+              </View>
+            )}
+          </View>
+
+          {showChevron && onPress ? (
+            <Ionicons name="chevron-forward" size={16} color={theme.colors.onSurfaceVariant} />
+          ) : null}
         </View>
       </TouchableRipple>
     </View>
@@ -158,37 +140,26 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   ripple: {
-    borderRadius: 0,
+    borderRadius: 24,
   },
   card: {
-    borderRadius: 0,
-    borderWidth: 2,
-    overflow: 'hidden',
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowColor: '#000000',
-    shadowRadius: 0,
-    elevation: 8,
-    flexDirection: 'row',
-  },
-  accentTab: {
-    width: 6,
-    alignSelf: 'stretch',
-  },
-  container: {
-    flex: 1,
+    borderRadius: 24,
+    padding: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
-    padding: spacing.md,
     gap: spacing.md,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 3,
   },
-  iconBox: {
-    width: 44,
-    height: 44,
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
-    borderRadius: 0,
   },
   content: {
     flex: 1,
@@ -200,24 +171,23 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   codeBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 0,
-    borderWidth: 2,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
   badgesRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.xs,
-    marginTop: 2,
+    marginTop: 4,
   },
   interchangeTag: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 0,
-    borderWidth: 2,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
   },
 });

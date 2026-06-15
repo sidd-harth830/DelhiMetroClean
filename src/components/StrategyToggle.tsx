@@ -26,9 +26,7 @@ export function StrategyToggle({ active, onChange }: Props) {
             style={[
               styles.option,
               {
-                backgroundColor: isActive ? theme.colors.primary : theme.colors.elevation.level2,
-                borderColor: '#FFFFFF',
-                borderRightWidth: index === 0 ? 0 : 2,
+                backgroundColor: isActive ? theme.colors.primary : theme.colors.surface,
               },
             ]}
             onPress={() => onChange(option.value)}
@@ -39,8 +37,8 @@ export function StrategyToggle({ active, onChange }: Props) {
               adjustsFontSizeToFit={true}
               style={{
                 color: isActive ? '#000000' : theme.colors.onSurface,
-                fontWeight: '800',
-                letterSpacing: 0.3,
+                fontWeight: '700',
+                letterSpacing: 0.2,
               }}
             >
               {option.label}
@@ -55,15 +53,16 @@ export function StrategyToggle({ active, onChange }: Props) {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
-    borderRadius: 0,
+    borderWidth: 0,
+    borderColor: 'transparent',
+    borderRadius: 20,
     overflow: 'hidden',
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 1,
     shadowColor: '#000000',
-    shadowRadius: 0,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+    gap: 0,
   },
   option: {
     flex: 1,
@@ -71,7 +70,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 12,
     borderRadius: 0,
-    borderWidth: 2,
+    borderWidth: 0,
     borderLeftWidth: 0,
     borderBottomWidth: 0,
     borderTopWidth: 0,

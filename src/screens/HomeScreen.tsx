@@ -75,15 +75,14 @@ export function HomeScreen() {
         elevated={false}
         style={{
           backgroundColor: theme.colors.background,
-          borderBottomWidth: 2,
-          borderBottomColor: '#FFFFFF',
+          borderBottomWidth: 0,
         }}
       >
         <Appbar.Content
-          title="DELHI METRO"
-          subtitle="PLAN YOUR JOURNEY"
-          titleStyle={{ fontWeight: '900', letterSpacing: 1 }}
-          subtitleStyle={{ fontWeight: '800', letterSpacing: 0.5 }}
+          title="Delhi Metro"
+          subtitle="Plan your journey"
+          titleStyle={{ fontWeight: '700', fontSize: 20 }}
+          subtitleStyle={{ fontWeight: '500', fontSize: 13 }}
         />
       </Appbar.Header>
       <ScrollView
@@ -91,26 +90,27 @@ export function HomeScreen() {
         contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + spacing['4xl'] }]}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Journey Planner Card */}
+        {/* Journey Planner Card - Premium Bento Box */}
         <View
           style={[
-            styles.plannerSection,
+            styles.plannerCard,
             {
-              backgroundColor: theme.colors.elevation.level2,
-              borderColor: '#FFFFFF',
+              backgroundColor: theme.colors.surface,
             },
           ]}
         >
-          {/* Header accent bar */}
-          <View style={[styles.plannerAccent, { backgroundColor: theme.colors.primary }]} />
-
           {/* Station inputs with connecting line */}
           <View style={styles.stationsBlock}>
             {/* Vertical connector on the left */}
             <View style={styles.connectorColumn}>
               <View style={[styles.connectorDot, { backgroundColor: semantic.success }]} />
-              <View style={[styles.connectorLine, { backgroundColor: theme.colors.primary }]} />
-              <View style={[styles.connectorDot, { backgroundColor: theme.colors.error }]} />
+              <View
+                style={[
+                  styles.connectorLine,
+                  { backgroundColor: theme.colors.onSurfaceVariant, opacity: 0.3 },
+                ]}
+              />
+              <View style={[styles.connectorDot, { backgroundColor: semantic.error }]} />
             </View>
 
             {/* Input fields */}
@@ -119,8 +119,9 @@ export function HomeScreen() {
                 style={[
                   styles.stationInput,
                   {
-                    backgroundColor: fromPicker.station ? theme.colors.primary : theme.colors.secondary,
-                    borderColor: '#FFFFFF',
+                    backgroundColor: isDark
+                      ? `${semantic.blue_line}15`
+                      : `${semantic.blue_line}10`,
                   },
                 ]}
                 onPress={fromPicker.open}
@@ -129,23 +130,27 @@ export function HomeScreen() {
                   variant="bodyLarge"
                   style={{
                     flex: 1,
-                    color: '#000000',
-                    fontWeight: '800',
-                    letterSpacing: 0.3,
+                    color: fromPicker.station ? theme.colors.onSurface : theme.colors.onSurfaceVariant,
+                    fontWeight: fromPicker.station ? '600' : '500',
                   }}
                   numberOfLines={1}
                 >
                   {fromPicker.station?.name ?? 'Where from?'}
                 </Text>
-                <Ionicons name="chevron-forward" size={16} color="#000000" />
+                <Ionicons
+                  name="chevron-forward"
+                  size={16}
+                  color={theme.colors.onSurfaceVariant}
+                />
               </Pressable>
 
               <Pressable
                 style={[
                   styles.stationInput,
                   {
-                    backgroundColor: toPicker.station ? theme.colors.primary : theme.colors.secondary,
-                    borderColor: '#FFFFFF',
+                    backgroundColor: isDark
+                      ? `${semantic.green_line}15`
+                      : `${semantic.green_line}10`,
                   },
                 ]}
                 onPress={toPicker.open}
@@ -154,36 +159,37 @@ export function HomeScreen() {
                   variant="bodyLarge"
                   style={{
                     flex: 1,
-                    color: '#000000',
-                    fontWeight: '800',
-                    letterSpacing: 0.3,
+                    color: toPicker.station ? theme.colors.onSurface : theme.colors.onSurfaceVariant,
+                    fontWeight: toPicker.station ? '600' : '500',
                   }}
                   numberOfLines={1}
                 >
                   {toPicker.station?.name ?? 'Where to?'}
                 </Text>
-                <Ionicons name="chevron-forward" size={16} color="#000000" />
+                <Ionicons
+                  name="chevron-forward"
+                  size={16}
+                  color={theme.colors.onSurfaceVariant}
+                />
               </Pressable>
             </View>
 
-            {/* Swap button on the right */}
+            {/* Swap button */}
             <Pressable
               style={[
                 styles.swapBtn,
                 {
-                  backgroundColor: theme.colors.tertiary,
-                  borderColor: '#FFFFFF',
+                  backgroundColor: theme.colors.primary,
                 },
               ]}
               onPress={handleSwap}
             >
-              <Ionicons name="swap-vertical" size={20} color="#000000" />
+              <Ionicons name="swap-vertical" size={18} color="#000000" />
             </Pressable>
           </View>
 
-          {/* Time chips row */}
-          <View style={styles.timeRow}>
-            <Ionicons name="time-outline" size={16} color={theme.colors.primary} />
+          {/* Time toggle */}
+          <View style={styles.timeSection}>
             <TimeToggle value={departureOffsetMinutes} onChange={setDepartureOffsetMinutes} />
           </View>
 
@@ -193,61 +199,67 @@ export function HomeScreen() {
             onPress={handleFindRoute}
             disabled={!canSearch}
             icon="navigation"
-            style={[
-              styles.findButton,
-              {
-                backgroundColor: canSearch ? theme.colors.primary : theme.colors.elevation.level3,
-              },
-            ]}
+            style={styles.findButton}
             contentStyle={{ paddingVertical: 8 }}
-            labelStyle={{ fontSize: 16, fontWeight: '900', letterSpacing: 0.5 }}
-            textColor="#000000"
+            labelStyle={{ fontSize: 16, fontWeight: '600' }}
           >
-            FIND ROUTE
+            Find Route
           </Button>
         </View>
 
-        {/* Disruption banner */}
+        {/* Disruption Alert Banner */}
         {disruptedLines.length > 0 && (
           <Pressable
             style={[
               styles.disruptionBanner,
-              { borderColor: '#FFB946' },
+              {
+                backgroundColor: isDark
+                  ? `${semantic.warning}15`
+                  : `${semantic.warning}10`,
+              },
             ]}
             onPress={() => navigation.getParent()?.navigate('AlertsTab' as never)}
           >
-            <View style={[styles.disruptionAccent, { backgroundColor: '#FFB946' }]} />
-            <View style={styles.disruptionLeft}>
-              <View style={[styles.disruptionIconWrap, { backgroundColor: '#FFB946' }]}>
-                <Ionicons name="warning" size={18} color="#000000" />
-              </View>
-              <View style={styles.disruptionText}>
-                <Text variant="labelLarge" style={{ color: '#FFB946', fontWeight: '900' }}>
-                  DISRUPTIONS
-                </Text>
-                <View style={styles.disruptionChips}>
-                  {disruptedLines.map((line) => (
-                    <View
-                      key={line.id}
-                      style={[
-                        styles.disruptionChip,
-                        { backgroundColor: line.primary_color_code, borderColor: '#FFFFFF' },
-                      ]}
-                    >
-                      <Text style={styles.disruptionChipText}>{line.line_code}</Text>
-                    </View>
-                  ))}
-                </View>
+            <View
+              style={[
+                styles.disruptionIcon,
+                { backgroundColor: semantic.warning },
+              ]}
+            >
+              <Ionicons name="warning" size={16} color="#000000" />
+            </View>
+            <View style={styles.disruptionContent}>
+              <Text
+                variant="labelLarge"
+                style={{
+                  color: semantic.warning,
+                  fontWeight: '700',
+                }}
+              >
+                Service Disruptions
+              </Text>
+              <View style={styles.disruptionChips}>
+                {disruptedLines.slice(0, 4).map((line) => (
+                  <View
+                    key={line.id}
+                    style={[
+                      styles.disruptionChip,
+                      { backgroundColor: line.primary_color_code },
+                    ]}
+                  >
+                    <Text style={styles.disruptionChipText}>{line.line_code}</Text>
+                  </View>
+                ))}
               </View>
             </View>
-            <Ionicons name="chevron-forward" size={16} color="#FFB946" />
+            <Ionicons name="chevron-forward" size={16} color={semantic.warning} />
           </Pressable>
         )}
 
-        {/* Popular Routes */}
+        {/* Popular Routes Section */}
         {(popularRoutes.data?.length ?? 0) > 0 && (
           <>
-            <SectionHeader title="POPULAR ROUTES" />
+            <SectionHeader title="Popular Routes" />
             <View style={styles.popularList}>
               {popularRoutes.data!.map((route, index) => (
                 <Pressable
@@ -255,23 +267,41 @@ export function HomeScreen() {
                   style={[
                     styles.popularCard,
                     {
-                      backgroundColor: theme.colors.elevation.level2,
-                      borderColor: '#FFFFFF',
+                      backgroundColor: theme.colors.surface,
                     },
-                    index > 0 && { borderTopWidth: 0 },
                   ]}
                   onPress={() => handlePopularRoute(route.fromStationCode, route.toStationCode)}
                 >
-                  <Ionicons name="train" size={18} color={theme.colors.primary} />
+                  <View
+                    style={[
+                      styles.popularIcon,
+                      { backgroundColor: semantic.blue_line },
+                    ]}
+                  >
+                    <Ionicons name="train" size={16} color="#FFFFFF" />
+                  </View>
                   <View style={styles.popularContent}>
-                    <Text style={{ fontWeight: '800', color: theme.colors.onSurface }}>
+                    <Text
+                      style={{
+                        fontWeight: '600',
+                        color: theme.colors.onSurface,
+                      }}
+                    >
                       {route.fromStationCode} → {route.toStationCode}
                     </Text>
                   </View>
-                  <View style={[styles.hitsBadge, { backgroundColor: theme.colors.primary }]}>
+                  <View
+                    style={[
+                      styles.hitsBadge,
+                      { backgroundColor: semantic.success },
+                    ]}
+                  >
                     <Text
                       variant="labelSmall"
-                      style={{ color: '#000000', fontWeight: '900' }}
+                      style={{
+                        color: '#000000',
+                        fontWeight: '700',
+                      }}
                     >
                       {route.hitCount}x
                     </Text>
@@ -282,10 +312,10 @@ export function HomeScreen() {
           </>
         )}
 
-        {/* Recent Notifications */}
+        {/* Recent Notifications Section */}
         {(notifications.data?.length ?? 0) > 0 && (
           <>
-            <SectionHeader title="RECENT ALERTS" />
+            <SectionHeader title="Recent Alerts" />
             <View style={styles.notifList}>
               {notifications.data!.slice(0, 3).map((notif) => (
                 <NotificationCard key={notif.id} notification={notif} />
@@ -317,33 +347,25 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
     paddingBottom: spacing['4xl'],
   },
-  // Planner
-  plannerSection: {
+  plannerCard: {
+    borderRadius: 28,
+    padding: spacing.lg,
     gap: spacing.md,
-    borderWidth: 2,
-    borderRadius: 0,
-    overflow: 'hidden',
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
     shadowColor: '#000000',
-    shadowRadius: 0,
-    elevation: 8,
-  },
-  plannerAccent: {
-    height: 6,
-    width: '100%',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
   },
   stationsBlock: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.md,
   },
   connectorColumn: {
     alignItems: 'center',
     gap: 0,
-    paddingVertical: 4,
+    paddingVertical: 8,
     alignSelf: 'stretch',
     justifyContent: 'center',
   },
@@ -353,7 +375,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   connectorLine: {
-    width: 3,
+    width: 2,
     flex: 1,
     minHeight: 20,
   },
@@ -366,139 +388,100 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: spacing.base,
     paddingVertical: 14,
-    borderRadius: 0,
+    borderRadius: 18,
     gap: spacing.sm,
-    borderWidth: 2,
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 1,
-    shadowColor: '#000000',
-    shadowRadius: 0,
-    elevation: 4,
   },
   swapBtn: {
     width: 44,
     height: 44,
-    borderRadius: 0,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 1,
     shadowColor: '#000000',
-    shadowRadius: 0,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  timeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
+  timeSection: {
+    marginTop: spacing.sm,
   },
   findButton: {
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.md,
-    borderRadius: 0,
-    borderWidth: 2,
-    borderColor: '#000000',
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 1,
-    shadowColor: '#000000',
-    shadowRadius: 0,
-    elevation: 6,
+    borderRadius: 16,
+    marginTop: spacing.md,
   },
-  popularList: {
-    gap: 0,
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
-    borderRadius: 0,
-    overflow: 'hidden',
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowColor: '#000000',
-    shadowRadius: 0,
-    elevation: 8,
-  },
-  popularCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    gap: spacing.md,
-    borderWidth: 2,
-    borderTopWidth: 2,
-    borderLeftWidth: 0,
-    borderRightWidth: 0,
-    borderBottomWidth: 0,
-  },
-  popularContent: {
-    flex: 1,
-  },
-  hitsBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 0,
-    borderWidth: 2,
-    borderColor: '#000000',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  notifList: {
-    gap: spacing.sm,
-  },
-  // Disruption banner
   disruptionBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    borderWidth: 2,
-    borderRadius: 0,
-    overflow: 'hidden',
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowColor: '#000000',
-    shadowRadius: 0,
-    elevation: 8,
-  },
-  disruptionAccent: {
-    width: 6,
-    alignSelf: 'stretch',
-  },
-  disruptionLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
     gap: spacing.md,
-    flex: 1,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
+    padding: spacing.md,
+    borderRadius: 20,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  disruptionIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 0,
-    borderWidth: 2,
-    borderColor: '#000000',
+  disruptionIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  disruptionText: {
-    gap: spacing.xs,
+  disruptionContent: {
     flex: 1,
+    gap: spacing.xs,
   },
   disruptionChips: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.xs,
+    marginTop: spacing.xs,
   },
   disruptionChip: {
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
     paddingVertical: 3,
-    borderRadius: 0,
-    borderWidth: 2,
+    borderRadius: 8,
   },
   disruptionChipText: {
     fontSize: 10,
-    fontWeight: '900',
-    color: '#000000',
-    letterSpacing: 0.5,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  popularList: {
+    gap: spacing.sm,
+    paddingHorizontal: spacing.base,
+  },
+  popularCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.md,
+    borderRadius: 18,
+    gap: spacing.md,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  popularIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  popularContent: {
+    flex: 1,
+  },
+  hitsBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 10,
+  },
+  notifList: {
+    gap: spacing.sm,
+    paddingHorizontal: spacing.base,
   },
 });

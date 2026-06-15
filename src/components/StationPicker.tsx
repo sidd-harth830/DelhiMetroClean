@@ -40,16 +40,19 @@ export function StationPicker({ visible, onSelect, onClose, title = 'Select Stat
         <View style={styles.header}>
           <Text
             variant="headlineSmall"
-            style={{ color: theme.colors.onSurface, fontWeight: '800' }}
+            style={{
+              color: theme.colors.onSurface,
+              fontWeight: '600',
+            }}
           >
             {title}
           </Text>
           <IconButton icon="close" onPress={handleClose} iconColor={theme.colors.onSurface} />
         </View>
 
-        <View style={[styles.searchbarWrapper, { borderColor: '#FFFFFF' }]}>
+        <View style={styles.searchWrapper}>
           <Searchbar
-            placeholder="Search station..."
+            placeholder="Search stations..."
             value={searchText}
             onChangeText={setSearchText}
             autoFocus
@@ -57,8 +60,8 @@ export function StationPicker({ visible, onSelect, onClose, title = 'Select Stat
             style={[
               styles.searchbar,
               {
-                backgroundColor: theme.colors.elevation.level2,
-                borderColor: '#FFFFFF',
+                backgroundColor: theme.colors.surface,
+                borderRadius: 24,
               },
             ]}
             inputStyle={{ color: theme.colors.onSurface }}
@@ -73,8 +76,7 @@ export function StationPicker({ visible, onSelect, onClose, title = 'Select Stat
               style={[
                 styles.loadingCard,
                 {
-                  backgroundColor: theme.colors.elevation.level2,
-                  borderColor: '#FFFFFF',
+                  backgroundColor: theme.colors.surface,
                 },
               ]}
             >
@@ -82,7 +84,7 @@ export function StationPicker({ visible, onSelect, onClose, title = 'Select Stat
               <ActivityIndicator size="small" color={theme.colors.primary} />
               <Text
                 variant="bodyMedium"
-                style={{ color: theme.colors.onSurfaceVariant, fontWeight: '700' }}
+                style={{ color: theme.colors.onSurfaceVariant, fontWeight: '500' }}
               >
                 Searching stations...
               </Text>
@@ -96,11 +98,13 @@ export function StationPicker({ visible, onSelect, onClose, title = 'Select Stat
             contentContainerStyle={styles.list}
             renderItem={({ item }) => {
               const lineColor = item.metro_lines?.[0]?.primary_color_code ?? theme.colors.primary;
+              const cardBg = isDark ? `${lineColor}12` : `${lineColor}08`;
+
               return (
                 <View style={styles.resultWrapper}>
                   <TouchableRipple
                     onPress={() => handleSelect(item)}
-                    rippleColor={theme.colors.primaryContainer}
+                    rippleColor={theme.colors.primary}
                     borderless
                     style={styles.resultRipple}
                   >
@@ -108,8 +112,7 @@ export function StationPicker({ visible, onSelect, onClose, title = 'Select Stat
                       style={[
                         styles.resultCard,
                         {
-                          backgroundColor: theme.colors.elevation.level2,
-                          borderColor: '#FFFFFF',
+                          backgroundColor: cardBg,
                         },
                       ]}
                     >
@@ -118,11 +121,10 @@ export function StationPicker({ visible, onSelect, onClose, title = 'Select Stat
                           styles.resultIcon,
                           {
                             backgroundColor: lineColor,
-                            borderColor: '#000000',
                           },
                         ]}
                       >
-                        <Ionicons name="train" size={18} color="#000000" />
+                        <Ionicons name="train" size={18} color="#FFFFFF" />
                       </View>
                       <View style={styles.resultContent}>
                         <View style={styles.resultNameRow}>
@@ -130,7 +132,7 @@ export function StationPicker({ visible, onSelect, onClose, title = 'Select Stat
                             variant="titleSmall"
                             style={{
                               color: theme.colors.onSurface,
-                              fontWeight: '800',
+                              fontWeight: '600',
                               flex: 1,
                             }}
                             numberOfLines={1}
@@ -142,17 +144,15 @@ export function StationPicker({ visible, onSelect, onClose, title = 'Select Stat
                               styles.resultCodeBadge,
                               {
                                 backgroundColor: lineColor,
-                                borderColor: '#FFFFFF',
                               },
                             ]}
                           >
                             <Text
                               variant="labelSmall"
                               style={{
-                                color: '#000000',
-                                fontWeight: '800',
+                                color: '#FFFFFF',
+                                fontWeight: '700',
                                 fontVariant: ['tabular-nums'],
-                                letterSpacing: 0.3,
                               }}
                             >
                               {item.station_code}
@@ -184,8 +184,7 @@ export function StationPicker({ visible, onSelect, onClose, title = 'Select Stat
                     style={[
                       styles.emptyIcon,
                       {
-                        backgroundColor: theme.colors.elevation.level3,
-                        borderColor: '#FFFFFF',
+                        backgroundColor: theme.colors.surface,
                       },
                     ]}
                   >
@@ -195,14 +194,14 @@ export function StationPicker({ visible, onSelect, onClose, title = 'Select Stat
                     variant="titleSmall"
                     style={{
                       color: theme.colors.onSurfaceVariant,
-                      fontWeight: '800',
+                      fontWeight: '600',
                     }}
                   >
                     No stations found
                   </Text>
                   <Text
                     variant="bodySmall"
-                    style={{ color: theme.colors.outline, textAlign: 'center' }}
+                    style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center' }}
                   >
                     Try a different station name or code
                   </Text>
@@ -227,50 +226,42 @@ const styles = StyleSheet.create({
     paddingLeft: spacing.base,
     paddingTop: spacing.md,
   },
-  searchbarWrapper: {
+  searchWrapper: {
     marginHorizontal: spacing.base,
-    marginBottom: spacing.base,
-    borderWidth: 2,
-    borderRadius: 0,
-    overflow: 'hidden',
+    marginBottom: spacing.lg,
   },
   searchbar: {
-    marginHorizontal: 0,
-    borderRadius: 0,
-    borderWidth: 0,
+    borderRadius: 24,
   },
   list: {
     paddingTop: spacing.xs,
     paddingBottom: spacing.lg,
+    paddingHorizontal: spacing.base,
   },
   resultWrapper: {
-    paddingHorizontal: spacing.base,
     paddingVertical: spacing.xs,
   },
   resultRipple: {
-    borderRadius: 0,
+    borderRadius: 20,
   },
   resultCard: {
-    borderRadius: 0,
-    borderWidth: 2,
-    overflow: 'hidden',
+    borderRadius: 20,
+    padding: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
-    padding: spacing.md,
     gap: spacing.md,
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 1,
     shadowColor: '#000000',
-    shadowRadius: 0,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   resultIcon: {
     width: 44,
     height: 44,
-    borderRadius: 0,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
   },
   resultContent: {
     flex: 1,
@@ -282,16 +273,15 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   resultCodeBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 0,
-    borderWidth: 2,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
   },
   badgesRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.xs,
-    marginTop: 2,
+    marginTop: 4,
   },
   loadingContainer: {
     flex: 1,
@@ -301,17 +291,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingCard: {
-    borderRadius: 0,
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderRadius: 24,
     padding: spacing.lg,
     alignItems: 'center',
     gap: spacing.md,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
     shadowColor: '#000000',
-    shadowRadius: 0,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 3,
   },
   emptyContainer: {
     flex: 1,
@@ -323,10 +311,14 @@ const styles = StyleSheet.create({
   emptyIcon: {
     width: 72,
     height: 72,
-    borderRadius: 0,
-    borderWidth: 2,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: spacing.sm,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
 });

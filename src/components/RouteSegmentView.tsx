@@ -34,7 +34,7 @@ export function RouteSegmentView({
       <View
         style={[
           styles.header,
-          { backgroundColor: lineColor, borderColor: '#000000' },
+          { backgroundColor: lineColor },
         ]}
       >
         <View style={styles.linePill}>
@@ -95,11 +95,10 @@ export function RouteSegmentView({
                       styles.infoBtn,
                       {
                         backgroundColor: lineColor,
-                        borderColor: '#000000',
                       },
                     ]}
                   >
-                    <Ionicons name="information-circle-outline" size={14} color="#000000" />
+                    <Ionicons name="information-circle-outline" size={16} color="#FFFFFF" />
                   </Pressable>
                 ) : null}
               </View>
@@ -139,7 +138,7 @@ export function RouteSegmentView({
 const styles = StyleSheet.create({
   container: {
     gap: spacing.sm,
-    borderLeftWidth: 3,
+    borderLeftWidth: 0,
     paddingLeft: spacing.md,
   },
   header: {
@@ -147,9 +146,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: spacing.md,
-    paddingVertical: 8,
-    borderWidth: 2,
-    borderRadius: 0,
+    paddingVertical: 12,
+    borderWidth: 0,
+    borderRadius: 20,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 3,
   },
   linePill: {
     flexDirection: 'row',
@@ -160,7 +164,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(255,255,255,0.6)',
   },
   stationsContainer: {
     flexDirection: 'row',
@@ -168,7 +172,7 @@ const styles = StyleSheet.create({
   },
   lineBar: {
     width: 4,
-    borderRadius: 0,
+    borderRadius: 2,
   },
   stations: {
     flex: 1,
@@ -182,12 +186,17 @@ const styles = StyleSheet.create({
     paddingRight: spacing.xs,
   },
   infoBtn: {
-    width: 24,
-    height: 24,
-    borderRadius: 0,
-    borderWidth: 2,
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    borderWidth: 0,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   stationDot: {
     width: 8,
@@ -208,13 +217,13 @@ const styles = StyleSheet.create({
     marginLeft: spacing.sm,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    borderRadius: 0,
-    borderWidth: 2,
+    borderRadius: 16,
+    borderWidth: 0,
     alignSelf: 'flex-start',
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 1,
     shadowColor: '#000000',
-    shadowRadius: 0,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
 });

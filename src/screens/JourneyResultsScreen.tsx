@@ -140,18 +140,18 @@ export function JourneyResultsScreen() {
             <Pressable
               onPress={() => navigation.navigate('StationDetail', { stationCode: fromCode, stationName: fromName })}
               hitSlop={8}
-              style={[styles.heroInfoBtn, { backgroundColor: 'rgba(0,0,0,0.2)', borderColor: '#000000' }]}
+              style={[styles.heroInfoBtn, { backgroundColor: 'rgba(0,0,0,0.1)' }]}
             >
-              <Ionicons name="information-circle-outline" size={18} color="#000000" />
+              <Ionicons name="information-circle-outline" size={20} color={theme.colors.onSurface} />
             </Pressable>
           </View>
 
           <View style={styles.heroConnector}>
-            <View style={[styles.heroLine, { backgroundColor: '#000000' }]} />
-            <View style={[styles.heroArrowCircle, { backgroundColor: '#000000' }]}>
-              <Ionicons name="arrow-down" size={18} color={theme.colors.primary} />
+            <View style={[styles.heroLine, { backgroundColor: theme.colors.outlineVariant }]} />
+            <View style={[styles.heroArrowCircle, { backgroundColor: theme.colors.primary }]}>
+              <Ionicons name="arrow-down" size={18} color="#000000" />
             </View>
-            <View style={[styles.heroLine, { backgroundColor: '#000000' }]} />
+            <View style={[styles.heroLine, { backgroundColor: theme.colors.outlineVariant }]} />
           </View>
 
           <View style={styles.heroStationRow}>
@@ -171,24 +171,24 @@ export function JourneyResultsScreen() {
             <Pressable
               onPress={() => navigation.navigate('StationDetail', { stationCode: toCode, stationName: toName })}
               hitSlop={8}
-              style={[styles.heroInfoBtn, { backgroundColor: 'rgba(0,0,0,0.2)', borderColor: '#000000' }]}
+              style={[styles.heroInfoBtn, { backgroundColor: 'rgba(0,0,0,0.1)' }]}
             >
-              <Ionicons name="information-circle-outline" size={18} color="#000000" />
+              <Ionicons name="information-circle-outline" size={20} color={theme.colors.onSurface} />
             </Pressable>
           </View>
         </View>
 
         {/* Inline stats row */}
         <View style={styles.heroStats}>
-          <View style={[styles.heroStat, { backgroundColor: 'rgba(0,0,0,0.2)', borderColor: '#000000' }]}>
-            <Ionicons name="git-commit-outline" size={16} color="#000000" />
-            <Text variant="labelLarge" style={{ color: '#000000', fontWeight: '900' }}>
+          <View style={[styles.heroStat, { backgroundColor: isDark ? `${theme.colors.primary}15` : `${theme.colors.primary}10` }]}>
+            <Ionicons name="git-commit-outline" size={18} color={theme.colors.primary} />
+            <Text variant="labelLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
               {fare.stations} stops
             </Text>
           </View>
-          <View style={[styles.heroStat, { backgroundColor: 'rgba(0,0,0,0.2)', borderColor: '#000000' }]}>
-            <Ionicons name="time-outline" size={16} color="#000000" />
-            <Text variant="labelLarge" style={{ color: '#000000', fontWeight: '900' }}>
+          <View style={[styles.heroStat, { backgroundColor: isDark ? `${theme.colors.primary}15` : `${theme.colors.primary}10` }]}>
+            <Ionicons name="time-outline" size={18} color={theme.colors.primary} />
+            <Text variant="labelLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
               {fare.total_time}
             </Text>
           </View>
@@ -218,15 +218,15 @@ export function JourneyResultsScreen() {
       <View
         style={[
           styles.timePill,
-          { backgroundColor: theme.colors.elevation.level2, borderColor: '#FFFFFF' },
+          { backgroundColor: theme.colors.surfaceVariant },
         ]}
       >
         <Ionicons name="time-outline" size={18} color={theme.colors.primary} />
-        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, flex: 1, fontWeight: '700' }}>
+        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, flex: 1, fontWeight: '600' }}>
           Departure
         </Text>
-        <View style={[styles.timeValue, { backgroundColor: theme.colors.secondary, borderColor: '#FFFFFF' }]}>
-          <Text variant="labelLarge" style={{ color: '#000000', fontWeight: '900' }}>
+        <View style={[styles.timeValue, { backgroundColor: theme.colors.primary }]}>
+          <Text variant="labelLarge" style={{ color: '#000000', fontWeight: '700' }}>
             {selectedTimeLabel}
           </Text>
         </View>
@@ -239,15 +239,15 @@ export function JourneyResultsScreen() {
       <View
         style={[
           styles.routeCard,
-          { backgroundColor: theme.colors.elevation.level2, borderColor: '#FFFFFF' },
+          { backgroundColor: theme.colors.surface },
         ]}
       >
         <View style={styles.routeHeader}>
           <Ionicons name="navigate-outline" size={18} color={theme.colors.primary} />
-          <Text variant="titleSmall" style={{ color: theme.colors.onSurface, fontWeight: '900' }}>
-            ROUTE
+          <Text variant="titleSmall" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
+            Route
           </Text>
-          <Text variant="labelSmall" style={{ color: theme.colors.primary, marginLeft: 'auto', fontWeight: '800' }}>
+          <Text variant="labelSmall" style={{ color: theme.colors.primary, marginLeft: 'auto', fontWeight: '600' }}>
             {fare.route.length} {fare.route.length === 1 ? 'line' : 'lines'}
           </Text>
         </View>
@@ -281,15 +281,15 @@ const styles = StyleSheet.create({
     paddingBottom: spacing['3xl'],
   },
   heroCard: {
-    borderRadius: 0,
+    borderRadius: 28,
     padding: spacing.lg,
     gap: spacing.base,
-    borderWidth: 2,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
+    borderWidth: 0,
     shadowColor: '#000000',
-    shadowRadius: 0,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 4,
   },
   heroStations: {
     gap: 0,
@@ -306,33 +306,42 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   heroInfoBtn: {
-    width: 30,
-    height: 30,
-    borderRadius: 0,
-    borderWidth: 2,
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    borderWidth: 0,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   heroConnector: {
     flexDirection: 'row',
     alignItems: 'center',
     marginLeft: 4,
     gap: 0,
-    paddingVertical: 2,
+    paddingVertical: 8,
   },
   heroLine: {
     flex: 1,
-    height: 3,
+    height: 2,
   },
   heroArrowCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 0,
-    borderWidth: 2,
-    borderColor: '#000000',
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    borderWidth: 0,
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: spacing.sm,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   heroStats: {
     flexDirection: 'row',
@@ -344,41 +353,51 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.xs,
-    paddingVertical: 10,
-    borderRadius: 0,
-    borderWidth: 2,
+    paddingVertical: 12,
+    borderRadius: 16,
+    borderWidth: 0,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
   timePill: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    borderRadius: 0,
-    borderWidth: 2,
+    borderRadius: 20,
+    borderWidth: 0,
     paddingLeft: spacing.base,
     paddingRight: spacing.xs,
     paddingVertical: spacing.sm,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
     shadowColor: '#000000',
-    shadowRadius: 0,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   timeValue: {
     paddingHorizontal: spacing.md,
-    paddingVertical: 6,
-    borderRadius: 0,
-    borderWidth: 2,
+    paddingVertical: 8,
+    borderRadius: 12,
+    borderWidth: 0,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 1,
   },
   routeCard: {
-    borderRadius: 0,
-    borderWidth: 2,
+    borderRadius: 24,
+    borderWidth: 0,
     padding: spacing.base,
     gap: spacing.md,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
     shadowColor: '#000000',
-    shadowRadius: 0,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 3,
   },
   routeHeader: {
     flexDirection: 'row',

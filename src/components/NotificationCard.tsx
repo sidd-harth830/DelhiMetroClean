@@ -3,6 +3,7 @@ import { StyleSheet, View, Animated, LayoutAnimation } from 'react-native';
 import { Text, useTheme, TouchableRipple } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import type { PassengerNotification } from '../types';
+import { useAppTheme } from '../theme/ThemeContext';
 import { spacing } from '../theme';
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
 
 export function NotificationCard({ notification }: Props) {
   const theme = useTheme();
+  const { isDark, semantic } = useAppTheme();
   const [expanded, setExpanded] = useState(false);
   const rotateAnim = useRef(new Animated.Value(0)).current;
 
@@ -29,28 +31,33 @@ export function NotificationCard({ notification }: Props) {
     outputRange: ['0deg', '180deg']
   });
 
+  const cardBg = isDark ? `${semantic.info}12` : `${semantic.info}08`;
+
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          backgroundColor: theme.colors.elevation.level2,
-          borderColor: '#FFFFFF',
-        },
-      ]}
-    >
-      <TouchableRipple onPress={toggleExpand} style={styles.touchable}>
-        <View style={styles.inner}>
+    <View style={styles.wrapper}>
+      <TouchableRipple
+        onPress={toggleExpand}
+        rippleColor={theme.colors.primary}
+        borderless
+        style={styles.ripple}
+      >
+        <View
+          style={[
+            styles.container,
+            {
+              backgroundColor: cardBg,
+            },
+          ]}
+        >
           <View
             style={[
               styles.iconWrap,
               {
-                backgroundColor: theme.colors.secondary,
-                borderColor: '#000000',
+                backgroundColor: semantic.info,
               },
             ]}
           >
-            <Ionicons name="megaphone-outline" size={18} color="#000000" />
+            <Ionicons name="megaphone-outline" size={18} color="#FFFFFF" />
           </View>
           <View style={styles.content}>
             <Text
@@ -58,7 +65,7 @@ export function NotificationCard({ notification }: Props) {
               numberOfLines={expanded ? 0 : 2}
               style={{
                 color: theme.colors.onSurface,
-                fontWeight: '700',
+                fontWeight: '600',
               }}
             >
               {notification.title}
@@ -66,9 +73,9 @@ export function NotificationCard({ notification }: Props) {
             <Text
               variant="labelSmall"
               style={{
-                color: theme.colors.outline,
-                fontWeight: '600',
-                letterSpacing: 0.2,
+                color: theme.colors.onSurfaceVariant,
+                fontWeight: '500',
+                marginTop: spacing.xs,
               }}
             >
               {notification.date}
@@ -86,29 +93,29 @@ export function NotificationCard({ notification }: Props) {
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.xs,
+  },
+  ripple: {
+    borderRadius: 18,
+  },
   container: {
-    borderRadius: 0,
-    borderWidth: 2,
-    overflow: 'hidden',
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 1,
-    shadowColor: '#000000',
-    shadowRadius: 0,
-    elevation: 6,
-  },
-  touchable: {
-    padding: spacing.base,
-  },
-  inner: {
+    borderRadius: 18,
+    padding: spacing.md,
     flexDirection: 'row',
     gap: spacing.md,
     alignItems: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   iconWrap: {
     width: 40,
     height: 40,
-    borderRadius: 0,
-    borderWidth: 2,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },

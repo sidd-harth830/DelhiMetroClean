@@ -12,7 +12,7 @@ export function LineBadge({ name, color, compact }: Props) {
     <View
       style={[
         styles.badge,
-        { backgroundColor: color, borderColor: '#000000' },
+        { backgroundColor: color },
         compact && styles.compact,
       ]}
     >
@@ -29,24 +29,22 @@ export function LineBadge({ name, color, compact }: Props) {
 
 const styles = StyleSheet.create({
   badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 0,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 14,
     alignSelf: 'flex-start',
-    borderWidth: 2,
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 1,
     shadowColor: '#000000',
-    shadowRadius: 0,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   compact: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
   },
   text: {
     color: '#fff',
-    fontWeight: '800',
-    letterSpacing: 0.3,
+    fontWeight: '600',
   },
 });
