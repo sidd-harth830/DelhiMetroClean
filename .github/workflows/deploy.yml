@@ -10,9 +10,11 @@ on:
 permissions:
   contents: write
 
-# This completely disables the annoying Node 20 deprecation warnings
+# These variables force all terminal tools to run in "Robot Mode"
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  CI: true 
+  EXPO_NO_TELEMETRY: true
 
 jobs:
   build-and-deploy:
@@ -32,19 +34,20 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '17'
-          # Removed the cache: 'gradle' line that was causing the crash!
 
       - name: Install Project Dependencies
         run: npm install
 
       - name: Generate Android Native Project
-        run: npx expo prebuild --platform android --clean
+        # --no-interactive forces it to instantly crash if it needs a human answer, saving us 6 hours.
+        run: npx expo prebuild --platform android --clean --no-interactive
 
       - name: Build Release APK via Gradle
+        # --no-daemon and --console=plain make Gradle highly stable in cloud CI environments
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleRelease
+          ./gradlew assembleRelease --no-daemon --console=plain
 
       - name: Find and Rename APK
         id: apk-setup
