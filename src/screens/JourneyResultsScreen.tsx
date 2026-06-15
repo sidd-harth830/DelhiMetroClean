@@ -273,7 +273,6 @@ export function JourneyResultsScreen() {
     </View>
   );
 }
-}
 
 const styles = StyleSheet.create({
   content: {
