@@ -51,7 +51,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
   const HORIZONTAL_MARGIN = (SCREEN_WIDTH - PILL_WIDTH) / 2;
 
   const handleTabPress = (route: any, index: number, isFocused: boolean) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+
 
     const event = navigation.emit({
       type: "tabPress",
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 8,
     paddingHorizontal: 12,
-    borderRadius: 100,
+    borderRadius: 19,
     height: 38,
   },
   tabLabel: {

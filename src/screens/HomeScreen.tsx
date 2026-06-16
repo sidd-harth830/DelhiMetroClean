@@ -71,12 +71,12 @@ export function HomeScreen() {
     toPicker.setStation(temp);
   }, [fromPicker, toPicker]);
 
-  const handlePopularRoute = (fromCode: string, toCode: string) => {
+  const handleSavedRoute = (fromCode: string, toCode: string, fromName: string, toName: string) => {
     navigation.navigate('JourneyResults', {
       fromCode,
       toCode,
-      fromName: fromCode,
-      toName: toCode,
+      fromName,
+      toName,
     });
   };
 
@@ -291,7 +291,7 @@ export function HomeScreen() {
                       shadowOpacity: isDark ? 0 : 0.05,
                     },
                   ]}
-                  onPress={() => handlePopularRoute(route.fromCode, route.toCode)}
+                  onPress={() => handleSavedRoute(route.fromCode, route.toCode, route.fromName, route.toName)}
                 >
                   <View
                     style={[
@@ -398,10 +398,6 @@ const styles = StyleSheet.create({
     borderRadius: bentoRadius.heroCard,
     padding: spacing.lg,
     gap: spacing.md,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 16,
-    elevation: 4,
   },
   stationsBlock: {
     flexDirection: 'row',
@@ -443,10 +439,6 @@ const styles = StyleSheet.create({
     borderRadius: bentoRadius.icon,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 3,
   },
   timeSection: {
     marginTop: spacing.sm,
@@ -462,10 +454,6 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderRadius: bentoRadius.card,
     overflow: 'hidden',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    elevation: 2,
   },
   disruptionAccent: {
     position: 'absolute',
@@ -515,10 +503,6 @@ const styles = StyleSheet.create({
     borderRadius: bentoRadius.card,
     gap: spacing.sm,
     alignItems: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    elevation: 2,
   },
   popularIcon: {
     width: 36,

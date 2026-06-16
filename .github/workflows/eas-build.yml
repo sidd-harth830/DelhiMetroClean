@@ -27,6 +27,12 @@ jobs:
         with:
           node-version: 22
 
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
       - name: Install Dependencies
         run: npm install
 
@@ -36,104 +42,39 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
+      - name: Create .env file
+        run: |
+          cat << 'EOF' > .env
+          ${{ secrets.ENV_FILE }}
+          EOF
+
       - name: Get Version from package.json
         id: version
         run: |
           VERSION=$(node -p "require('./package.json').version")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Trigger EAS Build (APK)
-        id: eas-build
+      - name: Build APK (Local on GitHub Runner)
         run: |
-          echo "🏗️ Starting EAS build for Android APK..."
-          BUILD_OUTPUT=$(eas build --platform android --profile release --non-interactive --json 2>&1)
-          echo "$BUILD_OUTPUT"
-          
-          # Extract the build ID from JSON output
-          BUILD_ID=$(echo "$BUILD_OUTPUT" | node -e "
-            const lines = require('fs').readFileSync('/dev/stdin','utf8');
-            try {
-              const parsed = JSON.parse(lines);
-              const arr = Array.isArray(parsed) ? parsed : [parsed];
-              console.log(arr[0].id);
-            } catch(e) {
-              // Fallback: grep for UUID pattern
-              const match = lines.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/);
-              if(match) console.log(match[0]);
-              else { console.error('Could not extract build ID'); process.exit(1); }
-            }
-          ")
-          echo "build_id=$BUILD_ID" >> $GITHUB_OUTPUT
-          echo "✅ EAS Build started with ID: $BUILD_ID"
-
-      - name: Wait for EAS Build to Complete
-        id: wait-build
-        run: |
-          echo "⏳ Waiting for EAS build to complete..."
-          BUILD_ID="${{ steps.eas-build.outputs.build_id }}"
-          
-          MAX_WAIT=3600  # 60 minutes max
-          ELAPSED=0
-          POLL_INTERVAL=30
-          
-          while [ $ELAPSED -lt $MAX_WAIT ]; do
-            STATUS_JSON=$(eas build:view "$BUILD_ID" --json 2>/dev/null || echo '{}')
-            STATUS=$(echo "$STATUS_JSON" | node -e "
-              const data = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
-              console.log(data.status || 'unknown');
-            " 2>/dev/null || echo "unknown")
-            
-            echo "  Status: $STATUS (${ELAPSED}s elapsed)"
-            
-            if [ "$STATUS" = "finished" ] || [ "$STATUS" = "FINISHED" ]; then
-              # Extract the APK download URL
-              APK_URL=$(echo "$STATUS_JSON" | node -e "
-                const data = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
-                console.log(data.artifacts?.buildUrl || '');
-              ")
-              echo "apk_url=$APK_URL" >> $GITHUB_OUTPUT
-              echo "✅ Build completed!"
-              break
-            elif [ "$STATUS" = "errored" ] || [ "$STATUS" = "ERRORED" ] || [ "$STATUS" = "canceled" ] || [ "$STATUS" = "CANCELED" ]; then
-              echo "❌ Build failed with status: $STATUS"
-              exit 1
-            fi
-            
-            sleep $POLL_INTERVAL
-            ELAPSED=$((ELAPSED + POLL_INTERVAL))
-          done
-          
-          if [ $ELAPSED -ge $MAX_WAIT ]; then
-            echo "❌ Build timed out after ${MAX_WAIT}s"
-            exit 1
-          fi
-
-      - name: Download APK from EAS
-        run: |
-          APK_URL="${{ steps.wait-build.outputs.apk_url }}"
-          VERSION="${{ steps.version.outputs.version }}"
-          APK_NAME="DelhiMetro-v${VERSION}.apk"
-          
-          echo "📥 Downloading APK from EAS..."
-          curl -L -o "$APK_NAME" "$APK_URL"
-          
-          echo "apk_name=$APK_NAME" >> $GITHUB_ENV
-          echo "version=$VERSION" >> $GITHUB_ENV
-          echo "✅ Downloaded: $APK_NAME ($(du -h "$APK_NAME" | cut -f1))"
+          echo "🏗️ Starting EAS build for Android APK on GitHub runner..."
+          eas build --platform android --profile release --local --output ./DelhiMetro-v${{ steps.version.outputs.version }}.apk
 
       - name: Create Draft GitHub Release (Pending Admin Review)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          APK_NAME="DelhiMetro-v${VERSION}.apk"
+          
           echo "📦 Creating DRAFT release (pending admin review)..."
-          gh release create "v${{ env.version }}" \
-            "${{ env.apk_name }}" \
-            --title "Release v${{ env.version }}" \
-            --notes "## 🚇 Delhi Metro v${{ env.version }}
+          gh release create "v${VERSION}" \
+            "$APK_NAME" \
+            --title "Release v${VERSION}" \
+            --notes "## 🚇 Delhi Metro v${VERSION}
 
           **Status:** ⏳ Pending admin review
 
-          Built with EAS Build (Expo Application Services).
+          Built directly on GitHub Actions (Local Build).
           
           ### For Admins
           - Review the APK attached below
@@ -141,7 +82,7 @@ jobs:
           - This will automatically trigger the database update
           
           ---
-          *Automated CI/CD via EAS Build*" \
+          *Automated CI/CD via GitHub Actions*" \
             --draft
           
           echo "✅ Draft release created. Waiting for admin to publish it."

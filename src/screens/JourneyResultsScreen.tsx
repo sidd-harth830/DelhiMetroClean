@@ -317,10 +317,6 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     gap: spacing.base,
     borderWidth: 0,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 16,
-    elevation: 4,
   },
   heroStations: {
     gap: 0,
@@ -386,10 +382,6 @@ const styles = StyleSheet.create({
     paddingLeft: spacing.base,
     paddingRight: spacing.xs,
     paddingVertical: spacing.sm,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    elevation: 2,
   },
   timeValue: {
     paddingHorizontal: spacing.md,
@@ -401,10 +393,6 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     padding: spacing.base,
     gap: spacing.md,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 10,
-    elevation: 3,
   },
   routeHeader: {
     flexDirection: 'row',
