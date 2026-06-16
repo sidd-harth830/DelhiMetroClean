@@ -13,13 +13,10 @@ permissions:
 env:
   CI: true
   EXPO_NO_TELEMETRY: true
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   eas-build-and-release:
     runs-on: ubuntu-latest
-    env:
-      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
     steps:
       - name: Checkout Code
@@ -34,43 +31,22 @@ jobs:
         run: npm install
 
       - name: Setup EAS CLI
-        run: npm install -g eas-cli
-
-      - name: Create .env file
-        run: |
-          cat << 'EOF' > .env
-          ${{ secrets.ENV_FILE }}
-          EOF
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Get Version from package.json
         id: version
         run: |
           VERSION=$(node -p "require('./package.json').version")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Verify EAS Authentication
-        run: |
-          echo "Verifying EAS login..."
-          eas whoami
-
       - name: Trigger EAS Build (APK)
         id: eas-build
         run: |
           echo "🏗️ Starting EAS build for Android APK..."
-          
-          # Temporarily disable set -e to capture output if eas build fails
-          set +e
           BUILD_OUTPUT=$(eas build --platform android --profile release --non-interactive --json 2>&1)
-          EXIT_CODE=$?
-          set -e
-          
-          echo "📝 EAS Build Output:"
           echo "$BUILD_OUTPUT"
-          
-          if [ $EXIT_CODE -ne 0 ]; then
-            echo "❌ EAS build failed with exit code $EXIT_CODE"
-            exit $EXIT_CODE
-          fi
           
           # Extract the build ID from JSON output
           BUILD_ID=$(echo "$BUILD_OUTPUT" | node -e "
@@ -88,7 +64,6 @@ jobs:
           ")
           echo "build_id=$BUILD_ID" >> $GITHUB_OUTPUT
           echo "✅ EAS Build started with ID: $BUILD_ID"
-
       - name: Wait for EAS Build to Complete
         id: wait-build
         run: |
@@ -130,7 +105,6 @@ jobs:
             echo "❌ Build timed out after ${MAX_WAIT}s"
             exit 1
           fi
-
       - name: Download APK from EAS
         run: |
           APK_URL="${{ steps.wait-build.outputs.apk_url }}"
@@ -143,7 +117,6 @@ jobs:
           echo "apk_name=$APK_NAME" >> $GITHUB_ENV
           echo "version=$VERSION" >> $GITHUB_ENV
           echo "✅ Downloaded: $APK_NAME ($(du -h "$APK_NAME" | cut -f1))"
-
       - name: Create Draft GitHub Release (Pending Admin Review)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -153,7 +126,6 @@ jobs:
             "${{ env.apk_name }}" \
             --title "Release v${{ env.version }}" \
             --notes "## 🚇 Delhi Metro v${{ env.version }}
-
           **Status:** ⏳ Pending admin review
           Built with EAS Build (Expo Application Services).
           
