@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useMetroLinesQuery } from '../hooks';
 import { useAppTheme } from '../theme/ThemeContext';
 import { spacing } from '../theme';
+import { bentoRadius } from '../theme/colors';
 import type { MetroLine } from '../types';
 
 const NORMAL_STATUS = 'normal service';
@@ -30,18 +31,24 @@ function PulseDot() {
 
 function LineCard({ line }: { line: MetroLine }) {
   const theme = useTheme();
+  const { isDark } = useAppTheme();
   const disrupted = isDisrupted(line);
 
   const statusColor = disrupted ? '#B45309' : '#15803D';
   const statusBg   = disrupted ? '#FEF3C7' : '#DCFCE7';
-  const statusColorDark = disrupted ? '#FCD34D' : '#4ADE80';
-  const statusBgDark    = disrupted ? 'rgba(253,211,77,0.15)' : 'rgba(74,222,128,0.12)';
-
-  const { isDark } = useAppTheme();
+  const statusColorDark = disrupted ? '#FCD34D' : '#69F0AE';
+  const statusBgDark    = disrupted ? 'rgba(253,211,77,0.15)' : 'rgba(105,240,174,0.12)';
 
   return (
-    <Surface style={styles.card} elevation={1}>
-      {/* Content */}
+    <Surface
+      style={[
+        styles.card,
+        { shadowOpacity: isDark ? 0 : undefined },
+      ]}
+      elevation={isDark ? 0 : 1}
+    >
+      {/* Colored top accent bar */}
+      <View style={[styles.cardAccent, { backgroundColor: line.primary_color_code }]} />
       <View style={styles.content}>
         <View style={styles.titleRow}>
           <Text variant="bodyMedium" style={{ color: theme.colors.onSurface, fontWeight: '700', flex: 1 }} numberOfLines={1}>
@@ -86,7 +93,9 @@ export function LineStatusCarousel() {
     <View style={styles.wrapper}>
       {/* Section header */}
       <View style={styles.sectionHeader}>
-        <View style={[styles.sectionIconWrap, { backgroundColor: isDark ? theme.colors.elevation.level3 : theme.colors.primaryContainer }]}>
+        <View style={[styles.sectionIconWrap, {
+          backgroundColor: isDark ? theme.colors.elevation.level3 : theme.colors.primaryContainer,
+        }]}>
           <Ionicons name="pulse-outline" size={16} color={theme.colors.primary} />
         </View>
         <Text variant="titleSmall" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
@@ -99,9 +108,9 @@ export function LineStatusCarousel() {
             </Text>
           </View>
         ) : (
-          <View style={[styles.badge, { backgroundColor: isDark ? 'rgba(74,222,128,0.12)' : '#DCFCE7' }]}>
-            <Ionicons name="checkmark-circle" size={12} color={isDark ? '#4ADE80' : '#15803D'} />
-            <Text style={[styles.badgeText, { color: isDark ? '#4ADE80' : '#15803D' }]}>All clear</Text>
+          <View style={[styles.badge, { backgroundColor: isDark ? 'rgba(105,240,174,0.12)' : '#DCFCE7' }]}>
+            <Ionicons name="checkmark-circle" size={12} color={isDark ? '#69F0AE' : '#15803D'} />
+            <Text style={[styles.badgeText, { color: isDark ? '#69F0AE' : '#15803D' }]}>All clear</Text>
           </View>
         )}
       </View>
@@ -134,7 +143,7 @@ const styles = StyleSheet.create({
   sectionIconWrap: {
     width: 28,
     height: 28,
-    borderRadius: 8,
+    borderRadius: bentoRadius.small,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -156,13 +165,22 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingBottom: spacing.xs,
   },
-  // Card mirrors NotificationCard but fixed width
   card: {
     width: 220,
     flexDirection: 'row',
     padding: spacing.base,
     gap: spacing.md,
-    borderRadius: 16,
+    borderRadius: bentoRadius.button,
+    overflow: 'hidden',
+  },
+  cardAccent: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 3,
+    borderTopLeftRadius: bentoRadius.button,
+    borderTopRightRadius: bentoRadius.button,
   },
   content: {
     flex: 1,

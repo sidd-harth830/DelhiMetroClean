@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import type { FirstLastTrainResponse } from '../types';
 import { useAppTheme } from '../theme/ThemeContext';
 import { spacing } from '../theme';
+import { bentoRadius } from '../theme/colors';
 
 interface Props {
   data: FirstLastTrainResponse;
@@ -27,9 +28,7 @@ function TrainRow({
       <View
         style={[
           styles.trainIcon,
-          {
-            backgroundColor: iconBg,
-          },
+          { backgroundColor: iconBg },
         ]}
       >
         <Ionicons name={icon} size={18} color="#FFFFFF" />
@@ -48,7 +47,7 @@ function TrainRow({
         variant="titleMedium"
         style={{
           color: theme.colors.primary,
-          fontWeight: '700',
+          fontWeight: '800',
           fontVariant: ['tabular-nums'],
         }}
       >
@@ -71,6 +70,7 @@ export function FirstLastTrainCard({ data }: Props) {
         styles.container,
         {
           backgroundColor: theme.colors.surface,
+          shadowOpacity: isDark ? 0 : 0.05,
         },
       ]}
     >
@@ -96,9 +96,7 @@ export function FirstLastTrainCard({ data }: Props) {
       <View
         style={[
           styles.divider,
-          {
-            backgroundColor: theme.colors.surfaceVariant,
-          },
+          { backgroundColor: theme.colors.surfaceVariant },
         ]}
       />
       <TrainRow
@@ -114,13 +112,12 @@ export function FirstLastTrainCard({ data }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 22,
+    borderRadius: bentoRadius.heroCard,
     padding: spacing.md,
     gap: spacing.md,
     marginHorizontal: spacing.base,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
     shadowRadius: 10,
     elevation: 3,
   },
@@ -137,7 +134,7 @@ const styles = StyleSheet.create({
   trainIcon: {
     width: 36,
     height: 36,
-    borderRadius: 10,
+    borderRadius: bentoRadius.badge,
     justifyContent: 'center',
     alignItems: 'center',
   },

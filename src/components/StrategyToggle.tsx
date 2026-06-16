@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
+import { bentoRadius } from '../theme/colors';
 
 interface Props {
   active: 'least-distance' | 'minimum-interchange';
@@ -17,8 +18,8 @@ export function StrategyToggle({ active, onChange }: Props) {
   const theme = useTheme();
 
   return (
-    <View style={styles.container}>
-      {OPTIONS.map((option, index) => {
+    <View style={[styles.container, { backgroundColor: theme.colors.surfaceVariant }]}>
+      {OPTIONS.map((option) => {
         const isActive = active === option.value;
         return (
           <Pressable
@@ -26,7 +27,7 @@ export function StrategyToggle({ active, onChange }: Props) {
             style={[
               styles.option,
               {
-                backgroundColor: isActive ? theme.colors.primary : theme.colors.surface,
+                backgroundColor: isActive ? theme.colors.primary : 'transparent',
               },
             ]}
             onPress={() => onChange(option.value)}
@@ -53,26 +54,16 @@ export function StrategyToggle({ active, onChange }: Props) {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    borderWidth: 0,
-    borderColor: 'transparent',
-    borderRadius: 20,
+    borderRadius: bentoRadius.card,
     overflow: 'hidden',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 2,
-    gap: 0,
+    padding: 4,
+    gap: 4,
   },
   option: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    borderRadius: 0,
-    borderWidth: 0,
-    borderLeftWidth: 0,
-    borderBottomWidth: 0,
-    borderTopWidth: 0,
+    borderRadius: bentoRadius.button,
   },
 });

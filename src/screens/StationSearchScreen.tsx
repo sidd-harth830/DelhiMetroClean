@@ -10,6 +10,7 @@ import { EmptyState } from '../components/EmptyState';
 import { useAppTheme } from '../theme/ThemeContext';
 import type { ExploreStackParamList } from '../navigation/types';
 import { spacing } from '../theme';
+import { bentoRadius } from '../theme/colors';
 
 type Nav = NativeStackNavigationProp<ExploreStackParamList, 'StationSearch'>;
 
@@ -100,6 +101,7 @@ const styles = StyleSheet.create({
   },
   list: {
     flexGrow: 1,
+    paddingBottom: spacing.tabBarClearance,
   },
   loadingContainer: {
     flex: 1,
@@ -107,7 +109,7 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
   },
   loadingCard: {
-    borderRadius: 20,
+    borderRadius: bentoRadius.card,
     padding: spacing.lg,
     alignItems: 'center',
     gap: spacing.md,
@@ -115,7 +117,7 @@ const styles = StyleSheet.create({
   loadingIcon: {
     width: 52,
     height: 52,
-    borderRadius: 16,
+    borderRadius: bentoRadius.icon,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -128,7 +130,7 @@ const styles = StyleSheet.create({
   skeletonCircle: {
     width: 40,
     height: 40,
-    borderRadius: 12,
+    borderRadius: bentoRadius.small,
   },
   skeletonBar: {
     height: 14,

@@ -10,6 +10,7 @@ import { useAppTheme } from '../theme/ThemeContext';
 import type { MetroLine } from '../types';
 import type { LinesStackParamList } from '../navigation/types';
 import { spacing } from '../theme';
+import { bentoRadius } from '../theme/colors';
 
 type Nav = NativeStackNavigationProp<LinesStackParamList, 'MetroLines'>;
 
@@ -72,6 +73,7 @@ export function MetroLinesScreen() {
 const styles = StyleSheet.create({
   list: {
     paddingVertical: spacing.sm,
+    paddingBottom: spacing.tabBarClearance,
   },
   row: {
     flexDirection: 'row',

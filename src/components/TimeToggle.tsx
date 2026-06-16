@@ -20,9 +20,6 @@ export function TimeToggle({ value, onChange }: Props) {
         <SegmentedButtons
           value={String(value)}
           onValueChange={(val) => onChange(Number(val))}
-          density={0}
-          // @ts-expect-error - Hide selection checkmark to prevent text overflow
-          showSelectedCheck={false}
           // Custom outline color for dark mode
           theme={isDark ? { colors: { outline: 'rgba(255,255,255,0.15)' } } : undefined}
           buttons={[
@@ -33,11 +30,6 @@ export function TimeToggle({ value, onChange }: Props) {
           ].map((btn) => ({
             ...btn,
             showSelectedCheck: false,
-            // @ts-expect-error - Inject Text props
-            numberOfLines: 1,
-            adjustsFontSizeToFit: true,
-            minimumFontScale: 0.8,
-            labelStyle: { flexWrap: 'nowrap', letterSpacing: 0 },
           }))}
         />
       </View>

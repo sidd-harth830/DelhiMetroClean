@@ -1,0 +1,96 @@
+name: Release Approved → Update Database
+
+# This workflow triggers ONLY when an admin publishes a draft release
+on:
+  release:
+    types: [published]
+
+env:
+  CI: true
+
+jobs:
+  update-database:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Extract Release Info
+        id: release-info
+        run: |
+          VERSION="${{ github.event.release.tag_name }}"
+          # Remove 'v' prefix if present
+          VERSION="${VERSION#v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          
+          # Find the APK asset URL from the release
+          APK_URL=$(echo '${{ toJson(github.event.release.assets) }}' | node -e "
+            const assets = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
+            const apk = assets.find(a => a.name.endsWith('.apk'));
+            if(apk) console.log(apk.browser_download_url);
+            else { console.error('No APK found in release assets'); process.exit(1); }
+          ")
+          echo "apk_url=$APK_URL" >> $GITHUB_OUTPUT
+          
+          APK_NAME=$(echo '${{ toJson(github.event.release.assets) }}' | node -e "
+            const assets = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
+            const apk = assets.find(a => a.name.endsWith('.apk'));
+            if(apk) console.log(apk.name);
+          ")
+          echo "apk_name=$APK_NAME" >> $GITHUB_OUTPUT
+          
+          echo "📦 Release: v${VERSION}"
+          echo "📱 APK: ${APK_NAME}"
+          echo "🔗 URL: ${APK_URL}"
+
+      - name: Update Appwrite Database
+        env:
+          APPWRITE_API_KEY: ${{ secrets.APPWRITE_API_KEY }}
+        run: |
+          node -e "
+            const version = '${{ steps.release-info.outputs.version }}';
+            const apkUrl = '${{ steps.release-info.outputs.apk_url }}';
+
+            console.log('📝 Updating Appwrite database...');
+            console.log('   Version:', version);
+            console.log('   APK URL:', apkUrl);
+
+            fetch('https://cloud.appwrite.io/v1/databases/6a2ce492003a18046d9b/collections/releases/documents', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Appwrite-Project': 'sgp-6a2ce46a003230dcf661',
+                'X-Appwrite-Key': process.env.APPWRITE_API_KEY
+              },
+              body: JSON.stringify({
+                documentId: 'unique()',
+                data: {
+                  versionNumber: version,
+                  isMandatory: true,
+                  apkUrl: apkUrl,
+                  status: 'released',
+                  releaseDate: new Date().toISOString()
+                }
+              })
+            }).then(async res => {
+              if(!res.ok) throw new Error(await res.text());
+              console.log('✅ Appwrite database updated successfully!');
+            }).catch(err => {
+              console.error('❌ Failed to update Appwrite:', err.message);
+              process.exit(1);
+            });
+          "
+
+      - name: Post Summary
+        run: |
+          echo "## ✅ Release v${{ steps.release-info.outputs.version }} Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **APK:** ${{ steps.release-info.outputs.apk_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Database:** Updated ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** Live 🚀" >> $GITHUB_STEP_SUMMARY

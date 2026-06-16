@@ -1,5 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
+import { bentoRadius } from '../theme/colors';
+import { useAppTheme } from '../theme/ThemeContext';
 
 interface Props {
   name: string;
@@ -8,11 +10,13 @@ interface Props {
 }
 
 export function LineBadge({ name, color, compact }: Props) {
+  const { isDark } = useAppTheme();
+
   return (
     <View
       style={[
         styles.badge,
-        { backgroundColor: color },
+        { backgroundColor: color, shadowOpacity: isDark ? 0 : 0.1 },
         compact && styles.compact,
       ]}
     >
@@ -31,11 +35,10 @@ const styles = StyleSheet.create({
   badge: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 14,
+    borderRadius: bentoRadius.icon,
     alignSelf: 'flex-start',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
   },

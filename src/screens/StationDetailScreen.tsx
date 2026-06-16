@@ -11,6 +11,7 @@ import { ErrorState } from '../components/ErrorState';
 import { useAppTheme } from '../theme/ThemeContext';
 import type { HomeStackParamList } from '../navigation/types';
 import { spacing } from '../theme';
+import { bentoRadius } from '../theme/colors';
 
 type Route = RouteProp<HomeStackParamList, 'StationDetail'>;
 
@@ -34,7 +35,7 @@ function Section({
   return (
     <Surface style={styles.section} elevation={1}>
       <Pressable style={styles.sectionHeader} onPress={() => setExpanded(!expanded)}>
-        <View style={[styles.sectionIconCircle, { backgroundColor: isDark ? theme.colors.elevation.level5 : theme.colors.primaryContainer }]}>
+        <View style={[styles.sectionIconCircle, { backgroundColor: isDark ? theme.colors.elevation.level3 : theme.colors.primaryContainer }]}>
           <Ionicons name={icon} size={16} color={theme.colors.primary} />
         </View>
         <Text variant="titleSmall" style={{ flex: 1, color: theme.colors.onSurface, fontWeight: '700' }}>
@@ -329,11 +330,11 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.base,
     gap: spacing.md,
-    paddingBottom: spacing['3xl'],
+    paddingBottom: spacing.tabBarClearance,
   },
   // Hero
   heroCard: {
-    borderRadius: 28,
+    borderRadius: bentoRadius.heroCard,
     padding: spacing.lg,
     gap: spacing.md,
   },
@@ -345,7 +346,7 @@ const styles = StyleSheet.create({
   codeBox: {
     width: 60,
     height: 60,
-    borderRadius: 18,
+    borderRadius: bentoRadius.button,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -365,7 +366,7 @@ const styles = StyleSheet.create({
   },
   // Sections
   section: {
-    borderRadius: 24,
+    borderRadius: bentoRadius.card,
     overflow: 'hidden',
   },
   sectionHeader: {
@@ -377,7 +378,7 @@ const styles = StyleSheet.create({
   sectionIconCircle: {
     width: 32,
     height: 32,
-    borderRadius: 10,
+    borderRadius: bentoRadius.small,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -409,7 +410,7 @@ const styles = StyleSheet.create({
   },
   // Item cards (platforms, gates, lifts)
   itemCard: {
-    borderRadius: 16,
+    borderRadius: bentoRadius.button,
     padding: spacing.md,
     gap: spacing.sm,
   },
@@ -421,7 +422,7 @@ const styles = StyleSheet.create({
   itemCardIcon: {
     width: 28,
     height: 28,
-    borderRadius: 8,
+    borderRadius: bentoRadius.small,
     justifyContent: 'center',
     alignItems: 'center',
   },

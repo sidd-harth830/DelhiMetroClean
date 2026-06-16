@@ -20,6 +20,7 @@ import { LoadingState } from '../components/LoadingState';
 import { ErrorState } from '../components/ErrorState';
 import { useAppTheme } from '../theme/ThemeContext';
 import { spacing } from '../theme';
+import { bentoRadius } from '../theme/colors';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const MIN_SCALE = 1;
@@ -201,15 +202,15 @@ export function MetroMapScreen() {
       </View>
 
       {/* Zoom controls — sibling of canvas, outside PanResponder */}
-      <View style={[styles.zoomControls, { bottom: insets.bottom + spacing['2xl'] }]} pointerEvents="box-none">
+      <View style={[styles.zoomControls, { bottom: insets.bottom + spacing.tabBarClearance }]} pointerEvents="box-none">
         <Pressable
-          style={[styles.zoomBtn, { backgroundColor: isDark ? theme.colors.elevation.level4 : theme.colors.surface }]}
+          style={[styles.zoomBtn, { backgroundColor: isDark ? theme.colors.elevation.level3 : theme.colors.surface, shadowOpacity: isDark ? 0 : 0.15 }]}
           onPress={handleZoomIn}
         >
           <Ionicons name="add" size={22} color={theme.colors.onSurface} />
         </Pressable>
         <Pressable
-          style={[styles.zoomBtn, { backgroundColor: isDark ? theme.colors.elevation.level4 : theme.colors.surface }]}
+          style={[styles.zoomBtn, { backgroundColor: isDark ? theme.colors.elevation.level3 : theme.colors.surface, shadowOpacity: isDark ? 0 : 0.15 }]}
           onPress={handleZoomOut}
         >
           <Ionicons name="remove" size={22} color={theme.colors.onSurface} />
@@ -221,7 +222,7 @@ export function MetroMapScreen() {
         style={[
           styles.fab,
           {
-            bottom: insets.bottom + spacing['2xl'],
+            bottom: insets.bottom + spacing.tabBarClearance,
             left: spacing.base,
             backgroundColor: downloading ? theme.colors.surfaceVariant : theme.colors.primary,
           },
@@ -271,7 +272,7 @@ const styles = StyleSheet.create({
   zoomBtn: {
     width: 44,
     height: 44,
-    borderRadius: 14,
+    borderRadius: bentoRadius.icon,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 3,
@@ -284,7 +285,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 64,
     height: 64,
-    borderRadius: 18,
+    borderRadius: bentoRadius.button,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 6,

@@ -17,6 +17,7 @@ import type { RouteStrategy } from '../types';
 import type { HomeStackParamList } from '../navigation/types';
 type Nav = NativeStackNavigationProp<HomeStackParamList, 'JourneyResults'>;
 import { spacing } from '../theme';
+import { bentoRadius } from '../theme/colors';
 
 type Route = RouteProp<HomeStackParamList, 'JourneyResults'>;
 
@@ -118,7 +119,7 @@ export function JourneyResultsScreen() {
           styles.heroCard,
           {
             backgroundColor: theme.colors.primary,
-            borderColor: '#FFFFFF',
+            shadowOpacity: isDark ? 0 : 0.12,
           },
         ]}
       >
@@ -180,15 +181,15 @@ export function JourneyResultsScreen() {
 
         {/* Inline stats row */}
         <View style={styles.heroStats}>
-          <View style={[styles.heroStat, { backgroundColor: isDark ? `${theme.colors.primary}15` : `${theme.colors.primary}10` }]}>
-            <Ionicons name="git-commit-outline" size={18} color={theme.colors.primary} />
-            <Text variant="labelLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
+          <View style={[styles.heroStat, { backgroundColor: 'rgba(0,0,0,0.08)' }]}>
+            <Ionicons name="git-commit-outline" size={18} color="#000000" />
+            <Text variant="labelLarge" style={{ color: '#000000', fontWeight: '800' }}>
               {fare.stations} stops
             </Text>
           </View>
-          <View style={[styles.heroStat, { backgroundColor: isDark ? `${theme.colors.primary}15` : `${theme.colors.primary}10` }]}>
-            <Ionicons name="time-outline" size={18} color={theme.colors.primary} />
-            <Text variant="labelLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
+          <View style={[styles.heroStat, { backgroundColor: 'rgba(0,0,0,0.08)' }]}>
+            <Ionicons name="time-outline" size={18} color="#000000" />
+            <Text variant="labelLarge" style={{ color: '#000000', fontWeight: '800' }}>
               {fare.total_time}
             </Text>
           </View>
@@ -218,7 +219,10 @@ export function JourneyResultsScreen() {
       <View
         style={[
           styles.timePill,
-          { backgroundColor: theme.colors.surfaceVariant },
+          {
+            backgroundColor: theme.colors.surfaceVariant,
+            shadowOpacity: isDark ? 0 : 0.08,
+          },
         ]}
       >
         <Ionicons name="time-outline" size={18} color={theme.colors.primary} />
@@ -239,7 +243,10 @@ export function JourneyResultsScreen() {
       <View
         style={[
           styles.routeCard,
-          { backgroundColor: theme.colors.surface },
+          {
+            backgroundColor: theme.colors.surface,
+            shadowOpacity: isDark ? 0 : 0.08,
+          },
         ]}
       >
         <View style={styles.routeHeader}>
@@ -278,17 +285,16 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.base,
     gap: spacing.md,
-    paddingBottom: spacing['3xl'],
+    paddingBottom: spacing.tabBarClearance,
   },
   heroCard: {
-    borderRadius: 28,
+    borderRadius: bentoRadius.heroCard,
     padding: spacing.lg,
     gap: spacing.base,
     borderWidth: 0,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
+    shadowRadius: 16,
     elevation: 4,
   },
   heroStations: {
@@ -308,15 +314,10 @@ const styles = StyleSheet.create({
   heroInfoBtn: {
     width: 36,
     height: 36,
-    borderRadius: 12,
+    borderRadius: bentoRadius.small,
     borderWidth: 0,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
   },
   heroConnector: {
     flexDirection: 'row',
@@ -332,16 +333,11 @@ const styles = StyleSheet.create({
   heroArrowCircle: {
     width: 36,
     height: 36,
-    borderRadius: 12,
+    borderRadius: bentoRadius.small,
     borderWidth: 0,
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: spacing.sm,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
   },
   heroStats: {
     flexDirection: 'row',
@@ -354,48 +350,34 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.xs,
     paddingVertical: 12,
-    borderRadius: 16,
-    borderWidth: 0,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
+    borderRadius: bentoRadius.icon,
   },
   timePill: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    borderRadius: 20,
+    borderRadius: bentoRadius.card,
     borderWidth: 0,
     paddingLeft: spacing.base,
     paddingRight: spacing.xs,
     paddingVertical: spacing.sm,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 2,
   },
   timeValue: {
     paddingHorizontal: spacing.md,
     paddingVertical: 8,
-    borderRadius: 12,
-    borderWidth: 0,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 1,
+    borderRadius: bentoRadius.small,
   },
   routeCard: {
-    borderRadius: 24,
+    borderRadius: bentoRadius.card,
     borderWidth: 0,
     padding: spacing.base,
     gap: spacing.md,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
     shadowRadius: 10,
     elevation: 3,
   },

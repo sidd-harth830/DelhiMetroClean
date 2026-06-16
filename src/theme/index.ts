@@ -1,4 +1,4 @@
-export { lightScheme, darkScheme } from './colors';
+export { lightPalette, darkPalette, bentoRadius, lineColorMap } from './colors';
 export {
   ThemeProvider,
   useAppTheme,

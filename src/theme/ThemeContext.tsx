@@ -18,12 +18,7 @@ import {
 } from '@react-navigation/native';
 import { lightPalette, darkPalette } from './colors';
 
-const IS_ANDROID_12_PLUS =
-  Platform.OS === 'android' &&
-  typeof Platform.Version === 'number' &&
-  Platform.Version >= 31;
-const SHOULD_USE_DYNAMIC_THEME = IS_ANDROID_12_PLUS && isDynamicThemeSupported;
-const FALLBACK_SOURCE_COLOR = '#7DD3C0'; // Premium teal
+const FALLBACK_SOURCE_COLOR = '#5DADE2'; // Cerulean primary
 const THEME_STORAGE_KEY = '@app_theme_mode';
 
 export type ThemeMode = 'system' | 'light' | 'dark';
@@ -42,7 +37,8 @@ function createPaperTheme(
   };
 }
 
-// Build Paper themes with premium bento-box colors
+// ──────── Paper themes with premium bento-box colors ────────
+
 export const paperLightTheme: MD3Theme = {
   ...MD3LightTheme,
   colors: {
@@ -99,44 +95,16 @@ export const paperDarkTheme: MD3Theme = {
   },
 };
 
-// Adapt navigation themes to match Paper
-const { LightTheme: navLight, DarkTheme: navDark } = adaptNavigationTheme({
-  reactNavigationLight: NavigationDefaultTheme,
-  reactNavigationDark: NavigationDarkTheme,
-  materialLight: paperLightTheme,
-  materialDark: paperDarkTheme,
-});
+// ──────── Semantic colors and premium metro lines ────────
 
-export const navigationLightTheme = {
-  ...navLight,
-  colors: {
-    ...navLight.colors,
-    background: lightPalette.background,
-    card: lightPalette.surface,
-    text: lightPalette.onSurface,
-    border: lightPalette.surfaceVariant,
-    primary: lightPalette.primary,
-  },
-};
-
-export const navigationDarkTheme = {
-  ...navDark,
-  colors: {
-    ...navDark.colors,
-    background: darkPalette.background,
-    card: darkPalette.elevation.level2,
-    text: darkPalette.onSurface,
-    border: darkPalette.surfaceVariant,
-    primary: darkPalette.primary,
-  },
-};
-
-// Semantic colors and premium metro lines
 export interface SemanticColors {
   success: string;
   warning: string;
   error: string;
   info: string;
+  interchange: string;
+  warningContainer: string;
+  successContainer: string;
   yellow_line: string;
   blue_line: string;
   red_line: string;
@@ -161,6 +129,9 @@ const defaultSemanticLight: SemanticColors = {
   warning: lightPalette.warning,
   error: lightPalette.error,
   info: lightPalette.info,
+  interchange: lightPalette.interchange,
+  warningContainer: lightPalette.warningContainer,
+  successContainer: lightPalette.successContainer,
   yellow_line: lightPalette.yellow_line,
   blue_line: lightPalette.blue_line,
   red_line: lightPalette.red_line,
@@ -176,6 +147,9 @@ const defaultSemanticDark: SemanticColors = {
   warning: darkPalette.warning,
   error: darkPalette.error,
   info: darkPalette.info,
+  interchange: darkPalette.interchange,
+  warningContainer: darkPalette.warningContainer,
+  successContainer: darkPalette.successContainer,
   yellow_line: darkPalette.yellow_line,
   blue_line: darkPalette.blue_line,
   red_line: darkPalette.red_line,
@@ -188,7 +162,7 @@ const defaultSemanticDark: SemanticColors = {
 
 const ThemeContext = createContext<AppTheme>({
   paperTheme: paperLightTheme,
-  navTheme: navigationLightTheme,
+  navTheme: NavigationDefaultTheme,
   isDark: false,
   semantic: defaultSemanticLight,
   themeMode: 'system',
@@ -219,7 +193,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const value = useMemo<AppTheme>(() => {
     const isDark = themeMode === 'dark' || (themeMode === 'system' && scheme === 'dark');
 
-    // Use premium bento-box palettes instead of dynamic Material 3
+    // Use premium bento-box palettes
     const lightMaterialScheme: Partial<MD3Theme['colors']> = paperLightTheme.colors;
     const darkMaterialScheme: Partial<MD3Theme['colors']> = paperDarkTheme.colors;
 
@@ -275,8 +249,5 @@ export function useAppTheme() {
 }
 
 export const themeRuntimeConfig = {
-  isAndroid12Plus: IS_ANDROID_12_PLUS,
-  shouldUseDynamicTheme: SHOULD_USE_DYNAMIC_THEME,
   fallbackSourceColor: FALLBACK_SOURCE_COLOR,
 } as const;
-

@@ -14,6 +14,7 @@ import { NotificationCard } from '../components/NotificationCard';
 import { useAppTheme } from '../theme/ThemeContext';
 import type { HomeStackParamList } from '../navigation/types';
 import { spacing } from '../theme';
+import { bentoRadius } from '../theme/colors';
 
 type Nav = NativeStackNavigationProp<HomeStackParamList, 'Home'>;
 
@@ -81,21 +82,24 @@ export function HomeScreen() {
         <Appbar.Content
           title="Delhi Metro"
           subtitle="Plan your journey"
-          titleStyle={{ fontWeight: '700', fontSize: 20 }}
-          subtitleStyle={{ fontWeight: '500', fontSize: 13 }}
+          titleStyle={{ fontWeight: '800', fontSize: 22, letterSpacing: -0.3 }}
+          subtitleStyle={{ fontWeight: '500', fontSize: 13, opacity: 0.7 }}
         />
       </Appbar.Header>
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + spacing['4xl'] }]}
+        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + spacing.tabBarClearance }]}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Journey Planner Card - Premium Bento Box */}
+        {/* Journey Planner Card — Hero Bento Box */}
         <View
           style={[
             styles.plannerCard,
             {
-              backgroundColor: theme.colors.surface,
+              backgroundColor: isDark
+                ? theme.colors.surface
+                : theme.colors.surface,
+              shadowOpacity: isDark ? 0 : 0.08,
             },
           ]}
         >
@@ -107,7 +111,7 @@ export function HomeScreen() {
               <View
                 style={[
                   styles.connectorLine,
-                  { backgroundColor: theme.colors.onSurfaceVariant, opacity: 0.3 },
+                  { backgroundColor: theme.colors.onSurfaceVariant, opacity: 0.2 },
                 ]}
               />
               <View style={[styles.connectorDot, { backgroundColor: semantic.error }]} />
@@ -120,8 +124,8 @@ export function HomeScreen() {
                   styles.stationInput,
                   {
                     backgroundColor: isDark
-                      ? `${semantic.blue_line}15`
-                      : `${semantic.blue_line}10`,
+                      ? `${semantic.blue_line}14`
+                      : `${semantic.blue_line}0A`,
                   },
                 ]}
                 onPress={fromPicker.open}
@@ -131,7 +135,7 @@ export function HomeScreen() {
                   style={{
                     flex: 1,
                     color: fromPicker.station ? theme.colors.onSurface : theme.colors.onSurfaceVariant,
-                    fontWeight: fromPicker.station ? '600' : '500',
+                    fontWeight: fromPicker.station ? '700' : '500',
                   }}
                   numberOfLines={1}
                 >
@@ -149,8 +153,8 @@ export function HomeScreen() {
                   styles.stationInput,
                   {
                     backgroundColor: isDark
-                      ? `${semantic.green_line}15`
-                      : `${semantic.green_line}10`,
+                      ? `${semantic.green_line}14`
+                      : `${semantic.green_line}0A`,
                   },
                 ]}
                 onPress={toPicker.open}
@@ -160,7 +164,7 @@ export function HomeScreen() {
                   style={{
                     flex: 1,
                     color: toPicker.station ? theme.colors.onSurface : theme.colors.onSurfaceVariant,
-                    fontWeight: toPicker.station ? '600' : '500',
+                    fontWeight: toPicker.station ? '700' : '500',
                   }}
                   numberOfLines={1}
                 >
@@ -180,6 +184,7 @@ export function HomeScreen() {
                 styles.swapBtn,
                 {
                   backgroundColor: theme.colors.primary,
+                  shadowOpacity: isDark ? 0 : 0.1,
                 },
               ]}
               onPress={handleSwap}
@@ -201,7 +206,7 @@ export function HomeScreen() {
             icon="navigation"
             style={styles.findButton}
             contentStyle={{ paddingVertical: 8 }}
-            labelStyle={{ fontSize: 16, fontWeight: '600' }}
+            labelStyle={{ fontSize: 16, fontWeight: '700' }}
           >
             Find Route
           </Button>
@@ -214,12 +219,15 @@ export function HomeScreen() {
               styles.disruptionBanner,
               {
                 backgroundColor: isDark
-                  ? `${semantic.warning}15`
-                  : `${semantic.warning}10`,
+                  ? `${semantic.warning}18`
+                  : `${semantic.warning}0C`,
+                shadowOpacity: isDark ? 0 : 0.05,
               },
             ]}
             onPress={() => navigation.getParent()?.navigate('AlertsTab' as never)}
           >
+            {/* Colored left accent */}
+            <View style={[styles.disruptionAccent, { backgroundColor: semantic.warning }]} />
             <View
               style={[
                 styles.disruptionIcon,
@@ -256,18 +264,21 @@ export function HomeScreen() {
           </Pressable>
         )}
 
-        {/* Popular Routes Section */}
+        {/* Popular Routes Section — Bento Grid */}
         {(popularRoutes.data?.length ?? 0) > 0 && (
           <>
             <SectionHeader title="Popular Routes" />
-            <View style={styles.popularList}>
+            <View style={styles.popularGrid}>
               {popularRoutes.data!.map((route, index) => (
                 <Pressable
                   key={route.routeKey}
                   style={[
                     styles.popularCard,
                     {
-                      backgroundColor: theme.colors.surface,
+                      backgroundColor: isDark
+                        ? `${semantic.blue_line}12`
+                        : `${semantic.blue_line}08`,
+                      shadowOpacity: isDark ? 0 : 0.05,
                     },
                   ]}
                   onPress={() => handlePopularRoute(route.fromStationCode, route.toStationCode)}
@@ -280,16 +291,16 @@ export function HomeScreen() {
                   >
                     <Ionicons name="train" size={16} color="#FFFFFF" />
                   </View>
-                  <View style={styles.popularContent}>
-                    <Text
-                      style={{
-                        fontWeight: '600',
-                        color: theme.colors.onSurface,
-                      }}
-                    >
-                      {route.fromStationCode} → {route.toStationCode}
-                    </Text>
-                  </View>
+                  <Text
+                    style={{
+                      fontWeight: '700',
+                      color: theme.colors.onSurface,
+                      fontSize: 13,
+                    }}
+                    numberOfLines={1}
+                  >
+                    {route.fromStationCode} → {route.toStationCode}
+                  </Text>
                   <View
                     style={[
                       styles.hitsBadge,
@@ -300,7 +311,7 @@ export function HomeScreen() {
                       variant="labelSmall"
                       style={{
                         color: '#000000',
-                        fontWeight: '700',
+                        fontWeight: '800',
                       }}
                     >
                       {route.hitCount}x
@@ -344,17 +355,15 @@ export function HomeScreen() {
 const styles = StyleSheet.create({
   content: {
     padding: spacing.base,
-    gap: spacing.lg,
-    paddingBottom: spacing['4xl'],
+    gap: spacing.sectionGap,
   },
   plannerCard: {
-    borderRadius: 28,
+    borderRadius: bentoRadius.heroCard,
     padding: spacing.lg,
     gap: spacing.md,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
+    shadowRadius: 16,
     elevation: 4,
   },
   stationsBlock: {
@@ -388,18 +397,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: spacing.base,
     paddingVertical: 14,
-    borderRadius: 18,
+    borderRadius: bentoRadius.button,
     gap: spacing.sm,
   },
   swapBtn: {
     width: 44,
     height: 44,
-    borderRadius: 14,
+    borderRadius: bentoRadius.icon,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
@@ -407,7 +415,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   findButton: {
-    borderRadius: 16,
+    borderRadius: bentoRadius.button,
     marginTop: spacing.md,
   },
   disruptionBanner: {
@@ -415,17 +423,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
     padding: spacing.md,
-    borderRadius: 20,
+    borderRadius: bentoRadius.card,
+    overflow: 'hidden',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
+  },
+  disruptionAccent: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 4,
+    borderTopLeftRadius: bentoRadius.card,
+    borderBottomLeftRadius: bentoRadius.card,
   },
   disruptionIcon: {
     width: 40,
     height: 40,
-    borderRadius: 12,
+    borderRadius: bentoRadius.badge,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -442,46 +459,43 @@ const styles = StyleSheet.create({
   disruptionChip: {
     paddingHorizontal: 10,
     paddingVertical: 3,
-    borderRadius: 8,
+    borderRadius: spacing.sm,
   },
   disruptionChipText: {
     fontSize: 10,
     fontWeight: '700',
     color: '#fff',
   },
-  popularList: {
-    gap: spacing.sm,
+  popularGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.bentoGap,
     paddingHorizontal: spacing.base,
   },
   popularCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    width: '47%',
     padding: spacing.md,
-    borderRadius: 18,
-    gap: spacing.md,
+    borderRadius: bentoRadius.card,
+    gap: spacing.sm,
+    alignItems: 'center',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
   },
   popularIcon: {
     width: 36,
     height: 36,
-    borderRadius: 10,
+    borderRadius: bentoRadius.badge,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  popularContent: {
-    flex: 1,
   },
   hitsBadge: {
     paddingHorizontal: 12,
     paddingVertical: 4,
-    borderRadius: 10,
+    borderRadius: bentoRadius.badge,
   },
   notifList: {
     gap: spacing.sm,
-    paddingHorizontal: spacing.base,
   },
 });

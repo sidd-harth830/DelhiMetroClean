@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LineBadge } from './LineBadge';
 import { useAppTheme } from '../theme/ThemeContext';
 import { spacing } from '../theme';
+import { bentoRadius } from '../theme/colors';
 import type { StationLineBadge } from '../types';
 
 interface StationLike {
@@ -25,8 +26,8 @@ export function StationCard({ station, onPress, showChevron = true }: Props) {
 
   const primaryLineColor = station.metro_lines?.[0]?.primary_color_code ?? theme.colors.primary;
   const cardBgColor = isDark
-    ? `${primaryLineColor}15`
-    : `${primaryLineColor}10`;
+    ? `${primaryLineColor}14`
+    : `${primaryLineColor}0C`;
 
   return (
     <View style={styles.wrapper}>
@@ -42,16 +43,18 @@ export function StationCard({ station, onPress, showChevron = true }: Props) {
             styles.card,
             {
               backgroundColor: cardBgColor,
+              shadowOpacity: isDark ? 0 : 0.05,
             },
           ]}
         >
+          {/* Colored left accent strip */}
+          <View style={[styles.accentStrip, { backgroundColor: primaryLineColor }]} />
+
           {/* Icon container with line color */}
           <View
             style={[
               styles.iconContainer,
-              {
-                backgroundColor: primaryLineColor,
-              },
+              { backgroundColor: primaryLineColor },
             ]}
           >
             {station.interchange ? (
@@ -68,7 +71,7 @@ export function StationCard({ station, onPress, showChevron = true }: Props) {
                 variant="titleSmall"
                 style={{
                   color: theme.colors.onSurface,
-                  fontWeight: '600',
+                  fontWeight: '700',
                   flex: 1,
                 }}
                 numberOfLines={1}
@@ -78,9 +81,7 @@ export function StationCard({ station, onPress, showChevron = true }: Props) {
               <View
                 style={[
                   styles.codeBadge,
-                  {
-                    backgroundColor: primaryLineColor,
-                  },
+                  { backgroundColor: primaryLineColor },
                 ]}
               >
                 <Text
@@ -107,7 +108,9 @@ export function StationCard({ station, onPress, showChevron = true }: Props) {
                   />
                 ))}
                 {station.interchange && (
-                  <View style={[styles.interchangeTag]}>
+                  <View style={[styles.interchangeTag, {
+                    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
+                  }]}>
                     <Ionicons name="git-compare" size={10} color={theme.colors.primary} />
                     <Text
                       variant="labelSmall"
@@ -140,24 +143,33 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   ripple: {
-    borderRadius: 24,
+    borderRadius: bentoRadius.card,
   },
   card: {
-    borderRadius: 24,
+    borderRadius: bentoRadius.card,
     padding: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
+    overflow: 'hidden',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
     shadowRadius: 10,
-    elevation: 3,
+    elevation: 2,
+  },
+  accentStrip: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 4,
+    borderTopLeftRadius: bentoRadius.card,
+    borderBottomLeftRadius: bentoRadius.card,
   },
   iconContainer: {
     width: 48,
     height: 48,
-    borderRadius: 16,
+    borderRadius: bentoRadius.icon,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -173,7 +185,7 @@ const styles = StyleSheet.create({
   codeBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: bentoRadius.badge,
   },
   badgesRow: {
     flexDirection: 'row',
@@ -187,7 +199,6 @@ const styles = StyleSheet.create({
     gap: 3,
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
-    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    borderRadius: bentoRadius.small,
   },
 });

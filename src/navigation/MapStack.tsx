@@ -13,7 +13,7 @@ export function MapStack() {
     <Stack.Navigator
       screenOptions={({ navigation }) => ({
         header: ({ options, back }) => (
-          <Appbar.Header style={{ backgroundColor: theme.colors.elevation.level2 }} elevated={false}>
+          <Appbar.Header style={{ backgroundColor: theme.colors.background }} elevated={false}>
             {back && <Appbar.BackAction onPress={navigation.goBack} color={theme.colors.onSurface} />}
             <Appbar.Content
               title={options.title ?? ''}

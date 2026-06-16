@@ -12,7 +12,7 @@ export function ProfileScreen() {
     return (
         <ScrollView
             style={[styles.container, { backgroundColor: theme.colors.background }]}
-            contentContainerStyle={{ paddingTop: insets.top + spacing.xl, paddingBottom: insets.bottom + spacing.lg }}
+            contentContainerStyle={{ paddingTop: insets.top + spacing.xl, paddingBottom: insets.bottom + spacing.tabBarClearance }}
         >
             <View style={styles.header}>
                 <Avatar.Icon size={80} icon="account" />

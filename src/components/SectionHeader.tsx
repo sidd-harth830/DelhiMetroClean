@@ -17,8 +17,8 @@ export function SectionHeader({ title, action, onAction }: Props) {
         variant="titleMedium"
         style={{
           color: theme.colors.onSurface,
-          fontWeight: '900',
-          letterSpacing: 0.5,
+          fontWeight: '800',
+          letterSpacing: 0.3,
         }}
       >
         {title}
@@ -29,8 +29,8 @@ export function SectionHeader({ title, action, onAction }: Props) {
             variant="labelLarge"
             style={{
               color: theme.colors.primary,
-              fontWeight: '900',
-              letterSpacing: 0.3,
+              fontWeight: '700',
+              letterSpacing: 0.2,
             }}
           >
             {action}

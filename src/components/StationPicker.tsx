@@ -7,6 +7,7 @@ import { LineBadge } from './LineBadge';
 import { useDebounce, useStationSearchQuery } from '../hooks';
 import { useAppTheme } from '../theme/ThemeContext';
 import { spacing } from '../theme';
+import { bentoRadius } from '../theme/colors';
 import type { StationSearchResult } from '../types';
 
 interface Props {
@@ -42,7 +43,7 @@ export function StationPicker({ visible, onSelect, onClose, title = 'Select Stat
             variant="headlineSmall"
             style={{
               color: theme.colors.onSurface,
-              fontWeight: '600',
+              fontWeight: '700',
             }}
           >
             {title}
@@ -60,8 +61,9 @@ export function StationPicker({ visible, onSelect, onClose, title = 'Select Stat
             style={[
               styles.searchbar,
               {
-                backgroundColor: theme.colors.surface,
-                borderRadius: 24,
+                backgroundColor: isDark
+                  ? theme.colors.surfaceVariant
+                  : theme.colors.surface,
               },
             ]}
             inputStyle={{ color: theme.colors.onSurface }}
@@ -76,7 +78,10 @@ export function StationPicker({ visible, onSelect, onClose, title = 'Select Stat
               style={[
                 styles.loadingCard,
                 {
-                  backgroundColor: theme.colors.surface,
+                  backgroundColor: isDark
+                    ? theme.colors.surfaceVariant
+                    : theme.colors.surface,
+                  shadowOpacity: isDark ? 0 : 0.05,
                 },
               ]}
             >
@@ -113,15 +118,16 @@ export function StationPicker({ visible, onSelect, onClose, title = 'Select Stat
                         styles.resultCard,
                         {
                           backgroundColor: cardBg,
+                          shadowOpacity: isDark ? 0 : 0.05,
                         },
                       ]}
                     >
+                      {/* Colored left accent */}
+                      <View style={[styles.resultAccent, { backgroundColor: lineColor }]} />
                       <View
                         style={[
                           styles.resultIcon,
-                          {
-                            backgroundColor: lineColor,
-                          },
+                          { backgroundColor: lineColor },
                         ]}
                       >
                         <Ionicons name="train" size={18} color="#FFFFFF" />
@@ -132,7 +138,7 @@ export function StationPicker({ visible, onSelect, onClose, title = 'Select Stat
                             variant="titleSmall"
                             style={{
                               color: theme.colors.onSurface,
-                              fontWeight: '600',
+                              fontWeight: '700',
                               flex: 1,
                             }}
                             numberOfLines={1}
@@ -142,9 +148,7 @@ export function StationPicker({ visible, onSelect, onClose, title = 'Select Stat
                           <View
                             style={[
                               styles.resultCodeBadge,
-                              {
-                                backgroundColor: lineColor,
-                              },
+                              { backgroundColor: lineColor },
                             ]}
                           >
                             <Text
@@ -184,7 +188,10 @@ export function StationPicker({ visible, onSelect, onClose, title = 'Select Stat
                     style={[
                       styles.emptyIcon,
                       {
-                        backgroundColor: theme.colors.surface,
+                        backgroundColor: isDark
+                          ? theme.colors.surfaceVariant
+                          : theme.colors.surface,
+                        shadowOpacity: isDark ? 0 : 0.05,
                       },
                     ]}
                   >
@@ -231,7 +238,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   searchbar: {
-    borderRadius: 24,
+    borderRadius: 28,
   },
   list: {
     paddingTop: spacing.xs,
@@ -242,24 +249,33 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   resultRipple: {
-    borderRadius: 20,
+    borderRadius: bentoRadius.card,
   },
   resultCard: {
-    borderRadius: 20,
+    borderRadius: bentoRadius.card,
     padding: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
+    overflow: 'hidden',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
+  },
+  resultAccent: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 4,
+    borderTopLeftRadius: bentoRadius.card,
+    borderBottomLeftRadius: bentoRadius.card,
   },
   resultIcon: {
     width: 44,
     height: 44,
-    borderRadius: 12,
+    borderRadius: bentoRadius.badge,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -275,7 +291,7 @@ const styles = StyleSheet.create({
   resultCodeBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 10,
+    borderRadius: bentoRadius.badge,
   },
   badgesRow: {
     flexDirection: 'row',
@@ -291,13 +307,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingCard: {
-    borderRadius: 24,
+    borderRadius: bentoRadius.card,
     padding: spacing.lg,
     alignItems: 'center',
     gap: spacing.md,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
     shadowRadius: 10,
     elevation: 3,
   },
@@ -311,13 +326,12 @@ const styles = StyleSheet.create({
   emptyIcon: {
     width: 72,
     height: 72,
-    borderRadius: 20,
+    borderRadius: bentoRadius.button,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: spacing.sm,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
   },

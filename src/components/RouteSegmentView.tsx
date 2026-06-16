@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import type { JourneyRouteSegment } from '../types';
 import { useAppTheme } from '../theme/ThemeContext';
 import { spacing } from '../theme';
+import { bentoRadius } from '../theme/colors';
 
 interface Props {
   segment: JourneyRouteSegment;
@@ -34,7 +35,10 @@ export function RouteSegmentView({
       <View
         style={[
           styles.header,
-          { backgroundColor: lineColor },
+          {
+            backgroundColor: lineColor,
+            shadowOpacity: isDark ? 0 : 0.08,
+          },
         ]}
       >
         <View style={styles.linePill}>
@@ -95,6 +99,7 @@ export function RouteSegmentView({
                       styles.infoBtn,
                       {
                         backgroundColor: lineColor,
+                        shadowOpacity: isDark ? 0 : 0.1,
                       },
                     ]}
                   >
@@ -114,7 +119,7 @@ export function RouteSegmentView({
             styles.interchange,
             {
               backgroundColor: semantic.interchange,
-              borderColor: '#FFFFFF',
+              shadowOpacity: isDark ? 0 : 0.08,
             },
           ]}
         >
@@ -148,10 +153,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: 12,
     borderWidth: 0,
-    borderRadius: 20,
+    borderRadius: bentoRadius.card,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
     shadowRadius: 10,
     elevation: 3,
   },
@@ -188,13 +192,12 @@ const styles = StyleSheet.create({
   infoBtn: {
     width: 32,
     height: 32,
-    borderRadius: 10,
+    borderRadius: bentoRadius.badge,
     borderWidth: 0,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
   },
@@ -217,12 +220,11 @@ const styles = StyleSheet.create({
     marginLeft: spacing.sm,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    borderRadius: 16,
+    borderRadius: bentoRadius.button,
     borderWidth: 0,
     alignSelf: 'flex-start',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 2,
   },

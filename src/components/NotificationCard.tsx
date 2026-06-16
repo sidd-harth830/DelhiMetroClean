@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import type { PassengerNotification } from '../types';
 import { useAppTheme } from '../theme/ThemeContext';
 import { spacing } from '../theme';
+import { bentoRadius } from '../theme/colors';
 
 interface Props {
   notification: PassengerNotification;
@@ -31,7 +32,7 @@ export function NotificationCard({ notification }: Props) {
     outputRange: ['0deg', '180deg']
   });
 
-  const cardBg = isDark ? `${semantic.info}12` : `${semantic.info}08`;
+  const cardBg = isDark ? `${semantic.info}14` : `${semantic.info}0A`;
 
   return (
     <View style={styles.wrapper}>
@@ -46,15 +47,17 @@ export function NotificationCard({ notification }: Props) {
             styles.container,
             {
               backgroundColor: cardBg,
+              shadowOpacity: isDark ? 0 : 0.05,
             },
           ]}
         >
+          {/* Colored left accent */}
+          <View style={[styles.accentStrip, { backgroundColor: semantic.info }]} />
+
           <View
             style={[
               styles.iconWrap,
-              {
-                backgroundColor: semantic.info,
-              },
+              { backgroundColor: semantic.info },
             ]}
           >
             <Ionicons name="megaphone-outline" size={18} color="#FFFFFF" />
@@ -98,24 +101,33 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   ripple: {
-    borderRadius: 18,
+    borderRadius: bentoRadius.card,
   },
   container: {
-    borderRadius: 18,
+    borderRadius: bentoRadius.card,
     padding: spacing.md,
     flexDirection: 'row',
     gap: spacing.md,
     alignItems: 'center',
+    overflow: 'hidden',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
+  },
+  accentStrip: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 4,
+    borderTopLeftRadius: bentoRadius.card,
+    borderBottomLeftRadius: bentoRadius.card,
   },
   iconWrap: {
     width: 40,
     height: 40,
-    borderRadius: 12,
+    borderRadius: bentoRadius.badge,
     justifyContent: 'center',
     alignItems: 'center',
   },

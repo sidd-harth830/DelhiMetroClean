@@ -2,7 +2,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "react-native-paper";
-import { Platform, StyleSheet, View, Dimensions } from "react-native";
+import { Platform, Pressable, StyleSheet, View, Dimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
 
@@ -14,6 +14,7 @@ import { AlertsStack } from "./AlertsStack";
 import { ProfileScreen } from "../screens/ProfileScreen";
 import { SettingsScreen } from "../screens/SettingsScreen";
 import { useAppTheme } from "../theme/ThemeContext";
+import { bentoRadius } from "../theme/colors";
 
 const Tab = createBottomTabNavigator<any>();
 const Stack = createNativeStackNavigator<any>();
@@ -27,8 +28,6 @@ const TAB_ICONS: Record<
   }
 > = {
   HomeTab: { focused: "train", default: "train-outline" },
-  SearchTab: { focused: "search", default: "search-outline" },
-  LinesTab: { focused: "git-branch", default: "git-branch-outline" },
   MapTab: { focused: "map", default: "map-outline" },
   AlertsTab: { focused: "notifications", default: "notifications-outline" },
   ProfileTab: { focused: "person-circle", default: "person-circle-outline" },
@@ -40,8 +39,8 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
   const insets = useSafeAreaInsets();
   const { isDark } = useAppTheme();
 
-  const TAB_HEIGHT = 60;
-  const PILL_WIDTH = 320;
+  const TAB_HEIGHT = 64;
+  const PILL_WIDTH = Math.min(SCREEN_WIDTH - 48, 340);
   const HORIZONTAL_MARGIN = (SCREEN_WIDTH - PILL_WIDTH) / 2;
 
   return (
@@ -49,23 +48,28 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
       style={[
         styles.tabBarContainer,
         {
-          bottom: insets.bottom + 12,
+          bottom: Math.max(insets.bottom, 12) + 8,
           left: HORIZONTAL_MARGIN,
           width: PILL_WIDTH,
         },
       ]}
     >
-      <BlurView intensity={85} style={styles.blurView}>
+      <BlurView
+        intensity={isDark ? 50 : 80}
+        tint={isDark ? "dark" : "light"}
+        style={styles.blurView}
+      >
         <View
           style={[
             styles.tabBarContent,
             {
               backgroundColor: isDark
-                ? "rgba(26, 26, 26, 0.6)"
-                : "rgba(255, 255, 255, 0.6)",
+                ? "rgba(12, 12, 18, 0.72)"
+                : "rgba(255, 255, 255, 0.78)",
               borderColor: isDark
-                ? "rgba(255, 255, 255, 0.1)"
-                : "rgba(0, 0, 0, 0.05)",
+                ? "rgba(255, 255, 255, 0.10)"
+                : "rgba(0, 0, 0, 0.06)",
+              height: TAB_HEIGHT,
             },
           ]}
         >
@@ -74,12 +78,6 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
             const isFocused = state.index === index;
             const icons = TAB_ICONS[route.name];
             const iconName = isFocused ? icons.focused : icons.default;
-            const label =
-              options.tabBarLabel !== undefined
-                ? options.tabBarLabel
-                : options.title !== undefined
-                ? options.title
-                : route.name;
 
             const onPress = () => {
               const event = navigation.emit({
@@ -94,19 +92,45 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
             };
 
             return (
-              <View key={route.key} style={styles.tabItem}>
+              <Pressable
+                key={route.key}
+                onPress={onPress}
+                style={styles.tabItem}
+              >
+                {/* Active glow background */}
+                {isFocused && (
+                  <View
+                    style={[
+                      styles.activeGlow,
+                      {
+                        backgroundColor: isDark
+                          ? `${theme.colors.primary}20`
+                          : `${theme.colors.primary}15`,
+                      },
+                    ]}
+                  />
+                )}
                 <Ionicons
                   name={iconName}
-                  size={22}
+                  size={24}
                   color={
                     isFocused
                       ? theme.colors.primary
-                      : theme.colors.onSurfaceVariant
+                      : isDark
+                        ? "rgba(255,255,255,0.45)"
+                        : "rgba(0,0,0,0.35)"
                   }
-                  onPress={onPress}
-                  style={{ marginBottom: 2 }}
                 />
-              </View>
+                {/* Active dot indicator */}
+                {isFocused && (
+                  <View
+                    style={[
+                      styles.activeDot,
+                      { backgroundColor: theme.colors.primary },
+                    ]}
+                  />
+                )}
+              </Pressable>
             );
           })}
         </View>
@@ -117,7 +141,6 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
 
 function TabNavigator() {
   const theme = useTheme();
-  const insets = useSafeAreaInsets();
 
   return (
     <Tab.Navigator
@@ -170,29 +193,38 @@ export function RootTabs() {
 const styles = StyleSheet.create({
   tabBarContainer: {
     position: "absolute",
-    left: 0,
-    right: 0,
     zIndex: 50,
   },
   blurView: {
     flex: 1,
-    borderRadius: 30,
+    borderRadius: bentoRadius.pill,
     overflow: "hidden",
   },
   tabBarContent: {
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    height: 60,
-    borderRadius: 30,
+    borderRadius: bentoRadius.pill,
     borderWidth: 1,
-    paddingHorizontal: 8,
-    paddingVertical: 8,
+    paddingHorizontal: 12,
   },
   tabItem: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     height: "100%",
+    position: "relative",
+  },
+  activeGlow: {
+    position: "absolute",
+    width: 44,
+    height: 44,
+    borderRadius: 16,
+  },
+  activeDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    marginTop: 4,
   },
 });

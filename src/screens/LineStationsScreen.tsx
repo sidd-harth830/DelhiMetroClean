@@ -120,6 +120,7 @@ export function LineStationsScreen() {
 const styles = StyleSheet.create({
   list: {
     paddingVertical: spacing.sm,
+    paddingBottom: spacing.tabBarClearance,
   },
   row: {
     flexDirection: 'row',

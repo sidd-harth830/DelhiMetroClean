@@ -9,6 +9,7 @@ import { ErrorState } from '../components/ErrorState';
 import { EmptyState } from '../components/EmptyState';
 import { useAppTheme } from '../theme/ThemeContext';
 import { spacing } from '../theme';
+import { bentoRadius } from '../theme/colors';
 
 export function NotificationsScreen() {
   const theme = useTheme();
@@ -64,7 +65,7 @@ const styles = StyleSheet.create({
   list: {
     gap: spacing.sm,
     flexGrow: 1,
-    paddingBottom: spacing['3xl'],
+    paddingBottom: spacing.tabBarClearance,
   },
   noticeHeader: {
     flexDirection: 'row',
@@ -77,7 +78,7 @@ const styles = StyleSheet.create({
   noticeIconWrap: {
     width: 28,
     height: 28,
-    borderRadius: 8,
+    borderRadius: bentoRadius.small,
     justifyContent: 'center',
     alignItems: 'center',
   },

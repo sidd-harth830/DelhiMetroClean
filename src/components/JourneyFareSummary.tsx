@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import type { JourneyFareWithRoute } from '../types';
 import { useAppTheme } from '../theme/ThemeContext';
 import { spacing } from '../theme';
+import { bentoRadius } from '../theme/colors';
 
 interface Props {
   fare: JourneyFareWithRoute;
@@ -23,7 +24,7 @@ function FareCard({
   const theme = useTheme();
   const { isDark } = useAppTheme();
 
-  const cardBgColor = isDark ? `${color}15` : `${color}10`;
+  const cardBgColor = isDark ? `${color}18` : `${color}0C`;
 
   return (
     <View
@@ -31,15 +32,14 @@ function FareCard({
         styles.fareCard,
         {
           backgroundColor: cardBgColor,
+          shadowOpacity: isDark ? 0 : 0.05,
         },
       ]}
     >
       <View
         style={[
           styles.iconWrapper,
-          {
-            backgroundColor: color,
-          },
+          { backgroundColor: color },
         ]}
       >
         <Ionicons name={icon} size={20} color="#FFFFFF" />
@@ -58,7 +58,7 @@ function FareCard({
         variant="headlineSmall"
         style={{
           color: theme.colors.onSurface,
-          fontWeight: '700',
+          fontWeight: '800',
           marginTop: spacing.xs,
         }}
       >
@@ -108,27 +108,26 @@ export function JourneyFareSummary({ fare }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    gap: spacing.md,
+    gap: spacing.bentoGap,
     paddingHorizontal: spacing.base,
   },
   row: {
     flexDirection: 'row',
-    gap: spacing.md,
+    gap: spacing.bentoGap,
   },
   fareCard: {
     flex: 1,
-    borderRadius: 20,
+    borderRadius: bentoRadius.card,
     padding: spacing.md,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
   },
   iconWrapper: {
     width: 40,
     height: 40,
-    borderRadius: 12,
+    borderRadius: bentoRadius.badge,
     justifyContent: 'center',
     alignItems: 'center',
   },

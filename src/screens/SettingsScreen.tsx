@@ -16,7 +16,10 @@ export function SettingsScreen() {
     const { themeMode, setThemeMode } = useAppTheme();
     const queryClient = useQueryClient();
     const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
-    const { currentlyRunning, isUpdateAvailable, isUpdatePending, isDownloading, downloadedBytes, totalBytes } = useUpdates();
+    const updatesInfo = useUpdates() as any;
+    const { currentlyRunning, isUpdateAvailable, isUpdatePending, isDownloading } = updatesInfo;
+    const downloadedBytes: number = updatesInfo.downloadedBytes ?? 0;
+    const totalBytes: number = updatesInfo.totalBytes ?? 0;
 
     const handleClearCache = async () => {
         try {
@@ -52,7 +55,7 @@ export function SettingsScreen() {
     return (
         <ScrollView
             style={[styles.container, { backgroundColor: theme.colors.background }]}
-            contentContainerStyle={{ paddingTop: insets.top + spacing.lg, paddingBottom: insets.bottom + spacing.lg }}
+            contentContainerStyle={{ paddingTop: insets.top + spacing.lg, paddingBottom: insets.bottom + spacing.tabBarClearance }}
         >
             <Text variant="headlineMedium" style={[styles.header, { color: theme.colors.onSurface }]}>
                 Settings
