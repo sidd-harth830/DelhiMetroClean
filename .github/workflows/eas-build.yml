@@ -13,10 +13,13 @@ permissions:
 env:
   CI: true
   EXPO_NO_TELEMETRY: true
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   eas-build-and-release:
     runs-on: ubuntu-latest
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
     steps:
       - name: Checkout Code
@@ -31,22 +34,36 @@ jobs:
         run: npm install
 
       - name: Setup EAS CLI
-        uses: expo/expo-github-action@v8
-        with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
+        run: npm install -g eas-cli
 
       - name: Get Version from package.json
         id: version
         run: |
           VERSION=$(node -p "require('./package.json').version")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+          
+      - name: Verify EAS Authentication
+        run: |
+          echo "Verifying EAS login..."
+          eas whoami
       - name: Trigger EAS Build (APK)
         id: eas-build
         run: |
           echo "🏗️ Starting EAS build for Android APK..."
+          
+          # Disable strict bash error checking temporarily to capture output
+          set +e
           BUILD_OUTPUT=$(eas build --platform android --profile release --non-interactive --json 2>&1)
+          EXIT_CODE=$?
+          set -e
+          
+          echo "📝 EAS Build Output:"
           echo "$BUILD_OUTPUT"
+          
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "❌ EAS build failed with exit code $EXIT_CODE"
+            exit $EXIT_CODE
+          fi
           
           # Extract the build ID from JSON output
           BUILD_ID=$(echo "$BUILD_OUTPUT" | node -e "
