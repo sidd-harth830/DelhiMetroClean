@@ -20,12 +20,16 @@ jobs:
     runs-on: ubuntu-latest
     env:
       EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      # 🚀 FIX: Increase memory limits for Node and Gradle to prevent OutOfMemory crashes
+      NODE_OPTIONS: "--max-old-space-size=4096"
+      GRADLE_OPTS: "-Dorg.gradle.jvmargs='-Xmx4g -XX:MaxMetaspaceSize=1g'"
+      _JAVA_OPTIONS: "-XX:MaxMetaspaceSize=1g"
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Required to get commit history for release notes
+          fetch-depth: 0 
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -80,9 +84,7 @@ jobs:
       - name: Get Latest Commit Message
         id: commit_msg
         run: |
-          # Grabs the last commit message to use as the changelog
           COMMIT_MSG=$(git log -1 --pretty=%B)
-          # Safely handle multiline strings for GitHub Actions environment variables
           echo "CHANGELOG<<EOF" >> $GITHUB_ENV
           echo "$COMMIT_MSG" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
