@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme, Text } from "react-native-paper";
-import { Platform, Pressable, StyleSheet, View, Dimensions, LayoutAnimation, UIManager } from "react-native";
+import { Animated, Pressable, StyleSheet, View, Dimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
 
@@ -14,14 +14,10 @@ import { MapStack } from "./MapStack";
 import { AlertsStack } from "./AlertsStack";
 import { ProfileScreen } from "../screens/ProfileScreen";
 import { SettingsScreen } from "../screens/SettingsScreen";
+import { SavedRoutesScreen } from "../screens/SavedRoutesScreen";
+import { FavoriteStationsScreen } from "../screens/FavoriteStationsScreen";
 import { useAppTheme } from "../theme/ThemeContext";
 import { bentoRadius } from "../theme/colors";
-
-// Enable LayoutAnimation on Android (only in Old Architecture where needed)
-const isNewArch = !!(global as any).nativeFabricUIManager;
-if (!isNewArch && Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 const Tab = createBottomTabNavigator<any>();
 const Stack = createNativeStackNavigator<any>();
@@ -41,6 +37,102 @@ const TAB_ICONS: Record<
   SettingsTab: { focused: "cog", default: "cog-outline" },
 };
 
+/**
+ * Each tab item uses Animated API (NOT LayoutAnimation) to smoothly
+ * transition the pill background. LayoutAnimation on Android was the
+ * root cause of the rectangular-pill bug — it animated the flex change
+ * without properly preserving borderRadius during the transition.
+ */
+function TabItem({ route, isFocused, descriptors, onPress, isDark, theme }: {
+  route: any;
+  isFocused: boolean;
+  descriptors: any;
+  onPress: () => void;
+  isDark: boolean;
+  theme: any;
+}) {
+  const anim = useRef(new Animated.Value(isFocused ? 1 : 0)).current;
+
+  useEffect(() => {
+    Animated.spring(anim, {
+      toValue: isFocused ? 1 : 0,
+      useNativeDriver: false,
+      friction: 10,
+      tension: 80,
+    }).start();
+  }, [isFocused]);
+
+  const { options } = descriptors[route.key];
+  const icons = TAB_ICONS[route.name];
+  const iconName = isFocused ? icons.focused : icons.default;
+  const label = options.tabBarLabel ?? options.title ?? route.name;
+
+  const pillBg = anim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [
+      'transparent',
+      isDark ? "rgba(190, 255, 108, 0.12)" : "rgba(21, 128, 61, 0.08)",
+    ],
+  });
+
+  const pillBorderColor = anim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [
+      'transparent',
+      isDark ? "rgba(190, 255, 108, 0.2)" : "rgba(21, 128, 61, 0.15)",
+    ],
+  });
+
+  const labelOpacity = anim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0, 0, 1],
+  });
+
+  return (
+    <Pressable onPress={onPress} style={styles.tabItem}>
+      <Animated.View
+        style={[
+          styles.itemPill,
+          {
+            backgroundColor: pillBg,
+            borderColor: pillBorderColor,
+            borderWidth: 1,
+          },
+        ]}
+      >
+        <Ionicons
+          name={iconName}
+          size={20}
+          color={
+            isFocused
+              ? theme.colors.primary
+              : isDark
+                ? "rgba(255, 255, 255, 0.5)"
+                : "rgba(0, 0, 0, 0.4)"
+          }
+        />
+        {isFocused && (
+          <Animated.View style={{ opacity: labelOpacity }}>
+            <Text
+              style={[
+                styles.tabLabel,
+                {
+                  color: theme.colors.primary,
+                  fontWeight: "700",
+                  marginLeft: 6,
+                },
+              ]}
+              numberOfLines={1}
+            >
+              {label}
+            </Text>
+          </Animated.View>
+        )}
+      </Animated.View>
+    </Pressable>
+  );
+}
+
 function CustomTabBar({ state, descriptors, navigation }: any) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
@@ -49,20 +141,6 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
   const TAB_BAR_HEIGHT = 68;
   const PILL_WIDTH = Math.min(SCREEN_WIDTH - 24, 400);
   const HORIZONTAL_MARGIN = (SCREEN_WIDTH - PILL_WIDTH) / 2;
-
-  const handleTabPress = (route: any, index: number, isFocused: boolean) => {
-
-
-    const event = navigation.emit({
-      type: "tabPress",
-      target: route.key,
-      preventDefault: false,
-    });
-
-    if (!isFocused && !event.defaultPrevented) {
-      navigation.navigate(route.name, route.params);
-    }
-  };
 
   return (
     <View
@@ -95,67 +173,26 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
           ]}
         >
           {state.routes.map((route: any, index: number) => {
-            const { options } = descriptors[route.key];
             const isFocused = state.index === index;
-            const icons = TAB_ICONS[route.name];
-            const iconName = isFocused ? icons.focused : icons.default;
-            const label = options.tabBarLabel !== undefined
-              ? options.tabBarLabel
-              : options.title !== undefined
-                ? options.title
-                : route.name;
-
             return (
-              <Pressable
+              <TabItem
                 key={route.key}
-                onPress={() => handleTabPress(route, index, isFocused)}
-                style={[
-                  styles.tabItem,
-                  isFocused ? styles.tabItemActive : styles.tabItemInactive
-                ]}
-              >
-                <View
-                  style={[
-                    styles.itemPill,
-                    isFocused && {
-                      backgroundColor: isDark
-                        ? "rgba(190, 255, 108, 0.12)"
-                        : "rgba(21, 128, 61, 0.08)",
-                      borderColor: isDark
-                        ? "rgba(190, 255, 108, 0.2)"
-                        : "rgba(21, 128, 61, 0.15)",
-                      borderWidth: 1,
-                    },
-                  ]}
-                >
-                  <Ionicons
-                    name={iconName}
-                    size={20}
-                    color={
-                      isFocused
-                        ? theme.colors.primary
-                        : isDark
-                          ? "rgba(255, 255, 255, 0.5)"
-                          : "rgba(0, 0, 0, 0.4)"
-                    }
-                  />
-                  {isFocused && (
-                    <Text
-                      style={[
-                        styles.tabLabel,
-                        {
-                          color: theme.colors.primary,
-                          fontWeight: "700",
-                          marginLeft: 6,
-                        },
-                      ]}
-                      numberOfLines={1}
-                    >
-                      {label}
-                    </Text>
-                  )}
-                </View>
-              </Pressable>
+                route={route}
+                isFocused={isFocused}
+                descriptors={descriptors}
+                onPress={() => {
+                  const event = navigation.emit({
+                    type: "tabPress",
+                    target: route.key,
+                    preventDefault: false,
+                  });
+                  if (!isFocused && !event.defaultPrevented) {
+                    navigation.navigate(route.name, route.params);
+                  }
+                }}
+                isDark={isDark}
+                theme={theme}
+              />
             );
           })}
         </View>
@@ -206,11 +243,41 @@ function TabNavigator() {
 }
 
 export function RootTabs() {
+  const theme = useTheme();
+
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator
+      screenOptions={() => ({
+        headerShown: false,
+      })}
+    >
       <Stack.Screen name="MainTabs" component={TabNavigator} />
       <Stack.Screen name="ExploreStack" component={ExploreStack} />
       <Stack.Screen name="LinesStack" component={LinesStack} />
+      <Stack.Screen
+        name="SavedRoutes"
+        component={SavedRoutesScreen}
+        options={{
+          headerShown: true,
+          title: 'Saved Routes',
+          headerStyle: { backgroundColor: theme.colors.background },
+          headerTintColor: theme.colors.onSurface,
+          headerTitleStyle: { fontWeight: '700' },
+          headerShadowVisible: false,
+        }}
+      />
+      <Stack.Screen
+        name="FavoriteStations"
+        component={FavoriteStationsScreen}
+        options={{
+          headerShown: true,
+          title: 'Favorite Stations',
+          headerStyle: { backgroundColor: theme.colors.background },
+          headerTintColor: theme.colors.onSurface,
+          headerTitleStyle: { fontWeight: '700' },
+          headerShadowVisible: false,
+        }}
+      />
     </Stack.Navigator>
   );
 }
@@ -232,31 +299,27 @@ const styles = StyleSheet.create({
   },
   tabBarContent: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-around",
     alignItems: "center",
     borderRadius: bentoRadius.pill,
     borderWidth: 1,
-    paddingHorizontal: 10,
+    paddingHorizontal: 6,
   },
   tabItem: {
     justifyContent: "center",
     alignItems: "center",
     height: "100%",
-  },
-  tabItemActive: {
-    flex: 1.5,
-  },
-  tabItemInactive: {
-    flex: 1,
+    paddingHorizontal: 2,
   },
   itemPill: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 19,
+    paddingHorizontal: 14,
+    borderRadius: 999,
     height: 38,
+    overflow: 'hidden',
   },
   tabLabel: {
     fontSize: 11,

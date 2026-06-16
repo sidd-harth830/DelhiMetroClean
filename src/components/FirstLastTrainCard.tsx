@@ -72,7 +72,8 @@ export function FirstLastTrainCard({ data }: Props) {
         styles.container,
         {
           backgroundColor: theme.colors.surface,
-          shadowOpacity: isDark ? 0 : 0.05,
+          borderWidth: isDark ? 0 : 1,
+          borderColor: isDark ? 'transparent' : 'rgba(0,0,0,0.06)',
         },
       ]}
     >
@@ -120,10 +121,6 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     gap: spacing.md,
     marginHorizontal: spacing.base,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 10,
-    elevation: 3,
   },
   headerRow: {
     flexDirection: 'row',

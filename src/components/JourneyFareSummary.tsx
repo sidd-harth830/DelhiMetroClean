@@ -24,7 +24,7 @@ function FareCard({
   const theme = useTheme();
   const { isDark } = useAppTheme();
 
-  const cardBgColor = isDark ? `${color}18` : `${color}0C`;
+  const cardBgColor = isDark ? `${color}1A` : `${color}12`;
 
   return (
     <View
@@ -32,7 +32,8 @@ function FareCard({
         styles.fareCard,
         {
           backgroundColor: cardBgColor,
-          shadowOpacity: isDark ? 0 : 0.05,
+          borderWidth: isDark ? 0 : 1,
+          borderColor: isDark ? 'transparent' : `${color}20`,
         },
       ]}
     >
@@ -119,10 +120,6 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: bentoRadius.card,
     padding: spacing.md,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    elevation: 2,
   },
   iconWrapper: {
     width: 40,

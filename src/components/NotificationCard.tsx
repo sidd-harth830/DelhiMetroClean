@@ -47,7 +47,8 @@ export function NotificationCard({ notification }: Props) {
             styles.container,
             {
               backgroundColor: cardBg,
-              shadowOpacity: isDark ? 0 : 0.05,
+              borderWidth: isDark ? 0 : 1,
+              borderColor: isDark ? 'transparent' : 'rgba(0,0,0,0.06)',
             },
           ]}
         >
@@ -110,10 +111,6 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     alignItems: 'center',
     overflow: 'hidden',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    elevation: 2,
   },
   accentStrip: {
     position: 'absolute',

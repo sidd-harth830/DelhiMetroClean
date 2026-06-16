@@ -109,7 +109,8 @@ export function HomeScreen() {
               backgroundColor: isDark
                 ? theme.colors.surface
                 : theme.colors.surface,
-              shadowOpacity: isDark ? 0 : 0.08,
+              borderWidth: isDark ? 0 : 1,
+              borderColor: isDark ? 'transparent' : 'rgba(0,0,0,0.06)',
             },
           ]}
         >
@@ -194,7 +195,6 @@ export function HomeScreen() {
                 styles.swapBtn,
                 {
                   backgroundColor: theme.colors.primary,
-                  shadowOpacity: isDark ? 0 : 0.1,
                 },
               ]}
               onPress={handleSwap}
@@ -231,7 +231,8 @@ export function HomeScreen() {
                 backgroundColor: isDark
                   ? `${semantic.warning}18`
                   : `${semantic.warning}0C`,
-                shadowOpacity: isDark ? 0 : 0.05,
+                borderWidth: isDark ? 0 : 1,
+                borderColor: isDark ? 'transparent' : `${semantic.warning}20`,
               },
             ]}
             onPress={() => navigation.getParent()?.navigate('AlertsTab' as never)}
@@ -288,7 +289,8 @@ export function HomeScreen() {
                       backgroundColor: isDark
                         ? `${semantic.blue_line}12`
                         : `${semantic.blue_line}08`,
-                      shadowOpacity: isDark ? 0 : 0.05,
+                      borderWidth: isDark ? 0 : 1,
+                      borderColor: isDark ? 'transparent' : `${semantic.blue_line}20`,
                     },
                   ]}
                   onPress={() => handleSavedRoute(route.fromCode, route.toCode, route.fromName, route.toName)}
@@ -331,7 +333,8 @@ export function HomeScreen() {
                       backgroundColor: isDark
                         ? `${semantic.success}12`
                         : `${semantic.success}08`,
-                      shadowOpacity: isDark ? 0 : 0.05,
+                      borderWidth: isDark ? 0 : 1,
+                      borderColor: isDark ? 'transparent' : `${semantic.success}20`,
                     },
                   ]}
                   onPress={() => navigation.navigate('StationDetail', { stationCode: station.code, stationName: station.name })}

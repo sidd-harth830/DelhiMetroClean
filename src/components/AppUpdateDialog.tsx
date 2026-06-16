@@ -115,13 +115,13 @@ export function AppUpdateDialog() {
       <View style={styles.overlay}>
         <View style={[styles.dialog, { backgroundColor: theme.colors.surface }]}>
           <Text variant="headlineSmall" style={[styles.title, { color: theme.colors.onSurface }]}>
-            Update Available
+            {updateType === 'ota' ? 'Patch Available' : 'New Version Available'}
           </Text>
           
           <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant, marginBottom: spacing.md }}>
             {updateType === 'ota' 
-              ? 'A minor update is available with bug fixes and improvements.' 
-              : `Version ${newVersion} is available. Please update to enjoy the latest features.`}
+              ? 'A patch with bug fixes, UI improvements, and settings updates is ready to install. No reinstall needed.' 
+              : `Version ${newVersion} is available with new features and improvements. Please download and install the latest version.`}
           </Text>
 
           {isDownloading && updateType === 'ota' ? (
@@ -153,7 +153,7 @@ export function AppUpdateDialog() {
                 textColor={theme.colors.onPrimary}
                 style={{ borderRadius: bentoRadius.button, marginLeft: spacing.sm }}
               >
-                Update Now
+                {updateType === 'ota' ? 'Install Patch' : 'Download Update'}
               </Button>
             </View>
           )}

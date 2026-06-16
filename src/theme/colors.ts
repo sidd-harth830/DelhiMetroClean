@@ -22,9 +22,9 @@ export const bentoRadius = {
 /* ───────── Light Palette ───────── */
 export const lightPalette = {
   // Backgrounds
-  background: '#F3F4F6', // Minimal gray background
-  surface: '#FCFCFC',    // Off-white surface to reduce strain
-  surfaceVariant: '#F1F3F5',
+  background: '#F5F6F8', // Warm minimal gray — less strain
+  surface: '#F0F1F3',    // Soft off-white, not pure white
+  surfaceVariant: '#E8EAED',
 
   // Text
   onBackground: '#111827',
@@ -77,11 +77,11 @@ export const lightPalette = {
   // Component surface elevations
   elevation: {
     level0: 'transparent',
-    level1: '#FFFFFF',
-    level2: '#F9FAFB',
-    level3: '#F3F4F6',
-    level4: '#E5E7EB',
-    level5: '#D1D5DB',
+    level1: '#F0F1F3',
+    level2: '#EAEBEE',
+    level3: '#E4E5E9',
+    level4: '#DCDEE2',
+    level5: '#D1D3D8',
   },
 
   // Card shadow

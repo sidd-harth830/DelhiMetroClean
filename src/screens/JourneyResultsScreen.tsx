@@ -135,9 +135,8 @@ export function JourneyResultsScreen() {
           styles.heroCard,
           {
             backgroundColor: theme.colors.surface,
-            shadowOpacity: isDark ? 0 : 0.05,
-            borderWidth: isDark ? 1 : 0,
-            borderColor: theme.colors.outlineVariant,
+            borderWidth: isDark ? 1 : 1,
+            borderColor: isDark ? theme.colors.outlineVariant : 'rgba(0,0,0,0.06)',
           },
         ]}
       >
@@ -246,7 +245,6 @@ export function JourneyResultsScreen() {
           styles.timePill,
           {
             backgroundColor: theme.colors.surfaceVariant,
-            shadowOpacity: isDark ? 0 : 0.08,
           },
         ]}
       >
@@ -270,7 +268,8 @@ export function JourneyResultsScreen() {
           styles.routeCard,
           {
             backgroundColor: theme.colors.surface,
-            shadowOpacity: isDark ? 0 : 0.08,
+            borderWidth: isDark ? 0 : 1,
+            borderColor: isDark ? 'transparent' : 'rgba(0,0,0,0.06)',
           },
         ]}
       >

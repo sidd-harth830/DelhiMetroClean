@@ -37,7 +37,6 @@ export function RouteSegmentView({
           styles.header,
           {
             backgroundColor: lineColor,
-            shadowOpacity: isDark ? 0 : 0.08,
           },
         ]}
       >
@@ -99,7 +98,6 @@ export function RouteSegmentView({
                       styles.infoBtn,
                       {
                         backgroundColor: lineColor,
-                        shadowOpacity: isDark ? 0 : 0.1,
                       },
                     ]}
                   >
@@ -119,7 +117,6 @@ export function RouteSegmentView({
             styles.interchange,
             {
               backgroundColor: semantic.interchange,
-              shadowOpacity: isDark ? 0 : 0.08,
             },
           ]}
         >
@@ -154,10 +151,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderWidth: 0,
     borderRadius: bentoRadius.card,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 10,
-    elevation: 3,
   },
   linePill: {
     flexDirection: 'row',
@@ -196,10 +189,6 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowRadius: 4,
-    elevation: 2,
   },
   stationDot: {
     width: 8,
@@ -223,9 +212,5 @@ const styles = StyleSheet.create({
     borderRadius: bentoRadius.button,
     borderWidth: 0,
     alignSelf: 'flex-start',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    elevation: 2,
   },
 });

@@ -40,6 +40,11 @@
     },
     "plugins": [
       "expo-web-browser"
-    ]
+    ],
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0D0D0D"
+    }
   }
 }

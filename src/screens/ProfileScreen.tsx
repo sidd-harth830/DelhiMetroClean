@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { ScrollView, StyleSheet, View, Alert } from 'react-native';
 import { Avatar, List, Text, useTheme, Button } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { spacing } from '../theme';
 import { useAuth } from '../auth/AuthContext';
 import { useAppTheme } from '../theme/ThemeContext';
 import { bentoRadius } from '../theme/colors';
+import { FavoritesStorage } from '../storage/favorites';
 
 export function ProfileScreen() {
     const theme = useTheme();
@@ -16,6 +17,15 @@ export function ProfileScreen() {
     const { user, logout } = useAuth();
 
     const isGuest = !user || !user.email; // Appwrite anonymous users don't have emails
+    const [savedRoutesCount, setSavedRoutesCount] = useState(0);
+    const [favoriteStationsCount, setFavoriteStationsCount] = useState(0);
+
+    useFocusEffect(
+        useCallback(() => {
+            FavoritesStorage.getSavedRoutes().then(routes => setSavedRoutesCount(routes.length));
+            FavoritesStorage.getFavoriteStations().then(stations => setFavoriteStationsCount(stations.length));
+        }, [])
+    );
 
     const handleLogout = () => {
         Alert.alert('Log Out', 'Are you sure you want to log out?', [
@@ -99,17 +109,19 @@ export function ProfileScreen() {
                 <View style={[styles.listCard, { backgroundColor: theme.colors.surface }]}>
                     <List.Item
                         title="Saved Routes"
-                        description="Quick access to your regular journeys"
+                        description={savedRoutesCount > 0 ? `${savedRoutesCount} saved route${savedRoutesCount !== 1 ? 's' : ''}` : 'Quick access to your regular journeys'}
                         left={(props) => <List.Icon {...props} icon="bookmark-outline" color={theme.colors.secondary} />}
-                        onPress={() => { }}
+                        right={(props) => <List.Icon {...props} icon="chevron-right" color={theme.colors.onSurfaceVariant} />}
+                        onPress={() => navigation.navigate('SavedRoutes' as never)}
                         titleStyle={{ color: theme.colors.onSurface, fontWeight: '600' }}
                         descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
                     />
                     <List.Item
                         title="Favorite Stations"
-                        description="Your most visited stations"
+                        description={favoriteStationsCount > 0 ? `${favoriteStationsCount} favorite station${favoriteStationsCount !== 1 ? 's' : ''}` : 'Your most visited stations'}
                         left={(props) => <List.Icon {...props} icon="star-outline" color={semantic.warning} />}
-                        onPress={() => { }}
+                        right={(props) => <List.Icon {...props} icon="chevron-right" color={theme.colors.onSurfaceVariant} />}
+                        onPress={() => navigation.navigate('FavoriteStations' as never)}
                         titleStyle={{ color: theme.colors.onSurface, fontWeight: '600' }}
                         descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
                     />

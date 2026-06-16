@@ -38,3 +38,11 @@ export type RootTabParamList = {
   MapTab: NavigatorScreenParams<MapStackParamList>;
   AlertsTab: NavigatorScreenParams<AlertsStackParamList>;
 };
+
+export type RootStackParamList = {
+  MainTabs: undefined;
+  ExploreStack: undefined;
+  LinesStack: undefined;
+  SavedRoutes: undefined;
+  FavoriteStations: undefined;
+};

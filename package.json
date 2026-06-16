@@ -19,7 +19,6 @@
     "@tanstack/react-query": "^5.95.2",
     "expo": "~54.0.33",
     "expo-blur": "~15.0.8",
-    "expo-dev-client": "~6.0.21",
     "expo-file-system": "~19.0.21",
     "expo-sharing": "~14.0.8",
     "expo-sqlite": "~16.0.10",
@@ -38,6 +37,7 @@
   "devDependencies": {
     "@types/react": "~19.1.0",
     "dotenv": "^17.4.2",
+    "expo-dev-client": "~6.0.21",
     "node-fetch": "^3.3.2",
     "typescript": "~5.9.2"
   },
