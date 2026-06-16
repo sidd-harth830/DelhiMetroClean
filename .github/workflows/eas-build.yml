@@ -24,6 +24,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required to get commit history for release notes
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -46,6 +48,7 @@ jobs:
         run: |
           echo "Verifying EAS login..."
           eas whoami
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -73,6 +76,17 @@ jobs:
           echo "apk_name=$APK_NAME" >> $GITHUB_ENV
           echo "version=$VERSION" >> $GITHUB_ENV
           echo "✅ Build completed successfully! APK is ready: $APK_NAME"
+
+      - name: Get Latest Commit Message
+        id: commit_msg
+        run: |
+          # Grabs the last commit message to use as the changelog
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          # Safely handle multiline strings for GitHub Actions environment variables
+          echo "CHANGELOG<<EOF" >> $GITHUB_ENV
+          echo "$COMMIT_MSG" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
       - name: Create Draft GitHub Release (Pending Admin Review)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -80,18 +94,26 @@ jobs:
           echo "📦 Creating DRAFT release (pending admin review)..."
           gh release create "v${{ env.version }}" \
             "${{ env.apk_name }}" \
-            --title "Release v${{ env.version }}" \
+            --title "🚀 Delhi Metro App Update v${{ env.version }}" \
             --notes "## 🚇 Delhi Metro v${{ env.version }}
-          **Status:** ⏳ Pending admin review
-          Built with EAS Build (Expo Application Services).
+          **Status:** ⏳ Pending Admin Review
           
-          ### For Admins
-          - Review the APK attached below
-          - Click **Edit** → uncheck **Set as a pre-release** → click **Publish release** to approve
-          - This will automatically trigger the database update
+          ### ✨ What's New in this Update?
+          ${{ env.CHANGELOG }}
+          
+          ### 📦 Build & Technical Details
+          - **Platform:** Android (APK)
+          - **Build Profile:** Release
+          - **Version Code:** v${{ env.version }}
+          - **Compiler:** EAS Build (Local CI)
+          
+          ### 🛠️ For Admins (Approval Process)
+          1. Download and test the \`${{ env.apk_name }}\` attached below.
+          2. If approved: Click **Edit** → uncheck **Set as a pre-release** → click **Publish release**.
+          3. Publishing this release will finalize the update.
           
           ---
-          *Automated CI/CD via EAS Build*" \
+          *Automated CI/CD via GitHub Actions*" \
             --draft
           
           echo "✅ Draft release created. Waiting for admin to publish it."
