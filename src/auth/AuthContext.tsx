@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Models, ID, OAuthProvider } from 'react-native-appwrite';
-import { account } from '../config/appwrite';
+import { account, databases } from '../config/appwrite';
 import * as WebBrowser from 'expo-web-browser';
 
 // Polyfill for OAuth flow
@@ -25,6 +25,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const currentAccount = await account.get();
       setUser(currentAccount);
+      
+      // Sync user to database
+      try {
+        const databaseId = process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID;
+        const usersCollectionId = process.env.EXPO_PUBLIC_APPWRITE_USERS_COLLECTION_ID || 'users';
+        
+        if (databaseId && usersCollectionId) {
+          try {
+            await databases.getDocument(databaseId, usersCollectionId, currentAccount.$id);
+          } catch (e: any) {
+            if (e?.code === 404 || e?.message?.includes('Document with the requested ID could not be found')) {
+              await databases.createDocument(databaseId, usersCollectionId, currentAccount.$id, {
+                name: currentAccount.name || 'Anonymous User',
+                email: currentAccount.email || '',
+              });
+            }
+          }
+        }
+      } catch (dbError) {
+        console.warn('Failed to sync user to database', dbError);
+      }
     } catch (error) {
       // Not logged in or session expired
       setUser(null);

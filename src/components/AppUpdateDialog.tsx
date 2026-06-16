@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Modal, Linking, Alert } from 'react-native';
+import { View, StyleSheet, Modal, Linking, Alert, Image } from 'react-native';
 import { Text, Button, ProgressBar, useTheme } from 'react-native-paper';
 import * as Updates from 'expo-updates';
 import { databases } from '../config/appwrite';
@@ -15,6 +15,8 @@ export function AppUpdateDialog() {
   const [newVersion, setNewVersion] = useState('');
   const [apkUrl, setApkUrl] = useState('');
   const [isMandatory, setIsMandatory] = useState(false);
+  const [updateMessage, setUpdateMessage] = useState('');
+  const [updateImageUrl, setUpdateImageUrl] = useState('');
   
   const [isDownloading, setIsDownloading] = useState(false);
   
@@ -63,6 +65,8 @@ export function AppUpdateDialog() {
             setNewVersion(latestRelease.versionNumber);
             setApkUrl(latestRelease.apkUrl);
             setIsMandatory(latestRelease.isMandatory || false);
+            setUpdateMessage(latestRelease.message || '');
+            setUpdateImageUrl(latestRelease.imageUrl || '');
             setVisible(true);
           }
         }
@@ -113,16 +117,23 @@ export function AppUpdateDialog() {
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
-        <View style={[styles.dialog, { backgroundColor: theme.colors.surface }]}>
-          <Text variant="headlineSmall" style={[styles.title, { color: theme.colors.onSurface }]}>
-            {updateType === 'ota' ? 'Patch Available' : 'New Version Available'}
-          </Text>
-          
-          <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant, marginBottom: spacing.md }}>
-            {updateType === 'ota' 
-              ? 'A patch with bug fixes, UI improvements, and settings updates is ready to install. No reinstall needed.' 
-              : `Version ${newVersion} is available with new features and improvements. Please download and install the latest version.`}
-          </Text>
+        <View style={[styles.dialog, { backgroundColor: theme.colors.surface, padding: updateImageUrl ? 0 : spacing.xl, overflow: 'hidden' }]}>
+          {updateImageUrl ? (
+            <Image 
+              source={{ uri: updateImageUrl }} 
+              style={{ width: '100%', height: 180, resizeMode: 'cover' }} 
+            />
+          ) : null}
+          <View style={{ padding: updateImageUrl ? spacing.xl : 0 }}>
+            <Text variant="headlineSmall" style={[styles.title, { color: theme.colors.onSurface }]}>
+              {updateType === 'ota' ? 'Patch Available' : 'New Version Available'}
+            </Text>
+            
+            <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant, marginBottom: spacing.md }}>
+              {updateType === 'ota' 
+                ? 'A patch with bug fixes, UI improvements, and settings updates is ready to install. No reinstall needed.' 
+                : (updateMessage || `Version ${newVersion} is available with new features and improvements. Please download and install the latest version.`)}
+            </Text>
 
           {isDownloading && updateType === 'ota' ? (
             <View style={styles.progressContainer}>
@@ -156,7 +167,8 @@ export function AppUpdateDialog() {
                 {updateType === 'ota' ? 'Install Patch' : 'Download Update'}
               </Button>
             </View>
-          )}
+            )}
+          </View>
         </View>
       </View>
     </Modal>
