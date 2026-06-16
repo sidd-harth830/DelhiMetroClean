@@ -111,11 +111,11 @@ export function StationCard({ station, onPress, showChevron = true }: Props) {
                   <View style={[styles.interchangeTag, {
                     backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
                   }]}>
-                    <Ionicons name="git-compare" size={10} color={theme.colors.primary} />
+                    <Ionicons name="git-compare" size={10} color={semantic.warning} />
                     <Text
                       variant="labelSmall"
                       style={{
-                        color: theme.colors.primary,
+                        color: semantic.warning,
                         fontWeight: '700',
                         fontSize: 10,
                       }}

@@ -9,9 +9,9 @@ export const spacing = {
   '3xl': 40,
   '4xl': 48,
   /** Standard gap between bento-box cards */
-  bentoGap: 14,
+  bentoGap: 12,
   /** Larger gap between major sections */
-  sectionGap: 24,
+  sectionGap: 20,
   /** Bottom padding to clear floating tab bar */
   tabBarClearance: 100,
 } as const;

@@ -1,8 +1,9 @@
+import React, { useState, useEffect, useRef } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "react-native-paper";
-import { Platform, Pressable, StyleSheet, View, Dimensions } from "react-native";
+import { useTheme, Text } from "react-native-paper";
+import { Platform, Pressable, StyleSheet, View, Dimensions, LayoutAnimation, UIManager } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
 
@@ -15,6 +16,12 @@ import { ProfileScreen } from "../screens/ProfileScreen";
 import { SettingsScreen } from "../screens/SettingsScreen";
 import { useAppTheme } from "../theme/ThemeContext";
 import { bentoRadius } from "../theme/colors";
+
+// Enable LayoutAnimation on Android (only in Old Architecture where needed)
+const isNewArch = !!(global as any).nativeFabricUIManager;
+if (!isNewArch && Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 const Tab = createBottomTabNavigator<any>();
 const Stack = createNativeStackNavigator<any>();
@@ -38,10 +45,44 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { isDark } = useAppTheme();
+  const [isExpanded, setIsExpanded] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const TAB_HEIGHT = 64;
-  const PILL_WIDTH = Math.min(SCREEN_WIDTH - 48, 340);
+  const COLLAPSED_HEIGHT = 64;
+  const EXPANDED_HEIGHT = 88;
+  const PILL_WIDTH = Math.min(SCREEN_WIDTH - 48, 380);
   const HORIZONTAL_MARGIN = (SCREEN_WIDTH - PILL_WIDTH) / 2;
+
+  const handleTabPress = (route: any, index: number, isFocused: boolean) => {
+    // Configure animation
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setIsExpanded(true);
+
+    const event = navigation.emit({
+      type: "tabPress",
+      target: route.key,
+      preventDefault: false,
+    });
+
+    if (!isFocused && !event.defaultPrevented) {
+      navigation.navigate(route.name, route.params);
+    }
+
+    // Reset timeout for auto-collapse
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setIsExpanded(false);
+    }, 4000); // 4 seconds before auto collapse
+  };
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
 
   return (
     <View
@@ -55,7 +96,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
       ]}
     >
       <BlurView
-        intensity={isDark ? 50 : 80}
+        intensity={isDark ? 30 : 60}
         tint={isDark ? "dark" : "light"}
         style={styles.blurView}
       >
@@ -64,12 +105,12 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
             styles.tabBarContent,
             {
               backgroundColor: isDark
-                ? "rgba(12, 12, 18, 0.72)"
-                : "rgba(255, 255, 255, 0.78)",
+                ? "rgba(12, 12, 18, 0.6)"
+                : "rgba(255, 255, 255, 0.6)",
               borderColor: isDark
-                ? "rgba(255, 255, 255, 0.10)"
-                : "rgba(0, 0, 0, 0.06)",
-              height: TAB_HEIGHT,
+                ? "rgba(255, 255, 255, 0.15)"
+                : "rgba(0, 0, 0, 0.1)",
+              height: isExpanded ? EXPANDED_HEIGHT : COLLAPSED_HEIGHT,
             },
           ]}
         >
@@ -78,57 +119,67 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
             const isFocused = state.index === index;
             const icons = TAB_ICONS[route.name];
             const iconName = isFocused ? icons.focused : icons.default;
-
-            const onPress = () => {
-              const event = navigation.emit({
-                type: "tabPress",
-                target: route.key,
-                preventDefault: false,
-              });
-
-              if (!isFocused && !event.defaultPrevented) {
-                navigation.navigate(route.name, route.params);
-              }
-            };
+            const label = options.tabBarLabel !== undefined
+              ? options.tabBarLabel
+              : options.title !== undefined
+                ? options.title
+                : route.name;
 
             return (
               <Pressable
                 key={route.key}
-                onPress={onPress}
+                onPress={() => handleTabPress(route, index, isFocused)}
                 style={styles.tabItem}
               >
-                {/* Active glow background */}
-                {isFocused && (
-                  <View
+                <View style={styles.iconContainer}>
+                  {/* Active glow background */}
+                  {isFocused && (
+                    <View
+                      style={[
+                        styles.activeGlow,
+                        {
+                          backgroundColor: isDark
+                            ? `${theme.colors.primary}25`
+                            : `${theme.colors.primary}20`,
+                        },
+                      ]}
+                    />
+                  )}
+                  <Ionicons
+                    name={iconName}
+                    size={24}
+                    color={
+                      isFocused
+                        ? theme.colors.primary
+                        : isDark
+                          ? "rgba(255,255,255,0.6)"
+                          : "rgba(0,0,0,0.5)"
+                    }
+                  />
+                  {/* Active dot indicator (only in collapsed state) */}
+                  {isFocused && !isExpanded && (
+                    <View
+                      style={[
+                        styles.activeDot,
+                        { backgroundColor: theme.colors.primary },
+                      ]}
+                    />
+                  )}
+                </View>
+                {/* Expandable Label */}
+                {isExpanded && (
+                  <Text
                     style={[
-                      styles.activeGlow,
+                      styles.tabLabel,
                       {
-                        backgroundColor: isDark
-                          ? `${theme.colors.primary}20`
-                          : `${theme.colors.primary}15`,
-                      },
+                        color: isFocused ? theme.colors.primary : (isDark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.5)"),
+                        fontWeight: isFocused ? "bold" : "normal",
+                      }
                     ]}
-                  />
-                )}
-                <Ionicons
-                  name={iconName}
-                  size={24}
-                  color={
-                    isFocused
-                      ? theme.colors.primary
-                      : isDark
-                        ? "rgba(255,255,255,0.45)"
-                        : "rgba(0,0,0,0.35)"
-                  }
-                />
-                {/* Active dot indicator */}
-                {isFocused && (
-                  <View
-                    style={[
-                      styles.activeDot,
-                      { backgroundColor: theme.colors.primary },
-                    ]}
-                  />
+                    numberOfLines={1}
+                  >
+                    {label}
+                  </Text>
                 )}
               </Pressable>
             );
@@ -206,25 +257,36 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: bentoRadius.pill,
     borderWidth: 1,
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
   },
   tabItem: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     height: "100%",
-    position: "relative",
+  },
+  iconContainer: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   activeGlow: {
     position: "absolute",
     width: 44,
     height: 44,
-    borderRadius: 16,
+    borderRadius: 22,
   },
   activeDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
+    position: 'absolute',
+    bottom: -2,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+  },
+  tabLabel: {
+    fontSize: 10,
     marginTop: 4,
+    textAlign: 'center',
   },
 });

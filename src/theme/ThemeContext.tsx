@@ -11,14 +11,16 @@ import {
   adaptNavigationTheme,
   type MD3Theme,
 } from 'react-native-paper';
+import { typography } from './typography';
 import {
+  NavigationContainer,
   DarkTheme as NavigationDarkTheme,
   DefaultTheme as NavigationDefaultTheme,
   type Theme as NavigationTheme,
 } from '@react-navigation/native';
 import { lightPalette, darkPalette } from './colors';
 
-const FALLBACK_SOURCE_COLOR = '#5DADE2'; // Cerulean primary
+const FALLBACK_SOURCE_COLOR = '#BEFF6C'; // Neon lime green primary
 const THEME_STORAGE_KEY = '@app_theme_mode';
 
 export type ThemeMode = 'system' | 'light' | 'dark';

@@ -10,8 +10,32 @@ import { DIProvider } from './src/di/DIContext';
 import { createServiceContainer } from './src/di/container';
 import { ThemeProvider, useAppTheme } from './src/theme';
 import { RootTabs } from './src/navigation/RootTabs';
+import { AuthProvider, useAuth } from './src/auth/AuthContext';
+import { LoginScreen } from './src/screens/LoginScreen';
+import { AppUpdateDialog } from './src/components/AppUpdateDialog';
+import { View, ActivityIndicator } from 'react-native';
 
 const container = createServiceContainer(apiClient);
+
+function AppNavigator() {
+  const { user, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  // If we have a user (including anonymous), show the main app
+  if (user) {
+    return <RootTabs />;
+  }
+
+  // Otherwise show login screen
+  return <LoginScreen />;
+}
 
 function AppInner() {
   const { paperTheme, navTheme } = useAppTheme();
@@ -20,7 +44,8 @@ function AppInner() {
     <PaperProvider theme={paperTheme}>
       <NavigationContainer theme={navTheme}>
         <StatusBar style="auto" />
-        <RootTabs />
+        <AppNavigator />
+        <AppUpdateDialog />
       </NavigationContainer>
     </PaperProvider>
   );
@@ -32,7 +57,9 @@ export default function App() {
       <ThemeProvider>
         <DIProvider container={container}>
           <QueryClientProvider client={queryClient}>
-            <AppInner />
+            <AuthProvider>
+              <AppInner />
+            </AuthProvider>
           </QueryClientProvider>
         </DIProvider>
       </ThemeProvider>

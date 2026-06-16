@@ -15,12 +15,14 @@ function TrainRow({
   time,
   icon,
   iconBg,
+  textColor,
   theme,
 }: {
   label: string;
   time: string;
   icon: keyof typeof Ionicons.glyphMap;
   iconBg: string;
+  textColor: string;
   theme: MD3Theme;
 }) {
   return (
@@ -46,7 +48,7 @@ function TrainRow({
       <Text
         variant="titleMedium"
         style={{
-          color: theme.colors.primary,
+          color: textColor,
           fontWeight: '800',
           fontVariant: ['tabular-nums'],
         }}
@@ -91,6 +93,7 @@ export function FirstLastTrainCard({ data }: Props) {
         time={firstTime}
         icon="sunny-outline"
         iconBg={semantic.yellow_line}
+        textColor={semantic.warning}
         theme={theme}
       />
       <View
@@ -104,6 +107,7 @@ export function FirstLastTrainCard({ data }: Props) {
         time={lastTime}
         icon="moon-outline"
         iconBg={semantic.purple_line}
+        textColor={semantic.warning}
         theme={theme}
       />
     </View>

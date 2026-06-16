@@ -1,8 +1,8 @@
 /**
  * Premium Bento-Box color system for Delhi Metro Clean.
  *
- * Light mode  — warm cream surfaces, soft pastel metro lines
- * Dark mode   — deep blue-black base, vivid neon metro lines
+ * Light mode  — forest green and crisp white
+ * Dark mode   — near-black base, neon lime green primary
  *
  * Inspired by modern bento-grid app designs with color-blocked
  * cards, bold metric typography, and floating glass navigation.
@@ -21,136 +21,136 @@ export const bentoRadius = {
 
 /* ───────── Light Palette ───────── */
 export const lightPalette = {
-  // Backgrounds — warm cream, not clinical white
-  background: '#FAF8F5',
+  // Backgrounds
+  background: '#F8F9FA', // Cool gray-white
   surface: '#FFFFFF',
-  surfaceVariant: '#F2EDE8',
+  surfaceVariant: '#F1F3F5',
 
   // Text
-  onBackground: '#1A1A1A',
-  onSurface: '#1C1C1E',
-  onSurfaceVariant: '#6E6E73',
+  onBackground: '#111827',
+  onSurface: '#1F2937',
+  onSurfaceVariant: '#6B7280',
 
-  // Premium Metro Lines — soft, curated pastels
-  yellow_line: '#E8A838',        // Soft Amber Gold
-  yellow_line_muted: '#FFF3D6',
-  yellow_line_bg: 'rgba(232,168,56,0.10)',
+  // Premium Metro Lines
+  yellow_line: '#F59E0B',
+  yellow_line_muted: '#FEF3C7',
+  yellow_line_bg: 'rgba(245,158,11,0.15)',
 
-  blue_line: '#5DADE2',          // Pastel Cerulean
-  blue_line_muted: '#D6EAF8',
-  blue_line_bg: 'rgba(93,173,226,0.10)',
+  blue_line: '#3B82F6',
+  blue_line_muted: '#DBEAFE',
+  blue_line_bg: 'rgba(59,130,246,0.15)',
 
-  red_line: '#E57373',           // Soft Rose
-  red_line_muted: '#FDDEDE',
-  red_line_bg: 'rgba(229,115,115,0.10)',
+  red_line: '#EF4444',
+  red_line_muted: '#FEE2E2',
+  red_line_bg: 'rgba(239,68,68,0.15)',
 
-  green_line: '#81C784',         // Sage Green
-  green_line_muted: '#D5E8D4',
-  green_line_bg: 'rgba(129,199,132,0.10)',
+  green_line: '#10B981',
+  green_line_muted: '#D1FAE5',
+  green_line_bg: 'rgba(16,185,129,0.15)',
 
-  pink_line: '#E991B2',          // Dusty Rose
-  pink_line_muted: '#FCE4EC',
-  pink_line_bg: 'rgba(233,145,178,0.10)',
+  pink_line: '#EC4899',
+  pink_line_muted: '#FCE7F3',
+  pink_line_bg: 'rgba(236,72,153,0.15)',
 
-  purple_line: '#B39DDB',        // Soft Lavender
-  purple_line_muted: '#EDE7F6',
-  purple_line_bg: 'rgba(179,157,219,0.10)',
+  purple_line: '#8B5CF6',
+  purple_line_muted: '#EDE9FE',
+  purple_line_bg: 'rgba(139,92,246,0.15)',
 
-  orange_line: '#F4A261',        // Warm Peach
-  orange_line_muted: '#FFE6CC',
-  orange_line_bg: 'rgba(244,162,97,0.10)',
+  orange_line: '#F97316',
+  orange_line_muted: '#FFEDD5',
+  orange_line_bg: 'rgba(249,115,22,0.15)',
 
-  brown_line: '#A1887F',         // Warm Mocha
-  brown_line_muted: '#D7CCC8',
-  brown_line_bg: 'rgba(161,136,127,0.10)',
+  brown_line: '#78350F',
+  brown_line_muted: '#FEF3C7',
+  brown_line_bg: 'rgba(120,53,15,0.15)',
 
   // Semantic
-  primary: '#5DADE2',            // Cerulean Blue primary
-  success: '#66BB6A',
-  warning: '#F4A261',
-  error: '#EF5350',
-  info: '#5DADE2',
-  interchange: '#E8A838',        // Amber for interchange badges
-  warningContainer: '#FFF3D6',
-  successContainer: '#E8F5E9',
+  primary: '#34A853',            // Forest green primary
+  success: '#10B981',
+  warning: '#F59E0B',
+  error: '#EF4444',
+  info: '#3B82F6',
+  interchange: '#F59E0B',
+  warningContainer: '#FEF3C7',
+  successContainer: '#D1FAE5',
 
   // Component surface elevations
   elevation: {
     level0: 'transparent',
     level1: '#FFFFFF',
-    level2: '#F8F5F1',
-    level3: '#F2EDE8',
-    level4: '#EDE7E0',
-    level5: '#E8E1D9',
+    level2: '#F9FAFB',
+    level3: '#F3F4F6',
+    level4: '#E5E7EB',
+    level5: '#D1D5DB',
   },
 
-  // Card shadow (soft light mode only)
-  shadow: 'rgba(0, 0, 0, 0.06)',
+  // Card shadow
+  shadow: 'rgba(0, 0, 0, 0.08)',
 };
 
 /* ───────── Dark Palette ───────── */
 export const darkPalette = {
-  // Backgrounds — deep blue-black
-  background: '#0A0A0F',
-  surface: '#161620',
-  surfaceVariant: '#1E1E2A',
+  // Backgrounds — near black
+  background: '#0D0D0D',
+  surface: '#1A1A1A',
+  surfaceVariant: '#242424',
 
   // Text
-  onBackground: '#F5F5F7',
-  onSurface: '#FFFFFF',
-  onSurfaceVariant: '#A0A0B0',
+  onBackground: '#F9FAFB',
+  onSurface: '#F3F4F6',
+  onSurfaceVariant: '#9CA3AF',
 
-  // Premium Metro Lines — vivid neon for dark backgrounds
-  yellow_line: '#FFD700',        // Glowing Gold
+  // Premium Metro Lines
+  yellow_line: '#FFD700',
   yellow_line_muted: 'rgba(255,215,0,0.20)',
   yellow_line_bg: 'rgba(255,215,0,0.12)',
 
-  blue_line: '#00E5FF',          // Vivid Cyan
-  blue_line_muted: 'rgba(0,229,255,0.20)',
-  blue_line_bg: 'rgba(0,229,255,0.12)',
+  blue_line: '#3B82F6',
+  blue_line_muted: 'rgba(59,130,246,0.20)',
+  blue_line_bg: 'rgba(59,130,246,0.12)',
 
-  red_line: '#FF5252',           // Vivid Red
-  red_line_muted: 'rgba(255,82,82,0.20)',
-  red_line_bg: 'rgba(255,82,82,0.12)',
+  red_line: '#FF4D4D',
+  red_line_muted: 'rgba(255,77,77,0.20)',
+  red_line_bg: 'rgba(255,77,77,0.12)',
 
-  green_line: '#69F0AE',         // Neon Mint
-  green_line_muted: 'rgba(105,240,174,0.20)',
-  green_line_bg: 'rgba(105,240,174,0.12)',
+  green_line: '#BEFF6C',
+  green_line_muted: 'rgba(190,255,108,0.20)',
+  green_line_bg: 'rgba(190,255,108,0.12)',
 
-  pink_line: '#FF4081',          // Hot Pink
-  pink_line_muted: 'rgba(255,64,129,0.20)',
-  pink_line_bg: 'rgba(255,64,129,0.12)',
+  pink_line: '#FF6B9D',
+  pink_line_muted: 'rgba(255,107,157,0.20)',
+  pink_line_bg: 'rgba(255,107,157,0.12)',
 
-  purple_line: '#B388FF',        // Neon Lavender
+  purple_line: '#B388FF',
   purple_line_muted: 'rgba(179,136,255,0.20)',
   purple_line_bg: 'rgba(179,136,255,0.12)',
 
-  orange_line: '#FF9100',        // Neon Orange
+  orange_line: '#FF9100',
   orange_line_muted: 'rgba(255,145,0,0.20)',
   orange_line_bg: 'rgba(255,145,0,0.12)',
 
-  brown_line: '#A1887F',         // Muted Mocha
+  brown_line: '#A1887F',
   brown_line_muted: 'rgba(161,136,127,0.20)',
   brown_line_bg: 'rgba(161,136,127,0.12)',
 
   // Semantic
-  primary: '#00E5FF',            // Neon Cyan primary
-  success: '#69F0AE',
-  warning: '#FF9100',
-  error: '#FF5252',
-  info: '#00E5FF',
+  primary: '#BEFF6C',            // Neon Lime Green
+  success: '#BEFF6C',
+  warning: '#FFD700',            // Gold
+  error: '#FF4D4D',
+  info: '#3B82F6',
   interchange: '#FFD700',
   warningContainer: 'rgba(255,215,0,0.15)',
-  successContainer: 'rgba(105,240,174,0.15)',
+  successContainer: 'rgba(190,255,108,0.15)',
 
   // Component surface elevations (color hierarchy, no shadows)
   elevation: {
     level0: 'transparent',
-    level1: '#161620',
-    level2: '#1E1E2A',
-    level3: '#262636',
-    level4: '#2E2E40',
-    level5: '#36364A',
+    level1: '#1A1A1A',
+    level2: '#242424',
+    level3: '#2E2E2E',
+    level4: '#383838',
+    level5: '#424242',
   },
 
   // No shadows in dark mode

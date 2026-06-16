@@ -32,7 +32,7 @@ export function NotificationCard({ notification }: Props) {
     outputRange: ['0deg', '180deg']
   });
 
-  const cardBg = isDark ? `${semantic.info}14` : `${semantic.info}0A`;
+  const cardBg = isDark ? `${semantic.pink_line}14` : `${semantic.pink_line}0A`;
 
   return (
     <View style={styles.wrapper}>
@@ -52,15 +52,15 @@ export function NotificationCard({ notification }: Props) {
           ]}
         >
           {/* Colored left accent */}
-          <View style={[styles.accentStrip, { backgroundColor: semantic.info }]} />
+          <View style={[styles.accentStrip, { backgroundColor: semantic.pink_line }]} />
 
           <View
             style={[
               styles.iconWrap,
-              { backgroundColor: semantic.info },
+              { backgroundColor: semantic.pink_line },
             ]}
           >
-            <Ionicons name="megaphone-outline" size={18} color="#FFFFFF" />
+            <Ionicons name="megaphone-outline" size={18} color="#000000" />
           </View>
           <View style={styles.content}>
             <Text
@@ -86,7 +86,7 @@ export function NotificationCard({ notification }: Props) {
           </View>
           <View style={styles.chevronWrap}>
             <Animated.View style={{ transform: [{ rotate: spin }] }}>
-              <Ionicons name="chevron-down" size={20} color={theme.colors.primary} />
+              <Ionicons name="chevron-down" size={20} color={semantic.pink_line} />
             </Animated.View>
           </View>
         </View>
