@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, useEffect } from 'react';
 import { Animated, PanResponder, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
@@ -18,6 +18,7 @@ import type { HomeStackParamList } from '../navigation/types';
 type Nav = NativeStackNavigationProp<HomeStackParamList, 'JourneyResults'>;
 import { spacing } from '../theme';
 import { bentoRadius } from '../theme/colors';
+import { FavoritesStorage } from '../storage/favorites';
 
 type Route = RouteProp<HomeStackParamList, 'JourneyResults'>;
 
@@ -32,6 +33,21 @@ export function JourneyResultsScreen() {
   const theme = useTheme();
   const { semantic, isDark } = useAppTheme();
   const [strategy, setStrategy] = useState<RouteStrategy>('least-distance');
+  const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    FavoritesStorage.isSavedRoute(fromCode, toCode).then(setIsSaved);
+  }, [fromCode, toCode]);
+
+  const toggleSaveRoute = async () => {
+    if (isSaved) {
+      await FavoritesStorage.removeSavedRoute(fromCode, toCode);
+      setIsSaved(false);
+    } else {
+      await FavoritesStorage.addSavedRoute({ fromCode, fromName, toCode, toName });
+      setIsSaved(true);
+    }
+  };
 
   const { data: plan, isLoading, isError, refetch } = useJourneyPlanCachedQuery(
     fromCode,
@@ -118,39 +134,45 @@ export function JourneyResultsScreen() {
         style={[
           styles.heroCard,
           {
-            backgroundColor: theme.colors.primary,
-            shadowOpacity: isDark ? 0 : 0.12,
+            backgroundColor: theme.colors.surface,
+            shadowOpacity: isDark ? 0 : 0.05,
+            borderWidth: isDark ? 1 : 0,
+            borderColor: theme.colors.outlineVariant,
           },
         ]}
       >
         <View style={styles.heroStations}>
-          <View style={styles.heroStationRow}>
-            <View style={[styles.heroDot, { backgroundColor: semantic.success }]} />
-            <Text
-              variant="titleMedium"
-              style={{
-                flex: 1,
-                color: '#000000',
-                fontWeight: '900',
-                letterSpacing: 0.3,
-              }}
-              numberOfLines={1}
-            >
-              {fromName}
-            </Text>
-            <Pressable
-              onPress={() => navigation.navigate('StationDetail', { stationCode: fromCode, stationName: fromName })}
-              hitSlop={8}
-              style={[styles.heroInfoBtn, { backgroundColor: 'rgba(0,0,0,0.1)' }]}
-            >
-              <Ionicons name="information-circle-outline" size={20} color={theme.colors.onSurface} />
-            </Pressable>
+          <View style={[styles.heroStationRow, { justifyContent: 'space-between' }]}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, gap: spacing.md }}>
+              <View style={[styles.heroDot, { backgroundColor: semantic.success }]} />
+              <Text
+                variant="titleMedium"
+                style={{
+                  flex: 1,
+                  color: theme.colors.onSurface,
+                  fontWeight: '900',
+                  letterSpacing: 0.3,
+                }}
+                numberOfLines={1}
+              >
+                {fromName}
+              </Text>
+            </View>
+            <View style={{ flexDirection: 'row', gap: spacing.xs }}>
+              <Pressable
+                onPress={() => navigation.navigate('StationDetail', { stationCode: fromCode, stationName: fromName })}
+                hitSlop={8}
+                style={[styles.heroInfoBtn, { backgroundColor: theme.colors.surfaceVariant }]}
+              >
+                <Ionicons name="information-circle-outline" size={20} color={theme.colors.onSurfaceVariant} />
+              </Pressable>
+            </View>
           </View>
 
           <View style={styles.heroConnector}>
             <View style={[styles.heroLine, { backgroundColor: theme.colors.outlineVariant }]} />
-            <View style={[styles.heroArrowCircle, { backgroundColor: theme.colors.primary }]}>
-              <Ionicons name="arrow-down" size={18} color="#000000" />
+            <View style={[styles.heroArrowCircle, { backgroundColor: isDark ? `${theme.colors.primary}20` : `${theme.colors.primary}15` }]}>
+              <Ionicons name="arrow-down" size={18} color={theme.colors.primary} />
             </View>
             <View style={[styles.heroLine, { backgroundColor: theme.colors.outlineVariant }]} />
           </View>
@@ -161,7 +183,7 @@ export function JourneyResultsScreen() {
               variant="titleMedium"
               style={{
                 flex: 1,
-                color: '#000000',
+                color: theme.colors.onSurface,
                 fontWeight: '900',
                 letterSpacing: 0.3,
               }}
@@ -172,27 +194,30 @@ export function JourneyResultsScreen() {
             <Pressable
               onPress={() => navigation.navigate('StationDetail', { stationCode: toCode, stationName: toName })}
               hitSlop={8}
-              style={[styles.heroInfoBtn, { backgroundColor: 'rgba(0,0,0,0.1)' }]}
+              style={[styles.heroInfoBtn, { backgroundColor: theme.colors.surfaceVariant }]}
             >
-              <Ionicons name="information-circle-outline" size={20} color={theme.colors.onSurface} />
+              <Ionicons name="information-circle-outline" size={20} color={theme.colors.onSurfaceVariant} />
             </Pressable>
           </View>
         </View>
 
         {/* Inline stats row */}
         <View style={styles.heroStats}>
-          <View style={[styles.heroStat, { backgroundColor: 'rgba(0,0,0,0.08)' }]}>
-            <Ionicons name="git-commit-outline" size={18} color="#000000" />
-            <Text variant="labelLarge" style={{ color: '#000000', fontWeight: '800' }}>
+          <View style={[styles.heroStat, { backgroundColor: theme.colors.surfaceVariant }]}>
+            <Ionicons name="git-commit-outline" size={18} color={theme.colors.onSurfaceVariant} />
+            <Text variant="labelLarge" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '800' }}>
               {fare.stations} stops
             </Text>
           </View>
-          <View style={[styles.heroStat, { backgroundColor: 'rgba(0,0,0,0.08)' }]}>
-            <Ionicons name="time-outline" size={18} color="#000000" />
-            <Text variant="labelLarge" style={{ color: '#000000', fontWeight: '800' }}>
+          <View style={[styles.heroStat, { backgroundColor: theme.colors.surfaceVariant }]}>
+            <Ionicons name="time-outline" size={18} color={theme.colors.onSurfaceVariant} />
+            <Text variant="labelLarge" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '800' }}>
               {fare.total_time}
             </Text>
           </View>
+          <Pressable onPress={toggleSaveRoute} style={[styles.heroStat, { backgroundColor: isSaved ? `${theme.colors.primary}20` : theme.colors.surfaceVariant, flex: 0, paddingHorizontal: 16 }]}>
+            <Ionicons name={isSaved ? "star" : "star-outline"} size={18} color={isSaved ? theme.colors.primary : theme.colors.onSurfaceVariant} />
+          </Pressable>
         </View>
       </View>
 

@@ -38,7 +38,7 @@ export function NotificationCard({ notification }: Props) {
     <View style={styles.wrapper}>
       <TouchableRipple
         onPress={toggleExpand}
-        rippleColor={theme.colors.primary}
+        rippleColor={isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)'}
         borderless
         style={styles.ripple}
       >

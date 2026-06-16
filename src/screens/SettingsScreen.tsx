@@ -134,24 +134,7 @@ export function SettingsScreen() {
                 </View>
             </List.Section>
 
-            <List.Section style={styles.section}>
-                <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>Developer Tools</List.Subheader>
-                <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
-                    <List.Item
-                        title="Send a Ping"
-                        description={isPinging ? "Pinging Appwrite..." : "Verify Appwrite SDK connection"}
-                        left={(props) => 
-                            isPinging ? 
-                            <ActivityIndicator {...props} size={24} style={[props.style, { margin: 8 }]} color={theme.colors.primary} /> :
-                            <List.Icon {...props} icon="wifi" color={theme.colors.primary} />
-                        }
-                        onPress={handlePing}
-                        titleStyle={{ color: theme.colors.onSurface, fontWeight: '600' }}
-                        descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
-                        disabled={isPinging}
-                    />
-                </View>
-            </List.Section>
+
 
             <List.Section style={styles.section}>
                 <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>App Info</List.Subheader>

@@ -67,8 +67,12 @@ export function AppUpdateDialog() {
           }
         }
       }
-    } catch (error) {
-      console.error('Update check failed:', error);
+    } catch (error: any) {
+      if (error?.message?.includes('Collection with the requested ID')) {
+        console.warn('Update check: Appwrite releases collection not found in database.');
+      } else {
+        console.warn('Update check failed:', error?.message || error);
+      }
     }
   };
 

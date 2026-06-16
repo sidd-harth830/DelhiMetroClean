@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,6 +15,7 @@ import { useAppTheme } from '../theme/ThemeContext';
 import type { HomeStackParamList } from '../navigation/types';
 import { spacing } from '../theme';
 import { bentoRadius } from '../theme/colors';
+import { FavoritesStorage, FavoriteStation, SavedRoute } from '../storage/favorites';
 
 type Nav = NativeStackNavigationProp<HomeStackParamList, 'Home'>;
 
@@ -32,6 +33,15 @@ export function HomeScreen() {
     (l) => l.status.trim().toLowerCase() !== 'normal service',
   );
   const [departureOffsetMinutes, setDepartureOffsetMinutes] = useState(0);
+  const [favoriteStations, setFavoriteStations] = useState<FavoriteStation[]>([]);
+  const [savedRoutes, setSavedRoutes] = useState<SavedRoute[]>([]);
+
+  useFocusEffect(
+    useCallback(() => {
+      FavoritesStorage.getFavoriteStations().then(setFavoriteStations);
+      FavoritesStorage.getSavedRoutes().then(setSavedRoutes);
+    }, [])
+  );
 
   const canSearch = fromPicker.station && toPicker.station;
 
@@ -264,14 +274,14 @@ export function HomeScreen() {
           </Pressable>
         )}
 
-        {/* Popular Routes Section — Bento Grid */}
-        {(popularRoutes.data?.length ?? 0) > 0 && (
+        {/* Saved Routes Section */}
+        {savedRoutes.length > 0 && (
           <>
-            <SectionHeader title="Popular Routes" />
+            <SectionHeader title="Saved Routes" />
             <View style={styles.popularGrid}>
-              {popularRoutes.data!.map((route, index) => (
+              {savedRoutes.map((route, index) => (
                 <Pressable
-                  key={route.routeKey}
+                  key={`${route.fromCode}-${route.toCode}`}
                   style={[
                     styles.popularCard,
                     {
@@ -281,7 +291,7 @@ export function HomeScreen() {
                       shadowOpacity: isDark ? 0 : 0.05,
                     },
                   ]}
-                  onPress={() => handlePopularRoute(route.fromStationCode, route.toStationCode)}
+                  onPress={() => handlePopularRoute(route.fromCode, route.toCode)}
                 >
                   <View
                     style={[
@@ -299,24 +309,51 @@ export function HomeScreen() {
                     }}
                     numberOfLines={1}
                   >
-                    {route.fromStationCode} → {route.toStationCode}
+                    {route.fromName} → {route.toName}
                   </Text>
+                </Pressable>
+              ))}
+            </View>
+          </>
+        )}
+
+        {/* Favorite Stations Section */}
+        {favoriteStations.length > 0 && (
+          <>
+            <SectionHeader title="Favorite Stations" />
+            <View style={styles.popularGrid}>
+              {favoriteStations.map((station, index) => (
+                <Pressable
+                  key={station.code}
+                  style={[
+                    styles.popularCard,
+                    {
+                      backgroundColor: isDark
+                        ? `${semantic.success}12`
+                        : `${semantic.success}08`,
+                      shadowOpacity: isDark ? 0 : 0.05,
+                    },
+                  ]}
+                  onPress={() => navigation.navigate('StationDetail', { stationCode: station.code, stationName: station.name })}
+                >
                   <View
                     style={[
-                      styles.hitsBadge,
+                      styles.popularIcon,
                       { backgroundColor: semantic.success },
                     ]}
                   >
-                    <Text
-                      variant="labelSmall"
-                      style={{
-                        color: '#000000',
-                        fontWeight: '800',
-                      }}
-                    >
-                      {route.hitCount}x
-                    </Text>
+                    <Ionicons name="business" size={16} color="#000000" />
                   </View>
+                  <Text
+                    style={{
+                      fontWeight: '700',
+                      color: theme.colors.onSurface,
+                      fontSize: 13,
+                    }}
+                    numberOfLines={1}
+                  >
+                    {station.name}
+                  </Text>
                 </Pressable>
               ))}
             </View>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
@@ -12,6 +12,7 @@ import { useAppTheme } from '../theme/ThemeContext';
 import type { HomeStackParamList } from '../navigation/types';
 import { spacing } from '../theme';
 import { bentoRadius } from '../theme/colors';
+import { FavoritesStorage } from '../storage/favorites';
 
 type Route = RouteProp<HomeStackParamList, 'StationDetail'>;
 
@@ -111,6 +112,22 @@ export function StationDetailScreen() {
   const theme = useTheme();
   const { semantic, isDark } = useAppTheme();
   const { data: station, isLoading, isError, refetch } = useStationDetailQuery(stationCode);
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  useEffect(() => {
+    FavoritesStorage.isFavoriteStation(stationCode).then(setIsFavorite);
+  }, [stationCode]);
+
+  const toggleFavorite = async () => {
+    if (!station) return;
+    if (isFavorite) {
+      await FavoritesStorage.removeFavoriteStation(stationCode);
+      setIsFavorite(false);
+    } else {
+      await FavoritesStorage.addFavoriteStation({ code: stationCode, name: station.station_name });
+      setIsFavorite(true);
+    }
+  };
 
   if (isLoading) return <LoadingState message="Loading station details..." />;
   if (isError) return <ErrorState message="Could not load station details" onRetry={refetch} />;
@@ -137,7 +154,7 @@ export function StationDetailScreen() {
               {station.station_code}
             </Text>
           </View>
-          <View style={styles.heroInfo}>
+          <View style={[styles.heroInfo, { flex: 1 }]}>
             <Text
               variant="headlineSmall"
               style={{ color: isDark ? theme.colors.onSurface : theme.colors.onPrimaryContainer, fontWeight: '800' }}
@@ -151,6 +168,9 @@ export function StationDetailScreen() {
               </Text>
             )}
           </View>
+          <Pressable onPress={toggleFavorite} style={{ padding: 8, justifyContent: 'center' }}>
+            <Ionicons name={isFavorite ? "star" : "star-outline"} size={28} color={isFavorite ? semantic.warning : isDark ? theme.colors.onSurface : theme.colors.onPrimaryContainer} />
+          </Pressable>
         </View>
 
         {/* Tags row */}

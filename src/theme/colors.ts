@@ -22,8 +22,8 @@ export const bentoRadius = {
 /* ───────── Light Palette ───────── */
 export const lightPalette = {
   // Backgrounds
-  background: '#F8F9FA', // Cool gray-white
-  surface: '#FFFFFF',
+  background: '#F3F4F6', // Minimal gray background
+  surface: '#FCFCFC',    // Off-white surface to reduce strain
   surfaceVariant: '#F1F3F5',
 
   // Text
@@ -85,7 +85,7 @@ export const lightPalette = {
   },
 
   // Card shadow
-  shadow: 'rgba(0, 0, 0, 0.08)',
+  shadow: 'transparent',
 };
 
 /* ───────── Dark Palette ───────── */
