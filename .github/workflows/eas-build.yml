@@ -13,14 +13,13 @@ permissions:
 env:
   CI: true
   EXPO_NO_TELEMETRY: true
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   eas-build-and-release:
     runs-on: ubuntu-latest
     env:
       EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-      # 🚀 FIX: Increase memory limits for Node and Gradle to prevent OutOfMemory crashes
+      # Memory limits to prevent the Gradle OutOfMemory crash
       NODE_OPTIONS: "--max-old-space-size=4096"
       GRADLE_OPTS: "-Dorg.gradle.jvmargs='-Xmx4g -XX:MaxMetaspaceSize=1g'"
       _JAVA_OPTIONS: "-XX:MaxMetaspaceSize=1g"
@@ -34,7 +33,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20 # 🟢 FIX: Downgraded from 22 to 20 (LTS) for stable Android compilation
 
       - name: Install Dependencies
         run: npm install
@@ -60,13 +59,18 @@ jobs:
           java-version: '17'
 
       - name: Build Android APK (Local/Free)
+        env:
+          # 🟢 FIX: If your app uses ANY API URLs or keys, you MUST inject them here.
+          # GitHub cannot read your expo.dev dashboard secrets. 
+          # Example: EXPO_PUBLIC_API_URL: ${{ secrets.EXPO_PUBLIC_API_URL }}
+          # If you don't use any variables, you can leave this blank.
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           APK_NAME="DelhiMetro-v${VERSION}.apk"
           
           echo "🏗️ Starting local EAS build for Android APK..."
           
-          # Disable strict bash error checking temporarily to capture output
           set +e
           eas build --platform android --profile release --local --non-interactive --output "$APK_NAME"
           EXIT_CODE=$?
@@ -107,7 +111,7 @@ jobs:
           - **Platform:** Android (APK)
           - **Build Profile:** Release
           - **Version Code:** v${{ env.version }}
-          - **Compiler:** EAS Build (Local CI)
+          - **Compiler:** EAS Build (Local CI / Node 20 LTS)
           
           ### 🛠️ For Admins (Approval Process)
           1. Download and test the \`${{ env.apk_name }}\` attached below.
