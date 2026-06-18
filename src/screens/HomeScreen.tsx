@@ -4,7 +4,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Appbar, Button, Text, useTheme } from 'react-native-paper';
+import { Appbar, Button, Text, useTheme, Chip } from 'react-native-paper';
 import { usePopularRoutesQuery, useNotificationsQuery, useStationPicker, useMetroLinesQuery } from '../hooks';
 import type { SelectedStation } from '../hooks/useStationPicker';
 import { StationPicker } from '../components/StationPicker';
@@ -223,20 +223,41 @@ export function HomeScreen() {
                 {departureDate ? departureDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Set Time'}
               </Button>
             </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: spacing.sm, paddingHorizontal: spacing.xs }}>
-              <Pressable onPress={() => setDepartureDate(undefined)}>
-                <Text style={{ color: !departureDate ? theme.colors.primary : theme.colors.onSurfaceVariant, fontWeight: !departureDate ? 'bold' : 'normal', fontSize: 13 }}>Now</Text>
-              </Pressable>
-              <Pressable onPress={() => setDepartureDate(new Date(Date.now() + 15 * 60000))}>
-                <Text style={{ color: theme.colors.primary, fontSize: 13 }}>+15m</Text>
-              </Pressable>
-              <Pressable onPress={() => setDepartureDate(new Date(Date.now() + 30 * 60000))}>
-                <Text style={{ color: theme.colors.primary, fontSize: 13 }}>+30m</Text>
-              </Pressable>
-              <Pressable onPress={() => setDepartureDate(new Date(Date.now() + 60 * 60000))}>
-                <Text style={{ color: theme.colors.primary, fontSize: 13 }}>+1h</Text>
-              </Pressable>
-            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm, paddingHorizontal: 2 }}>
+              <Chip
+                selected={!departureDate}
+                onPress={() => setDepartureDate(undefined)}
+                mode="outlined"
+                style={{ borderRadius: bentoRadius.pill }}
+                textStyle={{ fontSize: 13 }}
+              >
+                Now
+              </Chip>
+              <Chip
+                onPress={() => setDepartureDate(new Date(Date.now() + 15 * 60000))}
+                mode="outlined"
+                style={{ borderRadius: bentoRadius.pill }}
+                textStyle={{ fontSize: 13 }}
+              >
+                +15m
+              </Chip>
+              <Chip
+                onPress={() => setDepartureDate(new Date(Date.now() + 30 * 60000))}
+                mode="outlined"
+                style={{ borderRadius: bentoRadius.pill }}
+                textStyle={{ fontSize: 13 }}
+              >
+                +30m
+              </Chip>
+              <Chip
+                onPress={() => setDepartureDate(new Date(Date.now() + 60 * 60000))}
+                mode="outlined"
+                style={{ borderRadius: bentoRadius.pill }}
+                textStyle={{ fontSize: 13 }}
+              >
+                +1h
+              </Chip>
+            </ScrollView>
           </View>
           {showPicker && (
             <DateTimePicker
