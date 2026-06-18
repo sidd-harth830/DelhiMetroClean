@@ -5,7 +5,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { ActivityIndicator, Text, useTheme, Portal, Modal } from 'react-native-paper';
-import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { useMapFamilyPrimaryQuery } from '../hooks/useMapQueries';
 import { useAppTheme } from '../theme/ThemeContext';
@@ -262,9 +261,8 @@ export function MetroMapScreen() {
         <Modal
           visible={legendVisible}
           onDismiss={() => setLegendVisible(false)}
-          contentContainerStyle={[styles.modal, { backgroundColor: 'transparent', maxHeight: '80%', padding: 0, overflow: 'hidden' }]}
+          contentContainerStyle={[styles.modal, { backgroundColor: isDark ? 'rgba(30,30,30,0.95)' : 'rgba(255,255,255,0.95)', maxHeight: '80%', padding: 0, overflow: 'hidden' }]}
         >
-          <BlurView intensity={isDark ? 50 : 80} tint={isDark ? 'dark' : 'light'} style={{ flex: 1, backgroundColor: isDark ? 'rgba(30,30,30,0.6)' : 'rgba(255,255,255,0.7)' }}>
           <ScrollView contentContainerStyle={{ padding: spacing.xl }}>
           <Text variant="titleLarge" style={{ fontWeight: 'bold', marginBottom: spacing.md, color: theme.colors.onSurface }}>
             Map Legend
@@ -337,7 +335,6 @@ export function MetroMapScreen() {
             <Text style={{ color: theme.colors.onPrimary, fontWeight: 'bold' }}>Close</Text>
           </Pressable>
           </ScrollView>
-          </BlurView>
         </Modal>
       </Portal>
     </View>

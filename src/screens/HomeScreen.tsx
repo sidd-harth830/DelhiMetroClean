@@ -37,6 +37,7 @@ export function HomeScreen() {
   const [savedRoutes, setSavedRoutes] = useState<SavedRoute[]>([]);
   
   const [departureDate, setDepartureDate] = useState<Date | undefined>(undefined);
+  const [selectedChip, setSelectedChip] = useState<string>('now');
   const [showPicker, setShowPicker] = useState(false);
   const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date');
 
@@ -44,6 +45,7 @@ export function HomeScreen() {
     setShowPicker(false);
     if (selectedDate) {
       setDepartureDate(selectedDate);
+      setSelectedChip('custom');
     }
   };
 
@@ -215,6 +217,51 @@ export function HomeScreen() {
 
           {/* Time toggle */}
           <View style={styles.timeSection}>
+            <Text style={{ fontSize: 13, fontWeight: '600', color: theme.colors.onSurfaceVariant, marginBottom: spacing.sm }}>
+              <Ionicons name="time" size={14} color={theme.colors.onSurfaceVariant} /> Departure Time
+            </Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.sm, paddingHorizontal: 2 }}>
+              <Chip
+                selected={selectedChip === 'now'}
+                showSelectedCheck={false}
+                onPress={() => { setDepartureDate(undefined); setSelectedChip('now'); }}
+                mode="outlined"
+                style={{ borderRadius: bentoRadius.pill, backgroundColor: selectedChip === 'now' ? theme.colors.primaryContainer : 'transparent' }}
+                textStyle={{ fontSize: 13 }}
+              >
+                Now
+              </Chip>
+              <Chip
+                selected={selectedChip === '15m'}
+                showSelectedCheck={false}
+                onPress={() => { setDepartureDate(new Date(Date.now() + 15 * 60000)); setSelectedChip('15m'); }}
+                mode="outlined"
+                style={{ borderRadius: bentoRadius.pill, backgroundColor: selectedChip === '15m' ? theme.colors.primaryContainer : 'transparent' }}
+                textStyle={{ fontSize: 13 }}
+              >
+                +15m
+              </Chip>
+              <Chip
+                selected={selectedChip === '30m'}
+                showSelectedCheck={false}
+                onPress={() => { setDepartureDate(new Date(Date.now() + 30 * 60000)); setSelectedChip('30m'); }}
+                mode="outlined"
+                style={{ borderRadius: bentoRadius.pill, backgroundColor: selectedChip === '30m' ? theme.colors.primaryContainer : 'transparent' }}
+                textStyle={{ fontSize: 13 }}
+              >
+                +30m
+              </Chip>
+              <Chip
+                selected={selectedChip === '1h'}
+                showSelectedCheck={false}
+                onPress={() => { setDepartureDate(new Date(Date.now() + 60 * 60000)); setSelectedChip('1h'); }}
+                mode="outlined"
+                style={{ borderRadius: bentoRadius.pill, backgroundColor: selectedChip === '1h' ? theme.colors.primaryContainer : 'transparent' }}
+                textStyle={{ fontSize: 13 }}
+              >
+                +1h
+              </Chip>
+            </ScrollView>
             <View style={{ flexDirection: 'row', gap: spacing.sm }}>
               <Button mode="outlined" icon="calendar" onPress={() => { setPickerMode('date'); setShowPicker(true); }} style={{ flex: 1, borderColor: isDark ? 'rgba(255,255,255,0.15)' : theme.colors.outline }}>
                 {departureDate ? departureDate.toLocaleDateString() : 'Set Date'}
@@ -223,41 +270,6 @@ export function HomeScreen() {
                 {departureDate ? departureDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Set Time'}
               </Button>
             </View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm, paddingHorizontal: 2 }}>
-              <Chip
-                selected={!departureDate}
-                onPress={() => setDepartureDate(undefined)}
-                mode="outlined"
-                style={{ borderRadius: bentoRadius.pill }}
-                textStyle={{ fontSize: 13 }}
-              >
-                Now
-              </Chip>
-              <Chip
-                onPress={() => setDepartureDate(new Date(Date.now() + 15 * 60000))}
-                mode="outlined"
-                style={{ borderRadius: bentoRadius.pill }}
-                textStyle={{ fontSize: 13 }}
-              >
-                +15m
-              </Chip>
-              <Chip
-                onPress={() => setDepartureDate(new Date(Date.now() + 30 * 60000))}
-                mode="outlined"
-                style={{ borderRadius: bentoRadius.pill }}
-                textStyle={{ fontSize: 13 }}
-              >
-                +30m
-              </Chip>
-              <Chip
-                onPress={() => setDepartureDate(new Date(Date.now() + 60 * 60000))}
-                mode="outlined"
-                style={{ borderRadius: bentoRadius.pill }}
-                textStyle={{ fontSize: 13 }}
-              >
-                +1h
-              </Chip>
-            </ScrollView>
           </View>
           {showPicker && (
             <DateTimePicker
@@ -369,8 +381,9 @@ export function HomeScreen() {
                       fontWeight: '700',
                       color: theme.colors.onSurface,
                       fontSize: 13,
+                      flex: 1,
+                      flexWrap: 'wrap'
                     }}
-                    numberOfLines={1}
                   >
                     {route.fromName} → {route.toName}
                   </Text>
