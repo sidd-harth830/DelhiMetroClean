@@ -3,13 +3,13 @@ import {
   Alert,
   Animated,
   Dimensions,
-  Image,
   LayoutChangeEvent,
   PanResponder,
   Pressable,
   StyleSheet,
   View,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
@@ -185,8 +185,9 @@ export function MetroMapScreen() {
                 <Image
                   source={{ uri: imageUrl }}
                   style={{ width: canvasSize.width, height: canvasSize.height }}
-                  resizeMode="contain"
-                  onLoadEnd={() => setImageLoading(false)}
+                  contentFit="contain"
+                  allowDownscaling={true}
+                  onLoad={() => setImageLoading(false)}
                 />
               </Animated.View>
             </>

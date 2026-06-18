@@ -1,10 +1,6 @@
 name: EAS Build & Draft Release
 
 on:
-  push:
-    branches:
-      - main
-      - master
   workflow_dispatch:
 
 permissions:
