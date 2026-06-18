@@ -9,7 +9,7 @@ import { useAppTheme } from '../theme/ThemeContext';
 import { useAuth } from '../auth/AuthContext';
 import { spacing } from '../theme';
 import { bentoRadius } from '../theme/colors';
-import appConfig from '../../app.json';
+import Constants from 'expo-constants';
 import { databases } from '../config/appwrite';
 import { Query } from 'react-native-appwrite';
 
@@ -80,7 +80,7 @@ export function SettingsScreen() {
                 );
                 if (response.documents.length > 0) {
                     const latestRelease = response.documents[0];
-                    const currentVersion = appConfig.expo.version;
+                    const currentVersion = Constants.expoConfig?.version || require('../../package.json').version || '1.0.0';
                     if (isVersionGreater(latestRelease.versionNumber, currentVersion)) {
                         Alert.alert(
                             'New Version Available',
@@ -248,7 +248,7 @@ export function SettingsScreen() {
                 <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
                     <List.Item
                         title="Version"
-                        description={appConfig.expo.version}
+                        description={Constants.expoConfig?.version || require('../../package.json').version || '1.0.0'}
                         left={(props) => <List.Icon {...props} icon="information-outline" color={theme.colors.primary} />}
                         titleStyle={{ color: theme.colors.onSurface, fontWeight: '600' }}
                         descriptionStyle={{ color: theme.colors.onSurfaceVariant }}

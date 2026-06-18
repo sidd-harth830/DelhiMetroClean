@@ -34,6 +34,7 @@ function FareCard({
           backgroundColor: cardBgColor,
           borderWidth: isDark ? 0 : 1,
           borderColor: isDark ? 'transparent' : `${color}20`,
+          overflow: 'hidden',
         },
       ]}
     >
@@ -65,6 +66,18 @@ function FareCard({
       >
         {value}
       </Text>
+      <Ionicons
+        name={icon}
+        size={80}
+        color={color}
+        style={{
+          position: 'absolute',
+          right: -10,
+          bottom: -10,
+          opacity: 0.1,
+          transform: [{ rotate: '-15deg' }],
+        }}
+      />
     </View>
   );
 }

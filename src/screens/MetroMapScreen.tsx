@@ -1,241 +1,345 @@
-import { useRef, useState } from 'react';
-import {
-  Alert,
-  Animated,
-  Dimensions,
-  LayoutChangeEvent,
-  PanResponder,
-  Pressable,
-  StyleSheet,
-  View,
-} from 'react-native';
-import { Image } from 'expo-image';
+import { useEffect, useState, useRef } from 'react';
+import { StyleSheet, View, Pressable, Alert, ScrollView } from 'react-native';
+import { WebView } from 'react-native-webview';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
-import { ActivityIndicator, Text, useTheme } from 'react-native-paper';
+import { ActivityIndicator, Text, useTheme, Portal, Modal } from 'react-native-paper';
+import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
-import { useMapFamilyPrimaryQuery } from '../hooks';
-import { LoadingState } from '../components/LoadingState';
-import { ErrorState } from '../components/ErrorState';
+import { useMapFamilyPrimaryQuery } from '../hooks/useMapQueries';
 import { useAppTheme } from '../theme/ThemeContext';
 import { spacing } from '../theme';
 import { bentoRadius } from '../theme/colors';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const MIN_SCALE = 1;
-const MAX_SCALE = 5;
-const ZOOM_STEP = 0.5;
-
-function getDistance(touches: { pageX: number; pageY: number }[]) {
-  const dx = touches[0].pageX - touches[1].pageX;
-  const dy = touches[0].pageY - touches[1].pageY;
-  return Math.sqrt(dx * dx + dy * dy);
-}
-
-function clampScale(val: number) {
-  return Math.min(MAX_SCALE, Math.max(MIN_SCALE, val));
-}
-
-function clampTranslation(tx: number, ty: number, s: number, w: number, h: number) {
-  const maxX = Math.max(0, (w * (s - 1)) / 2);
-  const maxY = Math.max(0, (h * (s - 1)) / 2);
-  return {
-    x: Math.min(maxX, Math.max(-maxX, tx)),
-    y: Math.min(maxY, Math.max(-maxY, ty)),
-  };
-}
+const MAP_FILE_NAME = 'dmrc_interactive_map.svg';
+const MAP_FILE_URI = FileSystem.documentDirectory + MAP_FILE_NAME;
 
 export function MetroMapScreen() {
   const theme = useTheme();
   const { isDark } = useAppTheme();
   const insets = useSafeAreaInsets();
-  const { data, isLoading, isError, refetch } = useMapFamilyPrimaryQuery('network');
-  const [imageLoading, setImageLoading] = useState(true);
+  
+  const webviewRef = useRef<WebView>(null);
+  
+  const [svgContent, setSvgContent] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
-  const [canvasSize, setCanvasSize] = useState({ width: SCREEN_WIDTH, height: SCREEN_WIDTH });
+  const [legendVisible, setLegendVisible] = useState(false);
 
-  const scale = useRef(new Animated.Value(1)).current;
-  const translateX = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(0)).current;
-  const sv = useRef(1);
-  const txv = useRef(0);
-  const tyv = useRef(0);
-  const lastDist = useRef<number | null>(null);
-  const lastPan = useRef<{ x: number; y: number } | null>(null);
-  const lastTapTime = useRef(0);
+  const { data: networkMapData } = useMapFamilyPrimaryQuery('network');
 
-  const handleCanvasLayout = (e: LayoutChangeEvent) => {
-    const { width, height } = e.nativeEvent.layout;
-    if (width > 0 && height > 0) {
-      setCanvasSize({ width, height });
-    }
-  };
-
-  const applyTransform = (newScale: number, newTx: number, newTy: number, animated = false) => {
-    const s = clampScale(newScale);
-    const { x, y } = clampTranslation(newTx, newTy, s, canvasSize.width, canvasSize.height);
-    sv.current = s;
-    txv.current = x;
-    tyv.current = y;
-    if (animated) {
-      Animated.parallel([
-        Animated.spring(scale, { toValue: s, useNativeDriver: true, speed: 20, bounciness: 2 }),
-        Animated.spring(translateX, { toValue: x, useNativeDriver: true, speed: 20, bounciness: 2 }),
-        Animated.spring(translateY, { toValue: y, useNativeDriver: true, speed: 20, bounciness: 2 }),
-      ]).start();
-    } else {
-      scale.setValue(s);
-      translateX.setValue(x);
-      translateY.setValue(y);
-    }
-  };
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: (evt) => {
-        lastDist.current = null;
-        lastPan.current = null;
-        if (evt.nativeEvent.touches.length === 1) {
-          lastPan.current = { x: evt.nativeEvent.touches[0].pageX, y: evt.nativeEvent.touches[0].pageY };
+  useEffect(() => {
+    async function prepareMap() {
+      try {
+        let fileInfo = await FileSystem.getInfoAsync(MAP_FILE_URI);
+        
+        // If the cached file is too small (e.g., a 404 JSON response instead of a 3MB SVG), delete it.
+        if (fileInfo.exists && fileInfo.size !== undefined && fileInfo.size < 1024) {
+          await FileSystem.deleteAsync(MAP_FILE_URI, { idempotent: true });
+          fileInfo = await FileSystem.getInfoAsync(MAP_FILE_URI);
         }
-      },
-      onPanResponderMove: (evt) => {
-        const touches = evt.nativeEvent.touches;
-        if (touches.length === 2) {
-          lastPan.current = null;
-          const dist = getDistance(touches as { pageX: number; pageY: number }[]);
-          if (lastDist.current !== null) {
-            applyTransform(sv.current * (dist / lastDist.current), txv.current, tyv.current);
-          }
-          lastDist.current = dist;
-        } else if (touches.length === 1 && sv.current > 1) {
-          lastDist.current = null;
-          const touch = touches[0];
-          if (lastPan.current) {
-            applyTransform(sv.current, txv.current + (touch.pageX - lastPan.current.x), tyv.current + (touch.pageY - lastPan.current.y));
-          }
-          lastPan.current = { x: touch.pageX, y: touch.pageY };
-        }
-      },
-      onPanResponderRelease: () => {
-        lastDist.current = null;
-        lastPan.current = null;
-      },
-    }),
-  ).current;
 
-  const handleDoubleTap = () => {
-    const now = Date.now();
-    if (now - lastTapTime.current < 300) {
-      applyTransform(sv.current > 1.2 ? MIN_SCALE : 2.5, 0, 0, true);
+        if (!fileInfo.exists) {
+          const downloadUrl = `${apiClient.baseUrl}/dmrc/interactive-map`;
+          const result = await FileSystem.downloadAsync(downloadUrl, MAP_FILE_URI);
+          if (result.status !== 200) {
+            throw new Error(`Failed to download map. HTTP ${result.status}`);
+          }
+        }
+        let content = await FileSystem.readAsStringAsync(MAP_FILE_URI, { encoding: FileSystem.EncodingType.UTF8 });
+        
+        // Ensure SVG has a viewBox so it fits perfectly on screen without clipping
+        if (!content.includes('viewBox=')) {
+          content = content.replace('<svg ', '<svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet" ');
+        }
+        
+        setSvgContent(content);
+      } catch (e: any) {
+        setError(e.message || 'Failed to load interactive map.');
+      }
     }
-    lastTapTime.current = now;
+    prepareMap();
+  }, []);
+
+  const handleZoomIn = () => {
+    webviewRef.current?.injectJavaScript(`
+      window.zoomScale = (window.zoomScale || 1) * 1.25;
+      document.querySelector('svg').style.transform = 'scale(' + window.zoomScale + ')';
+      true;
+    `);
   };
 
-  const handleZoomIn = () => applyTransform(sv.current + ZOOM_STEP, txv.current, tyv.current, true);
-  const handleZoomOut = () => applyTransform(sv.current - ZOOM_STEP, txv.current, tyv.current, true);
+  const handleZoomOut = () => {
+    webviewRef.current?.injectJavaScript(`
+      window.zoomScale = (window.zoomScale || 1) / 1.25;
+      document.querySelector('svg').style.transform = 'scale(' + window.zoomScale + ')';
+      true;
+    `);
+  };
 
-  const handleDownloadPdf = async () => {
-    if (!data?.pdf?.url) {
-      Alert.alert('Unavailable', 'PDF map is not available at the moment.');
-      return;
-    }
+  const handleDownload = async () => {
     try {
+      const downloadUrl = networkMapData?.pdf?.url || networkMapData?.image?.url;
+      if (!downloadUrl) {
+        Alert.alert('Unavailable', 'Map is not available at the moment.');
+        return;
+      }
       setDownloading(true);
-      const fileUri = (FileSystem.cacheDirectory ?? '') + 'delhi-metro-map.pdf';
-      const { uri } = await FileSystem.downloadAsync(data.pdf.url, fileUri);
-      await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: 'Delhi Metro Network Map' });
-    } catch {
-      Alert.alert('Error', 'Failed to download the map. Please try again.');
+      const isPdf = !!networkMapData?.pdf?.url;
+      const ext = isPdf ? 'pdf' : 'jpg';
+      const mimeType = isPdf ? 'application/pdf' : 'image/jpeg';
+      
+      const fileUri = (FileSystem.cacheDirectory ?? '') + `delhi-metro-map.${ext}`;
+      const { uri } = await FileSystem.downloadAsync(downloadUrl, fileUri);
+      
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, { mimeType, dialogTitle: 'Delhi Metro Network Map' });
+      } else {
+        Alert.alert('Unavailable', 'Sharing is not available on this device.');
+      }
+    } catch (e) {
+      Alert.alert('Error', 'Failed to share or download the map.');
     } finally {
       setDownloading(false);
     }
   };
 
-  if (isLoading) return <LoadingState message="Loading map..." />;
-  if (isError) return <ErrorState message="Could not load map data" onRetry={refetch} />;
+  if (error) {
+    return (
+      <View style={[styles.center, { backgroundColor: theme.colors.background }]}>
+        <Ionicons name="warning-outline" size={48} color={theme.colors.error} />
+        <Text variant="titleMedium" style={{ color: theme.colors.error, marginTop: spacing.md, textAlign: 'center' }}>
+          {error}
+        </Text>
+      </View>
+    );
+  }
 
-  const imageUrl = data?.image?.url;
+  if (!svgContent) {
+    return (
+      <View style={[styles.center, { backgroundColor: theme.colors.background }]}>
+        <ActivityIndicator size="large" />
+        <Text variant="bodyMedium" style={{ marginTop: spacing.md, color: theme.colors.onSurfaceVariant }}>
+          Rendering interactive map...
+        </Text>
+      </View>
+    );
+  }
+
+  const htmlContent = `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=0.5, user-scalable=yes">
+    <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background-color: ${theme.colors.surface};
+        background-image: radial-gradient(${theme.colors.onSurfaceVariant}30 1.5px, transparent 1.5px);
+        background-size: 25px 25px;
+        overflow: auto;
+      }
+      #wrapper {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      #svg-container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      svg {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: contain;
+        transform-origin: center center;
+        transition: transform 0.2s ease-out;
+      }
+      /* Override black text for dark mode */
+      text {
+        fill: ${theme.colors.onBackground} !important;
+      }
+      /* Hide all locate flags that appear by default in the SVG */
+      .fromFlags, .toFlags, .fromFlag, .toFlag, [class*="locate"], [id*="locate"] {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="wrapper">
+      <div id="svg-container">
+        ${svgContent}
+      </div>
+    </div>
+    <script>
+      // Centering is handled by CSS flexbox on the 100vw wrapper
+    </script>
+  </body>
+  </html>
+  `;
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      {/* Canvas — fills all space between header and tab bar */}
-      <View
-        style={styles.canvas}
-        onLayout={handleCanvasLayout}
-        {...panResponder.panHandlers}
-      >
-        <Pressable onPress={handleDoubleTap} style={styles.canvasFill}>
-          {imageUrl ? (
-            <>
-              {imageLoading && (
-                <View style={[StyleSheet.absoluteFill, styles.loader, { backgroundColor: theme.colors.background }]}>
-                  <ActivityIndicator size="large" color={theme.colors.primary} />
-                  <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-                    Loading network map...
-                  </Text>
-                </View>
-              )}
-              <Animated.View
-                style={{ transform: [{ scale }, { translateX }, { translateY }] }}
-              >
-                <Image
-                  source={{ uri: imageUrl }}
-                  style={{ width: canvasSize.width, height: canvasSize.height }}
-                  contentFit="contain"
-                  allowDownscaling={true}
-                  onLoad={() => setImageLoading(false)}
-                />
-              </Animated.View>
-            </>
-          ) : (
-            <View style={styles.noImage}>
-              <Ionicons name="image-outline" size={48} color={theme.colors.outline} />
-              <Text variant="bodyMedium" style={{ color: theme.colors.outline }}>
-                Map image not available
-              </Text>
-            </View>
-          )}
+    <View style={[styles.container, { backgroundColor: theme.colors.background, paddingTop: insets.top }]}>
+      <View style={[styles.mapContainer, { backgroundColor: theme.colors.surface }]}>
+        <WebView
+          ref={webviewRef}
+          originWhitelist={['*']}
+          source={{ html: htmlContent, baseUrl: FileSystem.documentDirectory || '' }}
+          style={styles.webview}
+          allowFileAccess={true}
+          allowUniversalAccessFromFileURLs={true}
+          bounces={false}
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
+          scalesPageToFit={true}
+        />
+        
+        {/* Zoom controls overlay */}
+        <View style={[styles.zoomControls, { bottom: insets.bottom + spacing['2xl'] + 80 }]} pointerEvents="box-none">
+          <Pressable
+            style={[styles.zoomBtn, { backgroundColor: isDark ? theme.colors.elevation.level4 : theme.colors.surface }]}
+            onPress={handleZoomIn}
+          >
+            <Ionicons name="add" size={22} color={theme.colors.onSurface} />
+          </Pressable>
+          <Pressable
+            style={[styles.zoomBtn, { backgroundColor: isDark ? theme.colors.elevation.level4 : theme.colors.surface }]}
+            onPress={handleZoomOut}
+          >
+            <Ionicons name="remove" size={22} color={theme.colors.onSurface} />
+          </Pressable>
+        </View>
+
+        {/* Legend FAB */}
+        <Pressable
+          style={[
+            styles.fab,
+            {
+              top: spacing.base,
+              right: spacing.base,
+              width: 44,
+              height: 44,
+              borderRadius: 22,
+              backgroundColor: isDark ? theme.colors.elevation.level4 : theme.colors.surface,
+            },
+          ]}
+          onPress={() => setLegendVisible(true)}
+        >
+          <Ionicons name="information-circle-outline" size={24} color={theme.colors.onSurface} />
+        </Pressable>
+
+        {/* Download FAB */}
+        <Pressable
+          style={[
+            styles.fab,
+            {
+              bottom: insets.bottom + spacing['2xl'] + 80,
+              left: spacing.base,
+              backgroundColor: downloading ? theme.colors.surfaceVariant : theme.colors.primary,
+            },
+          ]}
+          onPress={handleDownload}
+          disabled={downloading}
+        >
+          {downloading
+            ? <ActivityIndicator size={26} color={theme.colors.onSurfaceVariant} />
+            : <Ionicons name="download-outline" size={26} color={theme.colors.onPrimary} />
+          }
         </Pressable>
       </View>
 
-      {/* Zoom controls — sibling of canvas, outside PanResponder */}
-      <View style={[styles.zoomControls, { bottom: insets.bottom + spacing.tabBarClearance }]} pointerEvents="box-none">
-        <Pressable
-          style={[styles.zoomBtn, { backgroundColor: isDark ? theme.colors.elevation.level3 : theme.colors.surface, shadowOpacity: isDark ? 0 : 0.15 }]}
-          onPress={handleZoomIn}
+      <Portal>
+        <Modal
+          visible={legendVisible}
+          onDismiss={() => setLegendVisible(false)}
+          contentContainerStyle={[styles.modal, { backgroundColor: 'transparent', maxHeight: '80%', padding: 0, overflow: 'hidden' }]}
         >
-          <Ionicons name="add" size={22} color={theme.colors.onSurface} />
-        </Pressable>
-        <Pressable
-          style={[styles.zoomBtn, { backgroundColor: isDark ? theme.colors.elevation.level3 : theme.colors.surface, shadowOpacity: isDark ? 0 : 0.15 }]}
-          onPress={handleZoomOut}
-        >
-          <Ionicons name="remove" size={22} color={theme.colors.onSurface} />
-        </Pressable>
-      </View>
-
-      {/* FAB — sibling of canvas, outside PanResponder */}
-      <Pressable
-        style={[
-          styles.fab,
-          {
-            bottom: insets.bottom + spacing.tabBarClearance,
-            left: spacing.base,
-            backgroundColor: downloading ? theme.colors.surfaceVariant : theme.colors.primary,
-          },
-        ]}
-        onPress={handleDownloadPdf}
-        disabled={downloading}
-      >
-        {downloading
-          ? <ActivityIndicator size={26} color={theme.colors.onSurfaceVariant} />
-          : <Ionicons name="download-outline" size={26} color={theme.colors.onPrimary} />
-        }
-      </Pressable>
+          <BlurView intensity={isDark ? 50 : 80} tint={isDark ? 'dark' : 'light'} style={{ flex: 1, backgroundColor: isDark ? 'rgba(30,30,30,0.6)' : 'rgba(255,255,255,0.7)' }}>
+          <ScrollView contentContainerStyle={{ padding: spacing.xl }}>
+          <Text variant="titleLarge" style={{ fontWeight: 'bold', marginBottom: spacing.md, color: theme.colors.onSurface }}>
+            Map Legend
+          </Text>
+          <View style={styles.legendRow}>
+            <View style={[styles.legendDot, { backgroundColor: '#FF0000' }]} />
+            <Text style={{ color: theme.colors.onSurface }}>Red Line</Text>
+          </View>
+          <View style={styles.legendRow}>
+            <View style={[styles.legendDot, { backgroundColor: '#FFD700' }]} />
+            <Text style={{ color: theme.colors.onSurface }}>Yellow Line</Text>
+          </View>
+          <View style={styles.legendRow}>
+            <View style={[styles.legendDot, { backgroundColor: '#0000FF' }]} />
+            <Text style={{ color: theme.colors.onSurface }}>Blue Line</Text>
+          </View>
+          <View style={styles.legendRow}>
+            <View style={[styles.legendDot, { backgroundColor: '#008000' }]} />
+            <Text style={{ color: theme.colors.onSurface }}>Green Line</Text>
+          </View>
+          <View style={styles.legendRow}>
+            <View style={[styles.legendDot, { backgroundColor: '#EE82EE' }]} />
+            <Text style={{ color: theme.colors.onSurface }}>Violet Line</Text>
+          </View>
+          <View style={styles.legendRow}>
+            <View style={[styles.legendDot, { backgroundColor: '#FFC0CB' }]} />
+            <Text style={{ color: theme.colors.onSurface }}>Pink Line</Text>
+          </View>
+          <View style={styles.legendRow}>
+            <View style={[styles.legendDot, { backgroundColor: '#FF00FF' }]} />
+            <Text style={{ color: theme.colors.onSurface }}>Magenta Line</Text>
+          </View>
+          <View style={styles.legendRow}>
+            <View style={[styles.legendDot, { backgroundColor: '#808080' }]} />
+            <Text style={{ color: theme.colors.onSurface }}>Grey Line</Text>
+          </View>
+          <View style={styles.legendRow}>
+            <View style={[styles.legendDot, { backgroundColor: '#FFA500' }]} />
+            <Text style={{ color: theme.colors.onSurface }}>Orange Line</Text>
+          </View>
+          <View style={styles.legendRow}>
+            <View style={[styles.legendDot, { backgroundColor: '#00FFFF' }]} />
+            <Text style={{ color: theme.colors.onSurface }}>Aqua Line</Text>
+          </View>
+          <View style={{ height: 1, backgroundColor: theme.colors.outlineVariant, marginVertical: spacing.md }} />
+          <View style={styles.legendRow}>
+            <View style={[styles.legendDot, { backgroundColor: 'transparent', borderColor: theme.colors.onSurface, borderWidth: 2 }]} />
+            <Text style={{ color: theme.colors.onSurface }}>Normal Station</Text>
+          </View>
+          <View style={styles.legendRow}>
+            <View style={[styles.legendDot, { backgroundColor: 'transparent', borderColor: theme.colors.onSurface, borderWidth: 2, borderRadius: 4, width: 20 }]} />
+            <Text style={{ color: theme.colors.onSurface }}>Interchange Station</Text>
+          </View>
+          <View style={styles.legendRow}>
+            <Ionicons name="water" size={20} color="#00BFFF" style={{ marginRight: spacing.sm, width: 20 }} />
+            <Text style={{ color: theme.colors.onSurface }}>Water Body</Text>
+          </View>
+          <View style={styles.legendRow}>
+            <View style={{ height: 0, width: 16, borderStyle: 'dotted', borderWidth: 2, borderColor: theme.colors.onSurface, marginRight: spacing.sm }} />
+            <Text style={{ color: theme.colors.onSurface }}>Foot Over Bridge / Walkway</Text>
+          </View>
+          <View style={styles.legendRow}>
+            <Ionicons name="car" size={20} color={theme.colors.onSurface} style={{ marginRight: spacing.sm, width: 20 }} />
+            <Text style={{ color: theme.colors.onSurface }}>Parking Available</Text>
+          </View>
+          <Pressable
+            style={[styles.closeBtn, { backgroundColor: theme.colors.primary }]}
+            onPress={() => setLegendVisible(false)}
+          >
+            <Text style={{ color: theme.colors.onPrimary, fontWeight: 'bold' }}>Close</Text>
+          </Pressable>
+          </ScrollView>
+          </BlurView>
+        </Modal>
+      </Portal>
     </View>
   );
 }
@@ -243,27 +347,22 @@ export function MetroMapScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: spacing.sm,
   },
-  canvas: {
+  mapContainer: {
     flex: 1,
+    borderRadius: bentoRadius.card,
     overflow: 'hidden',
   },
-  canvasFill: {
+  webview: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
+  center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  loader: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: spacing.md,
-    zIndex: 1,
-  },
-  noImage: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: spacing.md,
+    padding: spacing.xl,
   },
   zoomControls: {
     position: 'absolute',
@@ -273,7 +372,7 @@ const styles = StyleSheet.create({
   zoomBtn: {
     width: 44,
     height: 44,
-    borderRadius: bentoRadius.icon,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 3,
@@ -286,7 +385,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 64,
     height: 64,
-    borderRadius: bentoRadius.button,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 6,
@@ -294,5 +393,29 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
+  },
+  modal: {
+    margin: spacing.xl,
+    padding: spacing.xl,
+    borderRadius: bentoRadius.card,
+  },
+  legendRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  legendDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    marginRight: spacing.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.1)',
+  },
+  closeBtn: {
+    marginTop: spacing.md,
+    paddingVertical: spacing.md,
+    borderRadius: bentoRadius.button,
+    alignItems: 'center',
   },
 });

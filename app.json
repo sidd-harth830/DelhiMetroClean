@@ -39,7 +39,8 @@
       "url": "https://u.expo.dev/d5a9f98e-de44-445e-a448-a26619eb91e6"
     },
     "plugins": [
-      "expo-web-browser"
+      "expo-web-browser",
+      "@react-native-community/datetimepicker"
     ],
     "splash": {
       "image": "./assets/splash-icon.png",

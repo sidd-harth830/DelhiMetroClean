@@ -9,8 +9,8 @@ import { usePopularRoutesQuery, useNotificationsQuery, useStationPicker, useMetr
 import type { SelectedStation } from '../hooks/useStationPicker';
 import { StationPicker } from '../components/StationPicker';
 import { SectionHeader } from '../components/SectionHeader';
-import { TimeToggle } from '../components/TimeToggle';
 import { NotificationCard } from '../components/NotificationCard';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useAppTheme } from '../theme/ThemeContext';
 import type { HomeStackParamList } from '../navigation/types';
 import { spacing } from '../theme';
@@ -35,6 +35,17 @@ export function HomeScreen() {
   const [departureOffsetMinutes, setDepartureOffsetMinutes] = useState(0);
   const [favoriteStations, setFavoriteStations] = useState<FavoriteStation[]>([]);
   const [savedRoutes, setSavedRoutes] = useState<SavedRoute[]>([]);
+  
+  const [departureDate, setDepartureDate] = useState<Date | undefined>(undefined);
+  const [showPicker, setShowPicker] = useState(false);
+  const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date');
+
+  const onDateChange = (event: any, selectedDate?: Date) => {
+    setShowPicker(false);
+    if (selectedDate) {
+      setDepartureDate(selectedDate);
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -46,13 +57,12 @@ export function HomeScreen() {
   const canSearch = fromPicker.station && toPicker.station;
 
   const departureTime = useMemo(() => {
-    if (departureOffsetMinutes === 0) return undefined;
+    if (!departureDate) return undefined;
 
-    const future = new Date(Date.now() + departureOffsetMinutes * 60_000);
     const pad = (value: number) => String(value).padStart(2, '0');
-    const ms = String(future.getMilliseconds()).padStart(3, '0');
-    return `${future.getFullYear()}-${pad(future.getMonth() + 1)}-${pad(future.getDate())}T${pad(future.getHours())}:${pad(future.getMinutes())}:${pad(future.getSeconds())}.${ms}`;
-  }, [departureOffsetMinutes]);
+    const ms = String(departureDate.getMilliseconds()).padStart(3, '0');
+    return `${departureDate.getFullYear()}-${pad(departureDate.getMonth() + 1)}-${pad(departureDate.getDate())}T${pad(departureDate.getHours())}:${pad(departureDate.getMinutes())}:${pad(departureDate.getSeconds())}.${ms}`;
+  }, [departureDate]);
 
   const handleFindRoute = () => {
     if (!fromPicker.station || !toPicker.station) return;
@@ -205,8 +215,38 @@ export function HomeScreen() {
 
           {/* Time toggle */}
           <View style={styles.timeSection}>
-            <TimeToggle value={departureOffsetMinutes} onChange={setDepartureOffsetMinutes} />
+            <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+              <Button mode="outlined" icon="calendar" onPress={() => { setPickerMode('date'); setShowPicker(true); }} style={{ flex: 1, borderColor: isDark ? 'rgba(255,255,255,0.15)' : theme.colors.outline }}>
+                {departureDate ? departureDate.toLocaleDateString() : 'Set Date'}
+              </Button>
+              <Button mode="outlined" icon="clock-outline" onPress={() => { setPickerMode('time'); setShowPicker(true); }} style={{ flex: 1, borderColor: isDark ? 'rgba(255,255,255,0.15)' : theme.colors.outline }}>
+                {departureDate ? departureDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Set Time'}
+              </Button>
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: spacing.sm, paddingHorizontal: spacing.xs }}>
+              <Pressable onPress={() => setDepartureDate(undefined)}>
+                <Text style={{ color: !departureDate ? theme.colors.primary : theme.colors.onSurfaceVariant, fontWeight: !departureDate ? 'bold' : 'normal', fontSize: 13 }}>Now</Text>
+              </Pressable>
+              <Pressable onPress={() => setDepartureDate(new Date(Date.now() + 15 * 60000))}>
+                <Text style={{ color: theme.colors.primary, fontSize: 13 }}>+15m</Text>
+              </Pressable>
+              <Pressable onPress={() => setDepartureDate(new Date(Date.now() + 30 * 60000))}>
+                <Text style={{ color: theme.colors.primary, fontSize: 13 }}>+30m</Text>
+              </Pressable>
+              <Pressable onPress={() => setDepartureDate(new Date(Date.now() + 60 * 60000))}>
+                <Text style={{ color: theme.colors.primary, fontSize: 13 }}>+1h</Text>
+              </Pressable>
+            </View>
           </View>
+          {showPicker && (
+            <DateTimePicker
+              testID="dateTimePicker"
+              value={departureDate || new Date()}
+              mode={pickerMode}
+              is24Hour={false}
+              onChange={onDateChange}
+            />
+          )}
 
           {/* Find Route button */}
           <Button
