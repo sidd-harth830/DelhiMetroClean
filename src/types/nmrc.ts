@@ -7,6 +7,7 @@ export interface NmrcJourneyPlan {
   source: string;
   destination: string;
   fare: string;
+  concessionalFare: string;
   stations: number;
   time: string;
 }

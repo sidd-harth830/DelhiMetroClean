@@ -16,7 +16,7 @@ export function LineBadge({ name, color, compact }: Props) {
     <View
       style={[
         styles.badge,
-        { backgroundColor: color, shadowOpacity: isDark ? 0 : 0.1 },
+        { backgroundColor: color },
         compact && styles.compact,
       ]}
     >
@@ -37,10 +37,6 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: bentoRadius.icon,
     alignSelf: 'flex-start',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 2,
   },
   compact: {
     paddingHorizontal: 10,

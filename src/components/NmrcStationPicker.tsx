@@ -87,12 +87,11 @@ export function NmrcStationPicker({ visible, onSelect, onClose, title = 'Select 
                   backgroundColor: isDark
                     ? theme.colors.surfaceVariant
                     : theme.colors.surface,
-                  shadowOpacity: isDark ? 0 : 0.05,
                 },
               ]}
             >
-              <Ionicons name="train-outline" size={28} color={semantic.aqua_line} />
-              <ActivityIndicator size="small" color={semantic.aqua_line} />
+              <Ionicons name="train-outline" size={28} color={theme.colors.primary} />
+              <ActivityIndicator size="small" color={theme.colors.primary} />
               <Text
                 variant="bodyMedium"
                 style={{ color: theme.colors.onSurfaceVariant, fontWeight: '500' }}
@@ -108,7 +107,7 @@ export function NmrcStationPicker({ visible, onSelect, onClose, title = 'Select 
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={styles.list}
             renderItem={({ item }) => {
-              const lineColor = semantic.aqua_line;
+              const lineColor = theme.colors.primary;
               const cardBg = isDark ? `${lineColor}12` : `${lineColor}08`;
 
               return (
@@ -124,7 +123,6 @@ export function NmrcStationPicker({ visible, onSelect, onClose, title = 'Select 
                         styles.resultCard,
                         {
                           backgroundColor: cardBg,
-                          shadowOpacity: isDark ? 0 : 0.05,
                         },
                       ]}
                     >
@@ -184,11 +182,10 @@ export function NmrcStationPicker({ visible, onSelect, onClose, title = 'Select 
                         backgroundColor: isDark
                           ? theme.colors.surfaceVariant
                           : theme.colors.surface,
-                        shadowOpacity: isDark ? 0 : 0.05,
                       },
                     ]}
                   >
-                    <Ionicons name="search-outline" size={32} color={semantic.aqua_line} />
+                    <Ionicons name="search-outline" size={32} color={theme.colors.primary} />
                   </View>
                   <Text
                     variant="titleSmall"
@@ -230,10 +227,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
     overflow: 'hidden',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    elevation: 2,
   },
   resultAccent: {
     position: 'absolute', left: 0, top: 0, bottom: 0, width: 4,
@@ -249,11 +242,10 @@ const styles = StyleSheet.create({
   loadingContainer: { flex: 1, padding: spacing.lg, gap: spacing.lg, justifyContent: 'center', alignItems: 'center' },
   loadingCard: {
     borderRadius: bentoRadius.card, padding: spacing.lg, alignItems: 'center', gap: spacing.md,
-    shadowColor: '#000000', shadowOffset: { width: 0, height: 2 }, shadowRadius: 10, elevation: 3,
   },
   emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing['2xl'], gap: spacing.sm },
   emptyIcon: {
     width: 72, height: 72, borderRadius: bentoRadius.button, justifyContent: 'center', alignItems: 'center',
-    marginBottom: spacing.sm, shadowColor: '#000000', shadowOffset: { width: 0, height: 2 }, shadowRadius: 8, elevation: 2,
+    marginBottom: spacing.sm,
   },
 });

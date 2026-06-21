@@ -16,7 +16,7 @@ import { useAppTheme } from '../theme/ThemeContext';
 import type { RouteStrategy, JourneyRouteSegment } from '../types';
 import type { HomeStackParamList } from '../navigation/types';
 import { spacing } from '../theme';
-import { bentoRadius } from '../theme/colors';
+import { bentoRadius, lightPalette, darkPalette } from '../theme/colors';
 import { FavoritesStorage } from '../storage/favorites';
 
 type Nav = NativeStackNavigationProp<HomeStackParamList, 'JourneyResults'>;
@@ -105,8 +105,13 @@ export function JourneyResultsScreen() {
         map.set(s.station_name.trim().toLowerCase(), s.station_code);
       }
     }
+    if (nmrcStations) {
+      for (const s of nmrcStations) {
+        map.set(s.name.trim().toLowerCase(), s.id);
+      }
+    }
     return map;
-  }, [allStations]);
+  }, [allStations, nmrcStations]);
 
   const lineColorMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -154,7 +159,7 @@ export function JourneyResultsScreen() {
   if (!isNmrc && !dmrcQuery.data) return <ErrorState message="No DMRC route data available" />;
   if (isNmrc && !nmrcQuery.data) return <ErrorState message="No NMRC route data available" />;
 
-  const themeColor = isNmrc ? semantic.aqua_line : theme.colors.primary;
+  const themeColor = theme.colors.primary;
 
   return (
     <View style={{ flex: 1 }} {...panResponder.panHandlers}>
@@ -175,7 +180,7 @@ export function JourneyResultsScreen() {
         <View style={styles.heroStations}>
           <View style={[styles.heroStationRow, { justifyContent: 'space-between' }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, gap: spacing.md }}>
-              <View style={[styles.heroDot, { backgroundColor: isNmrc ? themeColor : semantic.success }]} />
+              <View style={[styles.heroDot, { backgroundColor: semantic.success }]} />
               <Text
                 variant="titleMedium"
                 style={{
@@ -189,17 +194,15 @@ export function JourneyResultsScreen() {
                 {fromName}
               </Text>
             </View>
-            {!isNmrc && (
-              <View style={{ flexDirection: 'row', gap: spacing.xs }}>
-                <Pressable
-                  onPress={() => navigation.navigate('StationDetail', { stationCode: fromCode, stationName: fromName })}
-                  hitSlop={8}
-                  style={[styles.heroInfoBtn, { backgroundColor: theme.colors.surfaceVariant }]}
-                >
-                  <Ionicons name="information-circle-outline" size={20} color={theme.colors.onSurfaceVariant} />
-                </Pressable>
-              </View>
-            )}
+            <View style={{ flexDirection: 'row', gap: spacing.xs }}>
+              <Pressable
+                onPress={() => navigation.navigate('StationDetail', { stationCode: fromCode, stationName: fromName })}
+                hitSlop={8}
+                style={[styles.heroInfoBtn, { backgroundColor: theme.colors.surfaceVariant }]}
+              >
+                <Ionicons name="information-circle-outline" size={20} color={theme.colors.onSurfaceVariant} />
+              </Pressable>
+            </View>
           </View>
 
           <View style={styles.heroConnector}>
@@ -211,7 +214,7 @@ export function JourneyResultsScreen() {
           </View>
 
           <View style={styles.heroStationRow}>
-            <View style={[styles.heroDot, { backgroundColor: isNmrc ? themeColor : theme.colors.error }]} />
+            <View style={[styles.heroDot, { backgroundColor: theme.colors.error }]} />
             <Text
               variant="titleMedium"
               style={{
@@ -224,15 +227,13 @@ export function JourneyResultsScreen() {
             >
               {toName}
             </Text>
-            {!isNmrc && (
-              <Pressable
-                onPress={() => navigation.navigate('StationDetail', { stationCode: toCode, stationName: toName })}
-                hitSlop={8}
-                style={[styles.heroInfoBtn, { backgroundColor: theme.colors.surfaceVariant }]}
-              >
-                <Ionicons name="information-circle-outline" size={20} color={theme.colors.onSurfaceVariant} />
-              </Pressable>
-            )}
+            <Pressable
+              onPress={() => navigation.navigate('StationDetail', { stationCode: toCode, stationName: toName })}
+              hitSlop={8}
+              style={[styles.heroInfoBtn, { backgroundColor: theme.colors.surfaceVariant }]}
+            >
+              <Ionicons name="information-circle-outline" size={20} color={theme.colors.onSurfaceVariant} />
+            </Pressable>
           </View>
         </View>
 
@@ -299,9 +300,17 @@ export function JourneyResultsScreen() {
          <View style={styles.fareRow}>
            <Text style={{ color: theme.colors.onSurfaceVariant, fontWeight: '600' }}>Total Fare</Text>
            <Text style={{ fontSize: 24, fontWeight: '800', color: themeColor }}>
-             ₹{isNmrc ? nmrcQuery.data!.fare : (strategy === 'least-distance' ? dmrcQuery.data!.least_distance_fare.normal_fare : dmrcQuery.data!.minimum_interchange_fare.normal_fare)}
+             ₹{isNmrc ? nmrcQuery.data!.fare : (strategy === 'least-distance' ? dmrcQuery.data!.least_distance_fare.weekday_fare : dmrcQuery.data!.minimum_interchange_fare.weekday_fare)}
            </Text>
          </View>
+         {isNmrc && nmrcQuery.data?.concessionalFare && nmrcQuery.data.concessionalFare !== "0" && (
+           <View style={[styles.fareRow, { marginTop: spacing.sm }]}>
+             <Text style={{ color: theme.colors.onSurfaceVariant, fontWeight: '600' }}>Concessional Fare <Text style={{ fontSize: 12 }}>(Sunday & Holiday)</Text></Text>
+             <Text style={{ fontSize: 18, fontWeight: '700', color: themeColor }}>
+               ₹{nmrcQuery.data.concessionalFare}
+             </Text>
+           </View>
+         )}
       </View>
 
       <View
@@ -328,8 +337,12 @@ export function JourneyResultsScreen() {
             nmrcRouteSegment && (
               <RouteSegmentView
                 segment={nmrcRouteSegment}
-                lineColor={themeColor}
+                lineColor={isDark ? darkPalette.aqua_line : lightPalette.aqua_line}
                 isLast={true}
+                stationCodeMap={stationCodeMap}
+                onStationPress={(code, name) =>
+                  navigation.navigate('StationDetail', { stationCode: code, stationName: name })
+                }
               />
             )
           ) : (

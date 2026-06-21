@@ -10,6 +10,7 @@ import { useMapFamilyPrimaryQuery } from '../hooks/useMapQueries';
 import { useAppTheme } from '../theme/ThemeContext';
 import { spacing } from '../theme';
 import { bentoRadius } from '../theme/colors';
+import { apiClient } from '../api/client';
 
 const MAP_FILE_NAME = 'dmrc_interactive_map.svg';
 const MAP_FILE_URI = FileSystem.documentDirectory + MAP_FILE_NAME;

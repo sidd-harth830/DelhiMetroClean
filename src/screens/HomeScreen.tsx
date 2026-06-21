@@ -260,17 +260,17 @@ export function HomeScreen() {
           style={[
             styles.plannerCard,
             {
-              backgroundColor: isDark ? `${semantic.aqua_line}12` : `${semantic.aqua_line}0A`,
+              backgroundColor: isDark ? `${theme.colors.primary}12` : `${theme.colors.primary}0A`,
               borderWidth: isDark ? 0 : 1,
-              borderColor: isDark ? 'transparent' : `${semantic.aqua_line}20`,
+              borderColor: isDark ? 'transparent' : `${theme.colors.primary}20`,
             },
           ]}
         >
-          <View style={[styles.cardHeaderRow, { backgroundColor: isDark ? `${semantic.aqua_line}20` : `${semantic.aqua_line}1A` }]}>
-            <View style={[styles.cardHeaderIcon, { backgroundColor: semantic.aqua_line }]}>
-              <Ionicons name="subway" size={16} color="#FFFFFF" />
+          <View style={[styles.cardHeaderRow, { backgroundColor: isDark ? `${theme.colors.primary}20` : `${theme.colors.primary}1A` }]}>
+            <View style={[styles.cardHeaderIcon, { backgroundColor: theme.colors.primary }]}>
+              <Ionicons name="subway" size={16} color={theme.colors.onPrimary} />
             </View>
-            <Text style={[styles.cardHeaderTitle, { color: semantic.aqua_line }]}>Noida Metro (NMRC)</Text>
+            <Text style={[styles.cardHeaderTitle, { color: theme.colors.primary }]}>Noida Metro (NMRC)</Text>
           </View>
           
           <View style={styles.stationsBlock}>
@@ -294,8 +294,8 @@ export function HomeScreen() {
               </Pressable>
             </View>
 
-            <Pressable style={[styles.swapBtn, { backgroundColor: semantic.aqua_line }]} onPress={handleSwapNmrc}>
-              <Ionicons name="swap-vertical" size={18} color="#FFFFFF" />
+            <Pressable style={[styles.swapBtn, { backgroundColor: theme.colors.primary }]} onPress={handleSwapNmrc}>
+              <Ionicons name="swap-vertical" size={18} color={theme.colors.onPrimary} />
             </Pressable>
           </View>
 
@@ -305,8 +305,6 @@ export function HomeScreen() {
             disabled={!canSearchNmrc}
             icon="navigation"
             style={[styles.findButton, { opacity: canSearchNmrc ? 1 : 0.6 }]}
-            buttonColor={semantic.aqua_line}
-            textColor="#FFFFFF"
             contentStyle={{ paddingVertical: 8 }}
             labelStyle={{ fontSize: 16, fontWeight: '700' }}
           >

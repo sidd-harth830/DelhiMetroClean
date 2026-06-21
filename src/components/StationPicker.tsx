@@ -81,7 +81,6 @@ export function StationPicker({ visible, onSelect, onClose, title = 'Select Stat
                   backgroundColor: isDark
                     ? theme.colors.surfaceVariant
                     : theme.colors.surface,
-                  shadowOpacity: isDark ? 0 : 0.05,
                 },
               ]}
             >
@@ -118,7 +117,6 @@ export function StationPicker({ visible, onSelect, onClose, title = 'Select Stat
                         styles.resultCard,
                         {
                           backgroundColor: cardBg,
-                          shadowOpacity: isDark ? 0 : 0.05,
                         },
                       ]}
                     >
@@ -191,7 +189,6 @@ export function StationPicker({ visible, onSelect, onClose, title = 'Select Stat
                         backgroundColor: isDark
                           ? theme.colors.surfaceVariant
                           : theme.colors.surface,
-                        shadowOpacity: isDark ? 0 : 0.05,
                       },
                     ]}
                   >
@@ -258,10 +255,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
     overflow: 'hidden',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    elevation: 2,
   },
   resultAccent: {
     position: 'absolute',
@@ -311,10 +304,6 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     alignItems: 'center',
     gap: spacing.md,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 10,
-    elevation: 3,
   },
   emptyContainer: {
     flex: 1,
@@ -330,9 +319,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: spacing.sm,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    elevation: 2,
   },
 });

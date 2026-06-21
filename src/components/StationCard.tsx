@@ -43,7 +43,6 @@ export function StationCard({ station, onPress, showChevron = true }: Props) {
             styles.card,
             {
               backgroundColor: cardBgColor,
-              shadowOpacity: isDark ? 0 : 0.05,
             },
           ]}
         >
@@ -152,10 +151,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
     overflow: 'hidden',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 10,
-    elevation: 2,
   },
   accentStrip: {
     position: 'absolute',
