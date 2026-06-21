@@ -3,6 +3,7 @@ import type { NavigatorScreenParams } from '@react-navigation/native';
 export type HomeStackParamList = {
   Home: undefined;
   JourneyResults: {
+    network?: 'dmrc' | 'nmrc';
     fromCode: string;
     toCode: string;
     fromName: string;

@@ -5,7 +5,7 @@ import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { Surface, Text, useTheme } from 'react-native-paper';
-import { useJourneyPlanCachedQuery, useMetroLinesQuery, useStationSearchQuery } from '../hooks';
+import { useJourneyPlanCachedQuery, useMetroLinesQuery, useStationSearchQuery, useNmrcJourneyPlanQuery, useNmrcStationsQuery } from '../hooks';
 import { StrategyToggle } from '../components/StrategyToggle';
 import { JourneyFareSummary } from '../components/JourneyFareSummary';
 import { RouteSegmentView } from '../components/RouteSegmentView';
@@ -13,13 +13,13 @@ import { FirstLastTrainCard } from '../components/FirstLastTrainCard';
 import { LoadingState } from '../components/LoadingState';
 import { ErrorState } from '../components/ErrorState';
 import { useAppTheme } from '../theme/ThemeContext';
-import type { RouteStrategy } from '../types';
+import type { RouteStrategy, JourneyRouteSegment } from '../types';
 import type { HomeStackParamList } from '../navigation/types';
-type Nav = NativeStackNavigationProp<HomeStackParamList, 'JourneyResults'>;
 import { spacing } from '../theme';
 import { bentoRadius } from '../theme/colors';
 import { FavoritesStorage } from '../storage/favorites';
 
+type Nav = NativeStackNavigationProp<HomeStackParamList, 'JourneyResults'>;
 type Route = RouteProp<HomeStackParamList, 'JourneyResults'>;
 
 function normalizeLineKey(value: string): string {
@@ -29,7 +29,7 @@ function normalizeLineKey(value: string): string {
 export function JourneyResultsScreen() {
   const route = useRoute<Route>();
   const navigation = useNavigation<Nav>();
-  const { fromCode, toCode, fromName, toName, journeyTime } = route.params;
+  const { network = 'dmrc', fromCode, toCode, fromName, toName, journeyTime } = route.params;
   const theme = useTheme();
   const { semantic, isDark } = useAppTheme();
   const [strategy, setStrategy] = useState<RouteStrategy>('least-distance');
@@ -49,13 +49,18 @@ export function JourneyResultsScreen() {
     }
   };
 
-  const { data: plan, isLoading, isError, refetch } = useJourneyPlanCachedQuery(
-    fromCode,
-    toCode,
-    journeyTime,
-  );
+  const isNmrc = network === 'nmrc';
+
+  const dmrcQuery = useJourneyPlanCachedQuery(fromCode, toCode, journeyTime);
+  const nmrcQuery = useNmrcJourneyPlanQuery(fromCode, toCode);
+
+  const isLoading = isNmrc ? nmrcQuery.isLoading : dmrcQuery.isLoading;
+  const isError = isNmrc ? nmrcQuery.isError : dmrcQuery.isError;
+  const refetch = isNmrc ? nmrcQuery.refetch : dmrcQuery.refetch;
+
   const { data: lines } = useMetroLinesQuery();
   const { data: allStations } = useStationSearchQuery('');
+  const { data: nmrcStations } = useNmrcStationsQuery();
   const swipeHint = useRef(new Animated.Value(0)).current;
   const strategyRef = useRef(strategy);
   strategyRef.current = strategy;
@@ -65,8 +70,9 @@ export function JourneyResultsScreen() {
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, gs) =>
-        Math.abs(gs.dx) > 12 && Math.abs(gs.dx) > Math.abs(gs.dy) * 1.5,
+        !isNmrc && Math.abs(gs.dx) > 12 && Math.abs(gs.dx) > Math.abs(gs.dy) * 1.5,
       onPanResponderRelease: (_, gs) => {
+        if (isNmrc) return;
         const current = strategyRef.current;
         if (gs.dx < -50 && current !== 'minimum-interchange') {
           setStrategy('minimum-interchange');
@@ -114,14 +120,41 @@ export function JourneyResultsScreen() {
     return map;
   }, [lines]);
 
+  const nmrcRouteSegment = useMemo(() => {
+    if (!isNmrc || !nmrcStations || !nmrcQuery.data) return null;
+    
+    const startIndex = nmrcStations.findIndex((s) => s.id === fromCode);
+    const endIndex = nmrcStations.findIndex((s) => s.id === toCode);
+    
+    if (startIndex === -1 || endIndex === -1) return null;
+    
+    let pathStations = [];
+    if (startIndex <= endIndex) {
+      pathStations = nmrcStations.slice(startIndex, endIndex + 1);
+    } else {
+      pathStations = nmrcStations.slice(endIndex, startIndex + 1).reverse();
+    }
+    
+    const segment: JourneyRouteSegment = {
+      line: 'Aqua Line',
+      line_no: null,
+      path: pathStations.map(s => ({ name: s.name, status: null })),
+      path_time: nmrcQuery.data.time,
+      'map-path': [],
+      station_interchange_time: 0,
+      start: nmrcQuery.data.source,
+      end: nmrcQuery.data.destination,
+    };
+    return segment;
+  }, [isNmrc, nmrcStations, nmrcQuery.data, fromCode, toCode]);
+
   if (isLoading) return <LoadingState message="Planning your journey..." />;
   if (isError) return <ErrorState message="Could not plan this journey" onRetry={refetch} />;
-  if (!plan) return <ErrorState message="No route data available" />;
+  
+  if (!isNmrc && !dmrcQuery.data) return <ErrorState message="No DMRC route data available" />;
+  if (isNmrc && !nmrcQuery.data) return <ErrorState message="No NMRC route data available" />;
 
-  const fare =
-    strategy === 'least-distance' ? plan.least_distance_fare : plan.minimum_interchange_fare;
-  const trainTimes =
-    strategy === 'least-distance' ? plan.least_distance_train : plan.minimum_interchange_train;
+  const themeColor = isNmrc ? semantic.aqua_line : theme.colors.primary;
 
   return (
     <View style={{ flex: 1 }} {...panResponder.panHandlers}>
@@ -129,7 +162,6 @@ export function JourneyResultsScreen() {
       style={{ flex: 1, backgroundColor: theme.colors.background }}
       contentContainerStyle={styles.content}
     >
-      {/* Journey header — bold hero card */}
       <View
         style={[
           styles.heroCard,
@@ -143,7 +175,7 @@ export function JourneyResultsScreen() {
         <View style={styles.heroStations}>
           <View style={[styles.heroStationRow, { justifyContent: 'space-between' }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, gap: spacing.md }}>
-              <View style={[styles.heroDot, { backgroundColor: semantic.success }]} />
+              <View style={[styles.heroDot, { backgroundColor: isNmrc ? themeColor : semantic.success }]} />
               <Text
                 variant="titleMedium"
                 style={{
@@ -157,27 +189,29 @@ export function JourneyResultsScreen() {
                 {fromName}
               </Text>
             </View>
-            <View style={{ flexDirection: 'row', gap: spacing.xs }}>
-              <Pressable
-                onPress={() => navigation.navigate('StationDetail', { stationCode: fromCode, stationName: fromName })}
-                hitSlop={8}
-                style={[styles.heroInfoBtn, { backgroundColor: theme.colors.surfaceVariant }]}
-              >
-                <Ionicons name="information-circle-outline" size={20} color={theme.colors.onSurfaceVariant} />
-              </Pressable>
-            </View>
+            {!isNmrc && (
+              <View style={{ flexDirection: 'row', gap: spacing.xs }}>
+                <Pressable
+                  onPress={() => navigation.navigate('StationDetail', { stationCode: fromCode, stationName: fromName })}
+                  hitSlop={8}
+                  style={[styles.heroInfoBtn, { backgroundColor: theme.colors.surfaceVariant }]}
+                >
+                  <Ionicons name="information-circle-outline" size={20} color={theme.colors.onSurfaceVariant} />
+                </Pressable>
+              </View>
+            )}
           </View>
 
           <View style={styles.heroConnector}>
             <View style={[styles.heroLine, { backgroundColor: theme.colors.outlineVariant }]} />
-            <View style={[styles.heroArrowCircle, { backgroundColor: isDark ? `${theme.colors.primary}20` : `${theme.colors.primary}15` }]}>
-              <Ionicons name="arrow-down" size={18} color={theme.colors.primary} />
+            <View style={[styles.heroArrowCircle, { backgroundColor: isDark ? `${themeColor}20` : `${themeColor}15` }]}>
+              <Ionicons name="arrow-down" size={18} color={themeColor} />
             </View>
             <View style={[styles.heroLine, { backgroundColor: theme.colors.outlineVariant }]} />
           </View>
 
           <View style={styles.heroStationRow}>
-            <View style={[styles.heroDot, { backgroundColor: theme.colors.error }]} />
+            <View style={[styles.heroDot, { backgroundColor: isNmrc ? themeColor : theme.colors.error }]} />
             <Text
               variant="titleMedium"
               style={{
@@ -190,56 +224,57 @@ export function JourneyResultsScreen() {
             >
               {toName}
             </Text>
-            <Pressable
-              onPress={() => navigation.navigate('StationDetail', { stationCode: toCode, stationName: toName })}
-              hitSlop={8}
-              style={[styles.heroInfoBtn, { backgroundColor: theme.colors.surfaceVariant }]}
-            >
-              <Ionicons name="information-circle-outline" size={20} color={theme.colors.onSurfaceVariant} />
-            </Pressable>
+            {!isNmrc && (
+              <Pressable
+                onPress={() => navigation.navigate('StationDetail', { stationCode: toCode, stationName: toName })}
+                hitSlop={8}
+                style={[styles.heroInfoBtn, { backgroundColor: theme.colors.surfaceVariant }]}
+              >
+                <Ionicons name="information-circle-outline" size={20} color={theme.colors.onSurfaceVariant} />
+              </Pressable>
+            )}
           </View>
         </View>
 
-        {/* Inline stats row */}
         <View style={styles.heroStats}>
           <View style={[styles.heroStat, { backgroundColor: theme.colors.surfaceVariant }]}>
             <Ionicons name="git-commit-outline" size={18} color={theme.colors.onSurfaceVariant} />
             <Text variant="labelLarge" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '800' }}>
-              {fare.stations} stops
+              {isNmrc ? nmrcQuery.data!.stations : (strategy === 'least-distance' ? dmrcQuery.data!.least_distance_fare.stations : dmrcQuery.data!.minimum_interchange_fare.stations)} stops
             </Text>
           </View>
           <View style={[styles.heroStat, { backgroundColor: theme.colors.surfaceVariant }]}>
             <Ionicons name="time-outline" size={18} color={theme.colors.onSurfaceVariant} />
             <Text variant="labelLarge" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '800' }}>
-              {fare.total_time}
+              {isNmrc ? nmrcQuery.data!.time : (strategy === 'least-distance' ? dmrcQuery.data!.least_distance_fare.total_time : dmrcQuery.data!.minimum_interchange_fare.total_time)}
             </Text>
           </View>
-          <Pressable onPress={toggleSaveRoute} style={[styles.heroStat, { backgroundColor: isSaved ? `${theme.colors.primary}20` : theme.colors.surfaceVariant, flex: 0, paddingHorizontal: 16 }]}>
-            <Ionicons name={isSaved ? "star" : "star-outline"} size={18} color={isSaved ? theme.colors.primary : theme.colors.onSurfaceVariant} />
+          <Pressable onPress={toggleSaveRoute} style={[styles.heroStat, { backgroundColor: isSaved ? `${themeColor}20` : theme.colors.surfaceVariant, flex: 0, paddingHorizontal: 16 }]}>
+            <Ionicons name={isSaved ? "star" : "star-outline"} size={18} color={isSaved ? themeColor : theme.colors.onSurfaceVariant} />
           </Pressable>
         </View>
       </View>
 
-      {/* Strategy toggle */}
-      <Animated.View style={{ transform: [{ translateX: swipeHint }] }}>
-        <StrategyToggle active={strategy} onChange={setStrategy} />
-        <View style={styles.swipeDots}>
-          {strategies.map((s) => (
-            <View
-              key={s}
-              style={[
-                styles.swipeDot,
-                {
-                  backgroundColor: strategy === s ? theme.colors.primary : theme.colors.outlineVariant,
-                  width: strategy === s ? 20 : 6,
-                },
-              ]}
-            />
-          ))}
-        </View>
-      </Animated.View>
+      {!isNmrc && (
+        <Animated.View style={{ transform: [{ translateX: swipeHint }] }}>
+          <StrategyToggle active={strategy} onChange={setStrategy} />
+          <View style={styles.swipeDots}>
+            {strategies.map((s) => (
+              <View
+                key={s}
+                style={[
+                  styles.swipeDot,
+                  {
+                    backgroundColor: strategy === s ? themeColor : theme.colors.outlineVariant,
+                    width: strategy === s ? 20 : 6,
+                  },
+                ]}
+              />
+            ))}
+          </View>
+        </Animated.View>
+      )}
 
-      {/* Departure time */}
       <View
         style={[
           styles.timePill,
@@ -248,21 +283,27 @@ export function JourneyResultsScreen() {
           },
         ]}
       >
-        <Ionicons name="time-outline" size={18} color={theme.colors.primary} />
+        <Ionicons name="time-outline" size={18} color={themeColor} />
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, flex: 1, fontWeight: '600' }}>
           Departure
         </Text>
-        <View style={[styles.timeValue, { backgroundColor: theme.colors.primary }]}>
+        <View style={[styles.timeValue, { backgroundColor: themeColor }]}>
           <Text variant="labelLarge" style={{ color: '#000000', fontWeight: '700' }}>
             {selectedTimeLabel}
           </Text>
         </View>
       </View>
 
-      {/* Fare cards */}
-      <JourneyFareSummary fare={fare} />
+      {/* Fare section */}
+      <View style={[styles.fareCard, { backgroundColor: theme.colors.surface }]}>
+         <View style={styles.fareRow}>
+           <Text style={{ color: theme.colors.onSurfaceVariant, fontWeight: '600' }}>Total Fare</Text>
+           <Text style={{ fontSize: 24, fontWeight: '800', color: themeColor }}>
+             ₹{isNmrc ? nmrcQuery.data!.fare : (strategy === 'least-distance' ? dmrcQuery.data!.least_distance_fare.normal_fare : dmrcQuery.data!.minimum_interchange_fare.normal_fare)}
+           </Text>
+         </View>
+      </View>
 
-      {/* Route visualization */}
       <View
         style={[
           styles.routeCard,
@@ -274,32 +315,43 @@ export function JourneyResultsScreen() {
         ]}
       >
         <View style={styles.routeHeader}>
-          <Ionicons name="navigate-outline" size={18} color={theme.colors.primary} />
+          <Ionicons name="navigate-outline" size={18} color={themeColor} />
           <Text variant="titleSmall" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
             Route
           </Text>
-          <Text variant="labelSmall" style={{ color: theme.colors.primary, marginLeft: 'auto', fontWeight: '600' }}>
-            {fare.route.length} {fare.route.length === 1 ? 'line' : 'lines'}
+          <Text variant="labelSmall" style={{ color: themeColor, marginLeft: 'auto', fontWeight: '600' }}>
+            {isNmrc ? '1 line' : (strategy === 'least-distance' ? dmrcQuery.data!.least_distance_fare.route.length : dmrcQuery.data!.minimum_interchange_fare.route.length) + ' lines'}
           </Text>
         </View>
         <View style={styles.routeSegments}>
-          {fare.route.map((segment, index) => (
-            <RouteSegmentView
-              key={`${segment.line}-${index}`}
-              segment={segment}
-              lineColor={lineColorMap.get(normalizeLineKey(segment.line)) ?? theme.colors.primary}
-              isLast={index === fare.route.length - 1}
-              stationCodeMap={stationCodeMap}
-              onStationPress={(code, name) =>
-                navigation.navigate('StationDetail', { stationCode: code, stationName: name })
-              }
-            />
-          ))}
+          {isNmrc ? (
+            nmrcRouteSegment && (
+              <RouteSegmentView
+                segment={nmrcRouteSegment}
+                lineColor={themeColor}
+                isLast={true}
+              />
+            )
+          ) : (
+            (strategy === 'least-distance' ? dmrcQuery.data!.least_distance_fare.route : dmrcQuery.data!.minimum_interchange_fare.route).map((segment, index, arr) => (
+              <RouteSegmentView
+                key={`${segment.line}-${index}`}
+                segment={segment}
+                lineColor={lineColorMap.get(normalizeLineKey(segment.line)) ?? themeColor}
+                isLast={index === arr.length - 1}
+                stationCodeMap={stationCodeMap}
+                onStationPress={(code, name) =>
+                  navigation.navigate('StationDetail', { stationCode: code, stationName: name })
+                }
+              />
+            ))
+          )}
         </View>
       </View>
 
-      {/* First/Last train */}
-      <FirstLastTrainCard data={trainTimes} />
+      {!isNmrc && (
+        <FirstLastTrainCard data={strategy === 'least-distance' ? dmrcQuery.data!.least_distance_train : dmrcQuery.data!.minimum_interchange_train} />
+      )}
     </ScrollView>
     </View>
   );
@@ -386,6 +438,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: 8,
     borderRadius: bentoRadius.small,
+  },
+  fareCard: {
+    borderRadius: bentoRadius.card,
+    padding: spacing.base,
+  },
+  fareRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   routeCard: {
     borderRadius: bentoRadius.card,

@@ -64,6 +64,10 @@ export const lightPalette = {
   brown_line_muted: '#FEF3C7',
   brown_line_bg: 'rgba(120,53,15,0.15)',
 
+  aqua_line: '#00B5B5',
+  aqua_line_muted: '#CCF0F0',
+  aqua_line_bg: 'rgba(0,181,181,0.15)',
+
   // Semantic
   primary: '#34A853',            // Forest green primary
   success: '#10B981',
@@ -133,6 +137,10 @@ export const darkPalette = {
   brown_line_muted: 'rgba(161,136,127,0.20)',
   brown_line_bg: 'rgba(161,136,127,0.12)',
 
+  aqua_line: '#00D1D1',
+  aqua_line_muted: 'rgba(0,209,209,0.20)',
+  aqua_line_bg: 'rgba(0,209,209,0.12)',
+
   // Semantic
   primary: '#BEFF6C',            // Neon Lime Green
   success: '#BEFF6C',
@@ -176,6 +184,8 @@ export const lineColorMap = {
     'OL': lightPalette.orange_line,
     'Brown': lightPalette.brown_line,
     'BR': lightPalette.brown_line,
+    'Aqua': lightPalette.aqua_line,
+    'AQ': lightPalette.aqua_line,
   },
   dark: {
     'Yellow': darkPalette.yellow_line,
@@ -194,5 +204,7 @@ export const lineColorMap = {
     'OL': darkPalette.orange_line,
     'Brown': darkPalette.brown_line,
     'BR': darkPalette.brown_line,
+    'Aqua': darkPalette.aqua_line,
+    'AQ': darkPalette.aqua_line,
   },
 };

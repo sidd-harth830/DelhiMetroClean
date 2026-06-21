@@ -18,7 +18,12 @@ export function NotificationCard({ notification }: Props) {
   const rotateAnim = useRef(new Animated.Value(0)).current;
 
   const toggleExpand = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    LayoutAnimation.configureNext({
+      duration: 300,
+      create: { type: 'easeInEaseOut', property: 'opacity' },
+      update: { type: 'spring', springDamping: 0.8 },
+      delete: { type: 'easeInEaseOut', property: 'opacity' },
+    });
     setExpanded(!expanded);
     Animated.timing(rotateAnim, {
       toValue: expanded ? 0 : 1,
@@ -32,13 +37,14 @@ export function NotificationCard({ notification }: Props) {
     outputRange: ['0deg', '180deg']
   });
 
-  const cardBg = isDark ? `${semantic.pink_line}14` : `${semantic.pink_line}0A`;
+  const cardBg = isDark ? `${semantic.pink_line}1A` : `${semantic.pink_line}0D`;
+  const expandedBg = isDark ? `${semantic.pink_line}08` : `${theme.colors.surface}`;
 
   return (
     <View style={styles.wrapper}>
       <TouchableRipple
         onPress={toggleExpand}
-        rippleColor={isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)'}
+        rippleColor={isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)'}
         borderless
         style={styles.ripple}
       >
@@ -48,47 +54,61 @@ export function NotificationCard({ notification }: Props) {
             {
               backgroundColor: cardBg,
               borderWidth: isDark ? 0 : 1,
-              borderColor: isDark ? 'transparent' : 'rgba(0,0,0,0.06)',
+              borderColor: isDark ? 'transparent' : 'rgba(0,0,0,0.04)',
             },
           ]}
         >
-          {/* Colored left accent */}
           <View style={[styles.accentStrip, { backgroundColor: semantic.pink_line }]} />
 
-          <View
-            style={[
-              styles.iconWrap,
-              { backgroundColor: semantic.pink_line },
-            ]}
-          >
-            <Ionicons name="megaphone-outline" size={18} color="#000000" />
+          <View style={styles.headerRow}>
+            <View
+              style={[
+                styles.iconWrap,
+                { backgroundColor: semantic.pink_line },
+              ]}
+            >
+              <Ionicons name="megaphone" size={18} color="#000000" />
+            </View>
+            
+            <View style={styles.headerTextWrap}>
+              <Text
+                variant="labelSmall"
+                style={{
+                  color: theme.colors.onSurfaceVariant,
+                  fontWeight: '600',
+                  textTransform: 'uppercase',
+                  letterSpacing: 0.5,
+                }}
+              >
+                {notification.date}
+              </Text>
+            </View>
+
+            <View style={styles.chevronWrap}>
+              <Animated.View style={{ transform: [{ rotate: spin }] }}>
+                <Ionicons name="chevron-down" size={20} color={semantic.pink_line} />
+              </Animated.View>
+            </View>
           </View>
-          <View style={styles.content}>
+
+          <View style={[
+            styles.contentBox,
+            expanded && [styles.contentBoxExpanded, { backgroundColor: expandedBg }]
+          ]}>
             <Text
               variant="bodyMedium"
               numberOfLines={expanded ? 0 : 2}
-              style={{
-                color: theme.colors.onSurface,
-                fontWeight: '600',
-              }}
+              style={[
+                styles.messageText,
+                {
+                  color: theme.colors.onSurface,
+                  lineHeight: 22,
+                },
+                expanded && styles.messageTextExpanded
+              ]}
             >
               {notification.title}
             </Text>
-            <Text
-              variant="labelSmall"
-              style={{
-                color: theme.colors.onSurfaceVariant,
-                fontWeight: '500',
-                marginTop: spacing.xs,
-              }}
-            >
-              {notification.date}
-            </Text>
-          </View>
-          <View style={styles.chevronWrap}>
-            <Animated.View style={{ transform: [{ rotate: spin }] }}>
-              <Ionicons name="chevron-down" size={20} color={semantic.pink_line} />
-            </Animated.View>
           </View>
         </View>
       </TouchableRipple>
@@ -107,9 +127,7 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: bentoRadius.card,
     padding: spacing.md,
-    flexDirection: 'row',
-    gap: spacing.md,
-    alignItems: 'center',
+    gap: spacing.sm,
     overflow: 'hidden',
   },
   accentStrip: {
@@ -121,21 +139,42 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: bentoRadius.card,
     borderBottomLeftRadius: bentoRadius.card,
   },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
   iconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: bentoRadius.badge,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  content: {
+  headerTextWrap: {
     flex: 1,
-    gap: 4,
   },
   chevronWrap: {
     justifyContent: 'center',
     alignItems: 'center',
-    width: 24,
-    height: 24,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(0,0,0,0.03)',
+  },
+  contentBox: {
+    paddingLeft: 36 + spacing.md, // icon width + gap
+    paddingRight: spacing.sm,
+  },
+  contentBoxExpanded: {
+    marginTop: spacing.xs,
+    padding: spacing.md,
+    borderRadius: bentoRadius.small,
+  },
+  messageText: {
+    fontWeight: '500',
+  },
+  messageTextExpanded: {
+    fontWeight: '400',
   },
 });
