@@ -16,6 +16,8 @@ import { ProfileScreen } from "../screens/ProfileScreen";
 import { SettingsScreen } from "../screens/SettingsScreen";
 import { SavedRoutesScreen } from "../screens/SavedRoutesScreen";
 import { FavoriteStationsScreen } from "../screens/FavoriteStationsScreen";
+import { ApiPortalScreen } from "../screens/ApiPortalScreen";
+import { AdminDashboardScreen } from "../screens/AdminDashboardScreen";
 import { useAppTheme } from "../theme/ThemeContext";
 import { bentoRadius } from "../theme/colors";
 
@@ -35,6 +37,7 @@ const TAB_ICONS: Record<
   AlertsTab: { focused: "notifications", default: "notifications-outline" },
   ProfileTab: { focused: "person-circle", default: "person-circle-outline" },
   SettingsTab: { focused: "cog", default: "cog-outline" },
+  ApiTab: { focused: "code-slash", default: "code-slash-outline" },
 };
 
 /**
@@ -234,6 +237,11 @@ function TabNavigator() {
         options={{ tabBarLabel: "Profile" }}
       />
       <Tab.Screen
+        name="ApiTab"
+        component={ApiPortalScreen}
+        options={{ tabBarLabel: "API" }}
+      />
+      <Tab.Screen
         name="SettingsTab"
         component={SettingsScreen}
         options={{ tabBarLabel: "Settings" }}
@@ -278,6 +286,7 @@ export function RootTabs() {
           headerShadowVisible: false,
         }}
       />
+      <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
     </Stack.Navigator>
   );
 }
