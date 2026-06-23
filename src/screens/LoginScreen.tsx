@@ -9,6 +9,7 @@ import { ID } from 'react-native-appwrite';
 import { Ionicons } from '@expo/vector-icons';
 import { spacing } from '../theme';
 import { bentoRadius } from '../theme/colors';
+import { classifyError } from '../api/errors';
 
 export function LoginScreen() {
   const theme = useTheme();
@@ -21,6 +22,8 @@ export function LoginScreen() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [guestLoading, setGuestLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleAuth = async () => {
     if (!email || !password || (!isLogin && !name)) {
@@ -46,18 +49,34 @@ export function LoginScreen() {
   };
 
   const handleGuest = async () => {
+    if (guestLoading) return;
+    setGuestLoading(true);
     try {
       await loginAnonymous();
-    } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to continue as guest');
+    } catch (error: unknown) {
+      const classified = classifyError(error);
+      Alert.alert(
+        classified.type === 'network' ? 'No Internet' : 'Error',
+        classified.message,
+      );
+    } finally {
+      setGuestLoading(false);
     }
   };
 
   const handleGoogleAuth = async () => {
+    if (googleLoading) return;
+    setGoogleLoading(true);
     try {
       await loginWithGoogle();
-    } catch (error: any) {
-      Alert.alert('Error', error.message || 'Google login failed');
+    } catch (error: unknown) {
+      const classified = classifyError(error);
+      Alert.alert(
+        classified.type === 'network' ? 'No Internet' : 'Error',
+        classified.message,
+      );
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -154,6 +173,8 @@ export function LoginScreen() {
           onPress={handleGoogleAuth}
           style={styles.googleButton}
           icon="google"
+          loading={googleLoading}
+          disabled={googleLoading || loading}
         >
           Continue with Google
         </Button>
@@ -163,6 +184,8 @@ export function LoginScreen() {
           onPress={handleGuest}
           style={[styles.guestButton, { borderColor: theme.colors.surfaceVariant }]}
           textColor={theme.colors.onSurface}
+          loading={guestLoading}
+          disabled={guestLoading || loading}
         >
           Continue as Guest
         </Button>

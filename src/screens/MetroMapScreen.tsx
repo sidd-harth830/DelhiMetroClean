@@ -1,24 +1,52 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { StyleSheet, View, Pressable, Alert, ScrollView } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
-import { ActivityIndicator, Text, useTheme, Portal, Modal } from 'react-native-paper';
+import { ActivityIndicator, Button, Text, useTheme, Portal, Modal } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { useMapFamilyPrimaryQuery } from '../hooks/useMapQueries';
 import { useAppTheme } from '../theme/ThemeContext';
 import { spacing } from '../theme';
 import { bentoRadius } from '../theme/colors';
-import { apiClient } from '../api/client';
+import { useDI } from '../di/DIContext';
+import { getApiKey, API_KEY_HEADER } from '../config/apiKeyProvider';
+import { env } from '../config/env';
 
 const MAP_FILE_NAME = 'dmrc_interactive_map.svg';
 const MAP_FILE_URI = FileSystem.documentDirectory + MAP_FILE_NAME;
+
+/**
+ * Checks whether a cached file looks like a valid SVG.
+ * Prevents corrupted/partial downloads or JSON error pages from being used.
+ */
+async function isCachedMapValid(): Promise<boolean> {
+  try {
+    const fileInfo = await FileSystem.getInfoAsync(MAP_FILE_URI);
+    if (!fileInfo.exists) return false;
+
+    // Must be a reasonable size (real SVGs are usually > 10KB)
+    if (fileInfo.size !== undefined && fileInfo.size < 1024) return false;
+
+    // Read the first 200 bytes and check for SVG markers
+    const head = await FileSystem.readAsStringAsync(MAP_FILE_URI, {
+      encoding: FileSystem.EncodingType.UTF8,
+      length: 200,
+    });
+
+    const trimmed = head.trimStart().toLowerCase();
+    return trimmed.startsWith('<svg') || trimmed.startsWith('<?xml') || trimmed.startsWith('<!doctype svg');
+  } catch {
+    return false;
+  }
+}
 
 export function MetroMapScreen() {
   const theme = useTheme();
   const { isDark } = useAppTheme();
   const insets = useSafeAreaInsets();
+  const { mapService } = useDI();
   
   const webviewRef = useRef<WebView>(null);
   
@@ -29,38 +57,56 @@ export function MetroMapScreen() {
 
   const { data: networkMapData } = useMapFamilyPrimaryQuery('network');
 
-  useEffect(() => {
-    async function prepareMap() {
-      try {
-        let fileInfo = await FileSystem.getInfoAsync(MAP_FILE_URI);
-        
-        // If the cached file is too small (e.g., a 404 JSON response instead of a 3MB SVG), delete it.
-        if (fileInfo.exists && fileInfo.size !== undefined && fileInfo.size < 1024) {
-          await FileSystem.deleteAsync(MAP_FILE_URI, { idempotent: true });
-          fileInfo = await FileSystem.getInfoAsync(MAP_FILE_URI);
+  const loadMap = useCallback(async () => {
+    setError(null);
+    setSvgContent(null);
+
+    try {
+      const isValid = await isCachedMapValid();
+      
+      if (!isValid) {
+        // Delete any corrupt/invalid cached file
+        await FileSystem.deleteAsync(MAP_FILE_URI, { idempotent: true });
+
+        // Build download headers with API key
+        const headers: Record<string, string> = {};
+        const apiKey = getApiKey();
+        if (apiKey) {
+          headers[API_KEY_HEADER] = apiKey;
         }
 
-        if (!fileInfo.exists) {
-          const downloadUrl = `${apiClient.baseUrl}/dmrc/interactive-map`;
-          const result = await FileSystem.downloadAsync(downloadUrl, MAP_FILE_URI);
-          if (result.status !== 200) {
-            throw new Error(`Failed to download map. HTTP ${result.status}`);
-          }
-        }
-        let content = await FileSystem.readAsStringAsync(MAP_FILE_URI, { encoding: FileSystem.EncodingType.UTF8 });
+        const interactiveMapUrl = `${env.apiBaseUrl}/dmrc/interactive-map`;
         
-        // Ensure SVG has a viewBox so it fits perfectly on screen without clipping
-        if (!content.includes('viewBox=')) {
-          content = content.replace('<svg ', '<svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet" ');
+        const result = await FileSystem.downloadAsync(interactiveMapUrl, MAP_FILE_URI, { headers });
+        if (result.status !== 200) {
+          throw new Error(`Failed to download map. HTTP ${result.status}`);
         }
-        
-        setSvgContent(content);
-      } catch (e: any) {
-        setError(e.message || 'Failed to load interactive map.');
+
+        // Validate the downloaded file is actually an SVG
+        const downloadedValid = await isCachedMapValid();
+        if (!downloadedValid) {
+          await FileSystem.deleteAsync(MAP_FILE_URI, { idempotent: true });
+          throw new Error('Downloaded file is not a valid SVG map. The server may be temporarily unavailable.');
+        }
       }
+
+      let content = await FileSystem.readAsStringAsync(MAP_FILE_URI, { encoding: FileSystem.EncodingType.UTF8 });
+      
+      // Ensure SVG has a viewBox so it fits perfectly on screen without clipping
+      if (!content.includes('viewBox=')) {
+        content = content.replace('<svg ', '<svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet" ');
+      }
+      
+      setSvgContent(content);
+    } catch (e: any) {
+      console.error('[MetroMapScreen] Map load failed:', e);
+      setError(e.message || 'Failed to load interactive map.');
     }
-    prepareMap();
-  }, []);
+  }, [mapService]);
+
+  useEffect(() => {
+    loadMap();
+  }, [loadMap]);
 
   const handleZoomIn = () => {
     webviewRef.current?.injectJavaScript(`
@@ -99,6 +145,7 @@ export function MetroMapScreen() {
         Alert.alert('Unavailable', 'Sharing is not available on this device.');
       }
     } catch (e) {
+      console.error('[MetroMapScreen] Download failed:', e);
       Alert.alert('Error', 'Failed to share or download the map.');
     } finally {
       setDownloading(false);
@@ -112,6 +159,16 @@ export function MetroMapScreen() {
         <Text variant="titleMedium" style={{ color: theme.colors.error, marginTop: spacing.md, textAlign: 'center' }}>
           {error}
         </Text>
+        <Button
+          mode="contained-tonal"
+          onPress={loadMap}
+          style={{ marginTop: spacing.lg }}
+          buttonColor={theme.colors.errorContainer}
+          textColor={theme.colors.onErrorContainer}
+          icon="refresh"
+        >
+          Try Again
+        </Button>
       </View>
     );
   }

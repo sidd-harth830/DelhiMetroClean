@@ -12,6 +12,7 @@ import { bentoRadius } from '../theme/colors';
 import Constants from 'expo-constants';
 import { databases } from '../config/appwrite';
 import { Query } from 'react-native-appwrite';
+import { classifyError } from '../api/errors';
 
 export function SettingsScreen() {
     const theme = useTheme();
@@ -104,11 +105,17 @@ export function SettingsScreen() {
             }
 
             Alert.alert('Up to Date', 'You are running the latest version of the app.');
-        } catch (error: any) {
-            if (error?.message?.includes('Collection with the requested ID')) {
+        } catch (error: unknown) {
+            if (error instanceof Error && error?.message?.includes('Collection with the requested ID')) {
                 Alert.alert('Up to Date', 'You are running the latest version.');
             } else {
-                Alert.alert('Error', 'Could not check for updates. Please try again later.');
+                const classified = classifyError(error);
+                Alert.alert(
+                    classified.type === 'network' ? 'No Internet' : 'Error',
+                    classified.type === 'network'
+                        ? 'Could not check for updates. Please check your internet connection.'
+                        : 'Could not check for updates. Please try again later.',
+                );
             }
         } finally {
             setIsCheckingUpdate(false);
@@ -139,8 +146,14 @@ export function SettingsScreen() {
                 onPress: async () => {
                     try {
                         await logout();
-                    } catch (error) {
-                        Alert.alert('Error', 'Failed to log out.');
+                    } catch (error: unknown) {
+                        const classified = classifyError(error);
+                        Alert.alert(
+                            classified.type === 'network' ? 'No Internet' : 'Error',
+                            classified.type === 'network'
+                                ? 'Could not log out. Please check your internet connection.'
+                                : 'Failed to log out. Please try again.',
+                        );
                     }
                 },
             },

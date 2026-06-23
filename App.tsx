@@ -13,6 +13,8 @@ import { RootTabs } from './src/navigation/RootTabs';
 import { AuthProvider, useAuth } from './src/auth/AuthContext';
 import { LoginScreen } from './src/screens/LoginScreen';
 import { AppUpdateDialog } from './src/components/AppUpdateDialog';
+import { ErrorBoundary } from './src/components/ErrorBoundary';
+import { OfflineBanner } from './src/components/OfflineBanner';
 import { View, ActivityIndicator } from 'react-native';
 
 const container = createServiceContainer(apiClient);
@@ -44,6 +46,7 @@ function AppInner() {
     <PaperProvider theme={paperTheme}>
       <NavigationContainer theme={navTheme}>
         <StatusBar style="auto" />
+        <OfflineBanner />
         <AppNavigator />
         <AppUpdateDialog />
       </NavigationContainer>
@@ -53,16 +56,18 @@ function AppInner() {
 
 export default function App() {
   return (
-    <SafeAreaProvider>
-      <ThemeProvider>
-        <DIProvider container={container}>
-          <QueryClientProvider client={queryClient}>
-            <AuthProvider>
-              <AppInner />
-            </AuthProvider>
-          </QueryClientProvider>
-        </DIProvider>
-      </ThemeProvider>
-    </SafeAreaProvider>
+    <ErrorBoundary>
+      <SafeAreaProvider>
+        <ThemeProvider>
+          <DIProvider container={container}>
+            <QueryClientProvider client={queryClient}>
+              <AuthProvider>
+                <AppInner />
+              </AuthProvider>
+            </QueryClientProvider>
+          </DIProvider>
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </ErrorBoundary>
   );
 }

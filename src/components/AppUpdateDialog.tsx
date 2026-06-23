@@ -25,7 +25,11 @@ export function AppUpdateDialog() {
   const totalBytes: number = updatesInfo?.totalBytes ?? 0;
 
   useEffect(() => {
-    checkForUpdates();
+    // Wrapped in a safety net: if the update check crashes for any reason,
+    // the app still boots normally. Update check is non-critical.
+    checkForUpdates().catch((err) => {
+      console.warn('[AppUpdateDialog] Update check failed silently:', err);
+    });
   }, []);
 
   const checkForUpdates = async () => {
@@ -99,12 +103,18 @@ export function AppUpdateDialog() {
         await Updates.fetchUpdateAsync();
         await Updates.reloadAsync();
       } catch (error) {
-        Alert.alert('Error', 'Failed to download OTA update');
+        console.error('[AppUpdateDialog] OTA update failed:', error);
+        Alert.alert('Error', 'Failed to download OTA update. Please try again later.');
         setIsDownloading(false);
       }
     } else if (updateType === 'apk') {
       if (apkUrl) {
-        Linking.openURL(apkUrl);
+        try {
+          Linking.openURL(apkUrl);
+        } catch (error) {
+          console.error('[AppUpdateDialog] Failed to open APK URL:', error);
+          Alert.alert('Error', 'Failed to open the download link.');
+        }
         if (!isMandatory) {
           setVisible(false);
         }

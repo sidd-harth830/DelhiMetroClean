@@ -20,7 +20,8 @@ export const FavoritesStorage = {
     try {
       const data = await AsyncStorage.getItem(FAVORITE_STATIONS_KEY);
       return data ? JSON.parse(data) : [];
-    } catch {
+    } catch (error) {
+      console.warn('[FavoritesStorage] Failed to get favorite stations:', error);
       return [];
     }
   },
@@ -31,7 +32,9 @@ export const FavoritesStorage = {
       if (!stations.some((s) => s.code === station.code)) {
         await AsyncStorage.setItem(FAVORITE_STATIONS_KEY, JSON.stringify([station, ...stations]));
       }
-    } catch {}
+    } catch (error) {
+      console.warn('[FavoritesStorage] Failed to add favorite station:', error);
+    }
   },
   
   removeFavoriteStation: async (code: string): Promise<void> => {
@@ -39,14 +42,17 @@ export const FavoritesStorage = {
       const stations = await FavoritesStorage.getFavoriteStations();
       const filtered = stations.filter((s) => s.code !== code);
       await AsyncStorage.setItem(FAVORITE_STATIONS_KEY, JSON.stringify(filtered));
-    } catch {}
+    } catch (error) {
+      console.warn('[FavoritesStorage] Failed to remove favorite station:', error);
+    }
   },
   
   isFavoriteStation: async (code: string): Promise<boolean> => {
     try {
       const stations = await FavoritesStorage.getFavoriteStations();
       return stations.some((s) => s.code === code);
-    } catch {
+    } catch (error) {
+      console.warn('[FavoritesStorage] Failed to check favorite station:', error);
       return false;
     }
   },
@@ -55,7 +61,8 @@ export const FavoritesStorage = {
     try {
       const data = await AsyncStorage.getItem(SAVED_ROUTES_KEY);
       return data ? JSON.parse(data) : [];
-    } catch {
+    } catch (error) {
+      console.warn('[FavoritesStorage] Failed to get saved routes:', error);
       return [];
     }
   },
@@ -69,7 +76,9 @@ export const FavoritesStorage = {
       if (!isSaved) {
         await AsyncStorage.setItem(SAVED_ROUTES_KEY, JSON.stringify([route, ...routes]));
       }
-    } catch {}
+    } catch (error) {
+      console.warn('[FavoritesStorage] Failed to add saved route:', error);
+    }
   },
 
   removeSavedRoute: async (fromCode: string, toCode: string): Promise<void> => {
@@ -79,7 +88,9 @@ export const FavoritesStorage = {
         (r) => !(r.fromCode === fromCode && r.toCode === toCode)
       );
       await AsyncStorage.setItem(SAVED_ROUTES_KEY, JSON.stringify(filtered));
-    } catch {}
+    } catch (error) {
+      console.warn('[FavoritesStorage] Failed to remove saved route:', error);
+    }
   },
   
   isSavedRoute: async (fromCode: string, toCode: string): Promise<boolean> => {
@@ -88,7 +99,8 @@ export const FavoritesStorage = {
       return routes.some(
         (r) => r.fromCode === fromCode && r.toCode === toCode
       );
-    } catch {
+    } catch (error) {
+      console.warn('[FavoritesStorage] Failed to check saved route:', error);
       return false;
     }
   }

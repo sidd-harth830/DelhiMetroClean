@@ -25,9 +25,19 @@ async function openDb(): Promise<SQLite.SQLiteDatabase> {
   return db;
 }
 
+/**
+ * Returns a singleton database connection.
+ * If the initial open fails, the cached promise is cleared so
+ * subsequent calls will retry instead of returning the rejected promise forever.
+ */
 export async function getDb(): Promise<SQLite.SQLiteDatabase> {
   if (!dbPromise) {
-    dbPromise = openDb();
+    dbPromise = openDb().catch((error) => {
+      // Clear the cached promise so the next call retries
+      dbPromise = null;
+      console.error('[database] Failed to open database:', error);
+      throw error;
+    });
   }
   return dbPromise;
 }

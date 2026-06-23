@@ -36,16 +36,20 @@ export function JourneyResultsScreen() {
   const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
-    FavoritesStorage.isSavedRoute(fromCode, toCode).then(setIsSaved);
+    FavoritesStorage.isSavedRoute(fromCode, toCode).then(setIsSaved).catch(() => setIsSaved(false));
   }, [fromCode, toCode]);
 
   const toggleSaveRoute = async () => {
-    if (isSaved) {
-      await FavoritesStorage.removeSavedRoute(fromCode, toCode);
-      setIsSaved(false);
-    } else {
-      await FavoritesStorage.addSavedRoute({ fromCode, fromName, toCode, toName });
-      setIsSaved(true);
+    try {
+      if (isSaved) {
+        await FavoritesStorage.removeSavedRoute(fromCode, toCode);
+        setIsSaved(false);
+      } else {
+        await FavoritesStorage.addSavedRoute({ fromCode, fromName, toCode, toName });
+        setIsSaved(true);
+      }
+    } catch (error) {
+      console.warn('[JourneyResults] Failed to toggle saved route:', error);
     }
   };
 
@@ -156,8 +160,25 @@ export function JourneyResultsScreen() {
   if (isLoading) return <LoadingState message="Planning your journey..." />;
   if (isError) return <ErrorState message="Could not plan this journey" onRetry={refetch} />;
   
-  if (!isNmrc && !dmrcQuery.data) return <ErrorState message="No DMRC route data available" />;
-  if (isNmrc && !nmrcQuery.data) return <ErrorState message="No NMRC route data available" />;
+  // Safe access to data — no more non-null assertions
+  const dmrcData = dmrcQuery.data;
+  const nmrcData = nmrcQuery.data;
+
+  if (!isNmrc && !dmrcData) return <ErrorState message="No DMRC route data available" onRetry={refetch} />;
+  if (isNmrc && !nmrcData) return <ErrorState message="No NMRC route data available" onRetry={refetch} />;
+
+  // Get the active fare data based on strategy (with safe fallbacks)
+  const activeDmrcFare = dmrcData
+    ? strategy === 'least-distance'
+      ? dmrcData.least_distance_fare
+      : dmrcData.minimum_interchange_fare
+    : null;
+
+  const activeDmrcTrain = dmrcData
+    ? strategy === 'least-distance'
+      ? dmrcData.least_distance_train
+      : dmrcData.minimum_interchange_train
+    : null;
 
   const themeColor = theme.colors.primary;
 
@@ -241,13 +262,13 @@ export function JourneyResultsScreen() {
           <View style={[styles.heroStat, { backgroundColor: theme.colors.surfaceVariant }]}>
             <Ionicons name="git-commit-outline" size={18} color={theme.colors.onSurfaceVariant} />
             <Text variant="labelLarge" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '800' }}>
-              {isNmrc ? nmrcQuery.data!.stations : (strategy === 'least-distance' ? dmrcQuery.data!.least_distance_fare.stations : dmrcQuery.data!.minimum_interchange_fare.stations)} stops
+              {isNmrc ? (nmrcData?.stations ?? '—') : (activeDmrcFare?.stations ?? '—')} stops
             </Text>
           </View>
           <View style={[styles.heroStat, { backgroundColor: theme.colors.surfaceVariant }]}>
             <Ionicons name="time-outline" size={18} color={theme.colors.onSurfaceVariant} />
             <Text variant="labelLarge" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '800' }}>
-              {isNmrc ? nmrcQuery.data!.time : (strategy === 'least-distance' ? dmrcQuery.data!.least_distance_fare.total_time : dmrcQuery.data!.minimum_interchange_fare.total_time)}
+              {isNmrc ? (nmrcData?.time ?? '—') : (activeDmrcFare?.total_time ?? '—')}
             </Text>
           </View>
           <Pressable onPress={toggleSaveRoute} style={[styles.heroStat, { backgroundColor: isSaved ? `${themeColor}20` : theme.colors.surfaceVariant, flex: 0, paddingHorizontal: 16 }]}>
@@ -300,14 +321,14 @@ export function JourneyResultsScreen() {
          <View style={styles.fareRow}>
            <Text style={{ color: theme.colors.onSurfaceVariant, fontWeight: '600' }}>Total Fare</Text>
            <Text style={{ fontSize: 24, fontWeight: '800', color: themeColor }}>
-             ₹{isNmrc ? nmrcQuery.data!.fare : (strategy === 'least-distance' ? dmrcQuery.data!.least_distance_fare.weekday_fare : dmrcQuery.data!.minimum_interchange_fare.weekday_fare)}
+             ₹{isNmrc ? (nmrcData?.fare ?? '—') : (activeDmrcFare?.weekday_fare ?? '—')}
            </Text>
          </View>
-         {isNmrc && nmrcQuery.data?.concessionalFare && nmrcQuery.data.concessionalFare !== "0" && (
+         {isNmrc && nmrcData?.concessionalFare && nmrcData.concessionalFare !== "0" && (
            <View style={[styles.fareRow, { marginTop: spacing.sm }]}>
              <Text style={{ color: theme.colors.onSurfaceVariant, fontWeight: '600' }}>Concessional Fare <Text style={{ fontSize: 12 }}>(Sunday & Holiday)</Text></Text>
              <Text style={{ fontSize: 18, fontWeight: '700', color: themeColor }}>
-               ₹{nmrcQuery.data.concessionalFare}
+               ₹{nmrcData.concessionalFare}
              </Text>
            </View>
          )}
@@ -329,7 +350,7 @@ export function JourneyResultsScreen() {
             Route
           </Text>
           <Text variant="labelSmall" style={{ color: themeColor, marginLeft: 'auto', fontWeight: '600' }}>
-            {isNmrc ? '1 line' : (strategy === 'least-distance' ? dmrcQuery.data!.least_distance_fare.route.length : dmrcQuery.data!.minimum_interchange_fare.route.length) + ' lines'}
+            {isNmrc ? '1 line' : ((activeDmrcFare?.route?.length ?? 0) + ' lines')}
           </Text>
         </View>
         <View style={styles.routeSegments}>
@@ -346,7 +367,7 @@ export function JourneyResultsScreen() {
               />
             )
           ) : (
-            (strategy === 'least-distance' ? dmrcQuery.data!.least_distance_fare.route : dmrcQuery.data!.minimum_interchange_fare.route).map((segment, index, arr) => (
+            (activeDmrcFare?.route ?? []).map((segment, index, arr) => (
               <RouteSegmentView
                 key={`${segment.line}-${index}`}
                 segment={segment}
@@ -362,8 +383,8 @@ export function JourneyResultsScreen() {
         </View>
       </View>
 
-      {!isNmrc && (
-        <FirstLastTrainCard data={strategy === 'least-distance' ? dmrcQuery.data!.least_distance_train : dmrcQuery.data!.minimum_interchange_train} />
+      {!isNmrc && activeDmrcTrain && (
+        <FirstLastTrainCard data={activeDmrcTrain} />
       )}
     </ScrollView>
     </View>

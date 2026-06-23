@@ -51,8 +51,12 @@ export function HomeScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      FavoritesStorage.getFavoriteStations().then(setFavoriteStations);
-      FavoritesStorage.getSavedRoutes().then(setSavedRoutes);
+      FavoritesStorage.getFavoriteStations()
+        .then(setFavoriteStations)
+        .catch(() => setFavoriteStations([]));
+      FavoritesStorage.getSavedRoutes()
+        .then(setSavedRoutes)
+        .catch(() => setSavedRoutes([]));
     }, [])
   );
 

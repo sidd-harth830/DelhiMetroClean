@@ -6,8 +6,8 @@ const endpoint = process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT || 'https://cloud.app
 const projectId = process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID || '6a2ce46a003230dcf661';
 
 export const client = new Client()
-    .setProject("6a2ce46a003230dcf661")
-    .setEndpoint("https://sgp.cloud.appwrite.io/v1")
+    .setProject(projectId)
+    .setEndpoint(endpoint)
     .setPlatform(Platform.OS === 'ios' ? 'com.siddharth.dmrc' : 'com.siddharth.dmrc');
 
 export const appwriteClient = client;
