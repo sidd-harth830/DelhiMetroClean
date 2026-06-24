@@ -23,8 +23,24 @@ export function HomeScreen() {
   const navigation = useNavigation<Nav>();
   const insets = useSafeAreaInsets();
   const theme = useTheme();
-  const { semantic, isDark } = useAppTheme();
-  
+  const { semantic, isDark, themeMode, setThemeMode } = useAppTheme();
+
+  const handleCycleTheme = () => {
+    if (themeMode === 'system') {
+      setThemeMode('light');
+    } else if (themeMode === 'light') {
+      setThemeMode('dark');
+    } else {
+      setThemeMode('system');
+    }
+  };
+
+  const getThemeIcon = () => {
+    if (themeMode === 'system') return 'theme-light-dark';
+    if (themeMode === 'light') return 'weather-sunny';
+    return 'weather-night';
+  };
+
   // DMRC State
   const fromPickerDmrc = useStationPicker();
   const toPickerDmrc = useStationPicker();
@@ -133,6 +149,11 @@ export function HomeScreen() {
           subtitle="Delhi & Noida Metro"
           titleStyle={{ fontWeight: '800', fontSize: 22, letterSpacing: -0.3 }}
           subtitleStyle={{ fontWeight: '500', fontSize: 13, opacity: 0.7 }}
+        />
+        <Appbar.Action
+          icon={getThemeIcon()}
+          onPress={handleCycleTheme}
+          color={theme.colors.primary}
         />
       </Appbar.Header>
       

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { Models, ID, OAuthProvider } from 'react-native-appwrite';
 import { account, databases } from '../config/appwrite';
 import * as WebBrowser from 'expo-web-browser';
+import { Platform, Linking } from 'react-native';
 
 // Polyfill for OAuth flow
 WebBrowser.maybeCompleteAuthSession();
@@ -51,14 +52,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginWithGoogle = async () => {
     try {
-      // In Expo, we often use Linking for deep links. But the Appwrite React Native SDK handles this 
-      // if properly configured. For now we use the OAuth2Session method.
-      // A full deep link setup might require scheme config in app.json.
-      const deepLink = new URL('com.siddharth.dmrc://auth');
-      await account.createOAuth2Session(OAuthProvider.Google, deepLink.toString(), deepLink.toString());
-      await checkSession();
+      setIsLoading(true);
+
+      if (Platform.OS === 'web') {
+        const redirectUrl = window.location.origin;
+        // createOAuth2Session returns a URL object in SDK. In web, we redirect the window.
+        const authUrl = account.createOAuth2Session(OAuthProvider.Google, redirectUrl, redirectUrl);
+        window.location.href = authUrl.toString();
+        return; // Redirects page
+      }
+
+      // Mobile / Native flow
+      const redirectUrl = 'com.siddharth.dmrc://auth';
+      const authUrl = account.createOAuth2Token(OAuthProvider.Google, redirectUrl, redirectUrl);
+
+      console.log('Initiating OAuth login with URL:', authUrl.toString());
+      console.log('Redirect URI:', redirectUrl);
+
+      const result = await WebBrowser.openAuthSessionAsync(authUrl.toString(), redirectUrl);
+
+      if (result.type === 'success' && result.url) {
+        console.log('OAuth login redirect URL:', result.url);
+        const parsedUrl = new URL(result.url);
+        let userId = parsedUrl.searchParams.get('userId');
+        let secret = parsedUrl.searchParams.get('secret');
+
+        if (!userId || !secret) {
+          // Fallback parser if searchParams object is empty
+          const query = result.url.split('?')[1] || '';
+          const params = new URLSearchParams(query);
+          userId = params.get('userId');
+          secret = params.get('secret');
+        }
+
+        if (userId && secret) {
+          await account.createSession(userId, secret);
+          await checkSession();
+        } else {
+          throw new Error('Failed to retrieve authentication token from redirect.');
+        }
+      } else {
+        // User cancelled or closed browser
+        setIsLoading(false);
+      }
     } catch (error) {
-      console.error('Google login failed', error);
+      console.error('Google login failed:', error);
+      setIsLoading(false);
       throw error;
     }
   };

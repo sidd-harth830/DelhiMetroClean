@@ -7,8 +7,11 @@ const projectId = process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID || '6a2ce46a003230
 
 export const client = new Client()
     .setProject(projectId)
-    .setEndpoint(endpoint)
-    .setPlatform(Platform.OS === 'ios' ? 'com.siddharth.dmrc' : 'com.siddharth.dmrc');
+    .setEndpoint(endpoint);
+
+if (Platform.OS !== 'web') {
+    client.setPlatform('com.siddharth.dmrc');
+}
 
 export const appwriteClient = client;
 
