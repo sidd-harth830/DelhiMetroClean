@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { ScrollView, StyleSheet, View, Alert } from 'react-native';
+import { ScrollView, StyleSheet, View, Alert, Pressable } from 'react-native';
 import { ActivityIndicator, List, SegmentedButtons, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQueryClient } from '@tanstack/react-query';
@@ -9,6 +9,7 @@ import { useAppTheme } from '../theme/ThemeContext';
 import { useAuth } from '../auth/AuthContext';
 import { spacing } from '../theme';
 import { bentoRadius } from '../theme/colors';
+import { palettes } from '../theme/palettes';
 import Constants from 'expo-constants';
 import { databases } from '../config/appwrite';
 import { Query } from 'react-native-appwrite';
@@ -17,7 +18,7 @@ import { classifyError } from '../api/errors';
 export function SettingsScreen() {
     const theme = useTheme();
     const insets = useSafeAreaInsets();
-    const { themeMode, setThemeMode, isDark } = useAppTheme();
+    const { themeMode, setThemeMode, isDark, colorPaletteId, setColorPalette } = useAppTheme();
     const queryClient = useQueryClient();
     const { user, logout } = useAuth();
     
@@ -236,6 +237,38 @@ export function SettingsScreen() {
             </List.Section>
 
             <List.Section style={styles.section}>
+                <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>Color Theme</List.Subheader>
+                <View style={[styles.card, { backgroundColor: theme.colors.surface, padding: spacing.md }]}>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingHorizontal: 4, paddingVertical: 8 }}>
+                        {palettes.map((p) => {
+                            const isActive = p.id === colorPaletteId;
+                            const swatchColor = isDark ? p.dark.primary : p.light.primary;
+                            return (
+                                <Pressable
+                                    key={p.id}
+                                    onPress={() => setColorPalette(p.id)}
+                                    style={[
+                                        styles.paletteSwatch,
+                                        {
+                                            borderColor: isActive ? swatchColor : 'transparent',
+                                            borderWidth: 3,
+                                        },
+                                    ]}
+                                >
+                                    <View style={[styles.paletteInner, { backgroundColor: swatchColor }]}>
+                                        <Text style={{ fontSize: 16 }}>{p.emoji}</Text>
+                                    </View>
+                                    <Text style={[styles.paletteLabel, { color: isActive ? theme.colors.onSurface : theme.colors.onSurfaceVariant }]}>
+                                        {p.name}
+                                    </Text>
+                                </Pressable>
+                            );
+                        })}
+                    </ScrollView>
+                </View>
+            </List.Section>
+
+            <List.Section style={styles.section}>
                 <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>Data & Storage</List.Subheader>
                 <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
                     <List.Item
@@ -301,5 +334,24 @@ const styles = StyleSheet.create({
     card: {
         borderRadius: bentoRadius.card,
         overflow: 'hidden',
+    },
+    paletteSwatch: {
+        alignItems: 'center',
+        borderRadius: 20,
+        padding: 3,
+    },
+    paletteInner: {
+        width: 48,
+        height: 48,
+        borderRadius: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    paletteLabel: {
+        fontSize: 10,
+        fontWeight: '600',
+        marginTop: 4,
+        textAlign: 'center',
+        maxWidth: 56,
     },
 });

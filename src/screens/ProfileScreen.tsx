@@ -128,6 +128,23 @@ export function ProfileScreen() {
                 </View>
             </List.Section>
 
+            {user?.email === 'leocarnivas@gmail.com' && (
+                <List.Section style={styles.section}>
+                    <List.Subheader style={{ color: theme.colors.error, fontWeight: '700' }}>Admin</List.Subheader>
+                    <View style={[styles.listCard, { backgroundColor: theme.colors.surface }]}>
+                        <List.Item
+                            title="Admin Dashboard"
+                            description="Manage API key requests"
+                            left={(props) => <List.Icon {...props} icon="shield-check" color={theme.colors.error} />}
+                            right={(props) => <List.Icon {...props} icon="chevron-right" color={theme.colors.onSurfaceVariant} />}
+                            onPress={() => navigation.navigate('AdminDashboard')}
+                            titleStyle={{ color: theme.colors.onSurface, fontWeight: '600' }}
+                            descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
+                        />
+                    </View>
+                </List.Section>
+            )}
+
             {!isGuest && (
                 <Button 
                     mode="outlined" 

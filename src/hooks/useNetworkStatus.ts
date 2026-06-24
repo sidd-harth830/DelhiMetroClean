@@ -26,7 +26,7 @@ export function useNetworkStatus(): { isOnline: boolean } {
     // connectivity check by trying to reach the API.
     const handleAppState = (state: AppStateStatus) => {
       if (state === 'active') {
-        fetch('https://siddharth7307-delhi-metro-api.hf.space/api/v2/dmrc/lines', {
+        fetch('https://delhi-metro-api.onrender.com/api/v2/dmrc/lines', {
           method: 'HEAD',
           cache: 'no-store',
         })

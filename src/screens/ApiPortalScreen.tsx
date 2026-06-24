@@ -24,7 +24,7 @@ const DATABASE_ID = process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID || '';
 const COLLECTION_ID = 'ApiKeys'; // The one we created
 
 export function ApiPortalScreen() {
-  const { user, signInWithGoogle } = useAuth();
+  const { user, loginWithGoogle } = useAuth();
   const theme = useTheme();
   const { isDark } = useAppTheme();
   const navigation = useNavigation<any>();
@@ -127,7 +127,7 @@ export function ApiPortalScreen() {
           </Text>
           <Button
             mode="contained"
-            onPress={signInWithGoogle}
+            onPress={loginWithGoogle}
             style={styles.loginBtn}
             icon="google"
           >

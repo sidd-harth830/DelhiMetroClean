@@ -14,7 +14,7 @@ const COLLECTION_ID = 'ApiKeys';
 // Generate a secure looking API key
 const generateApiKey = () => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let key = 'dmrc_';
+  let key = 'mr_';
   for (let i = 0; i < 32; i++) {
     key += chars.charAt(Math.floor(Math.random() * chars.length));
   }
@@ -71,7 +71,7 @@ export function AdminDashboardScreen() {
         docId,
         data
       );
-      
+
       Alert.alert('Success', `Request has been ${action}.`);
       fetchPendingRequests(); // Refresh list
     } catch (error) {
@@ -86,7 +86,7 @@ export function AdminDashboardScreen() {
       <Text style={[styles.date, { color: theme.colors.onSurfaceVariant }]}>
         Requested: {new Date(item.$createdAt).toLocaleDateString()}
       </Text>
-      
+
       <View style={[styles.usecaseBox, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}>
         <Text style={[styles.usecaseLabel, { color: theme.colors.onSurfaceVariant }]}>Use Case:</Text>
         <Text style={{ color: theme.colors.onSurface }}>{item.usecase}</Text>

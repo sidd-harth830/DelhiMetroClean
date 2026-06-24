@@ -19,9 +19,11 @@ import {
   type Theme as NavigationTheme,
 } from '@react-navigation/native';
 import { lightPalette, darkPalette } from './colors';
+import { palettes, getPalette, DEFAULT_PALETTE_ID, type PaletteDefinition } from './palettes';
 
 const FALLBACK_SOURCE_COLOR = '#BEFF6C'; // Neon lime green primary
 const THEME_STORAGE_KEY = '@app_theme_mode';
+const PALETTE_STORAGE_KEY = '@app_color_palette';
 
 export type ThemeMode = 'system' | 'light' | 'dark';
 
@@ -39,63 +41,43 @@ function createPaperTheme(
   };
 }
 
-// ──────── Paper themes with premium bento-box colors ────────
+// ──────── Build Paper theme from palette ────────
 
-export const paperLightTheme: MD3Theme = {
-  ...MD3LightTheme,
-  colors: {
-    ...MD3LightTheme.colors,
-    primary: lightPalette.primary,
-    onPrimary: '#FFFFFF',
-    primaryContainer: lightPalette.elevation.level3,
-    onPrimaryContainer: lightPalette.onSurface,
-    secondary: lightPalette.blue_line,
-    onSecondary: '#FFFFFF',
-    secondaryContainer: lightPalette.blue_line_muted,
-    onSecondaryContainer: lightPalette.onSurface,
-    error: lightPalette.error,
-    onError: '#FFFFFF',
-    errorContainer: lightPalette.red_line_muted,
-    onErrorContainer: lightPalette.onSurface,
-    background: lightPalette.background,
-    onBackground: lightPalette.onBackground,
-    surface: lightPalette.surface,
-    onSurface: lightPalette.onSurface,
-    surfaceVariant: lightPalette.surfaceVariant,
-    onSurfaceVariant: lightPalette.onSurfaceVariant,
-    outline: lightPalette.onSurfaceVariant,
-    outlineVariant: lightPalette.surfaceVariant,
-    elevation: lightPalette.elevation,
-  },
-};
+function buildPaperColors(palette: PaletteDefinition, isDark: boolean): Partial<MD3Theme['colors']> {
+  const p = isDark ? palette.dark : palette.light;
+  const basePalette = isDark ? darkPalette : lightPalette;
 
-export const paperDarkTheme: MD3Theme = {
-  ...MD3DarkTheme,
-  colors: {
-    ...MD3DarkTheme.colors,
-    primary: darkPalette.primary,
-    onPrimary: '#000000',
-    primaryContainer: darkPalette.elevation.level3,
-    onPrimaryContainer: darkPalette.onSurface,
-    secondary: darkPalette.blue_line,
-    onSecondary: '#000000',
-    secondaryContainer: darkPalette.elevation.level2,
-    onSecondaryContainer: darkPalette.onSurface,
-    error: darkPalette.error,
-    onError: '#000000',
-    errorContainer: darkPalette.elevation.level2,
-    onErrorContainer: darkPalette.onSurface,
-    background: darkPalette.background,
-    onBackground: darkPalette.onBackground,
-    surface: darkPalette.surface,
-    onSurface: darkPalette.onSurface,
-    surfaceVariant: darkPalette.surfaceVariant,
-    onSurfaceVariant: darkPalette.onSurfaceVariant,
-    outline: darkPalette.onSurfaceVariant,
-    outlineVariant: darkPalette.surfaceVariant,
-    elevation: darkPalette.elevation,
-  },
-};
+  return {
+    primary: p.primary,
+    onPrimary: p.onPrimary,
+    primaryContainer: isDark ? basePalette.elevation.level3 : p.surfaceVariant,
+    onPrimaryContainer: p.onSurface,
+    secondary: p.info,
+    onSecondary: p.onPrimary,
+    secondaryContainer: isDark ? basePalette.elevation.level2 : p.surfaceVariant,
+    onSecondaryContainer: p.onSurface,
+    error: p.error,
+    onError: p.onPrimary,
+    errorContainer: isDark ? basePalette.elevation.level2 : '#FEE2E2',
+    onErrorContainer: p.onSurface,
+    background: p.background,
+    onBackground: p.onBackground,
+    surface: p.surface,
+    onSurface: p.onSurface,
+    surfaceVariant: p.surfaceVariant,
+    onSurfaceVariant: p.onSurfaceVariant,
+    outline: p.onSurfaceVariant,
+    outlineVariant: p.surfaceVariant,
+    elevation: isDark ? darkPalette.elevation : {
+      level0: 'transparent',
+      level1: p.surface,
+      level2: p.surfaceVariant,
+      level3: isDark ? '#2E2E2E' : '#E8EAED',
+      level4: isDark ? '#383838' : '#DCDEE2',
+      level5: isDark ? '#424242' : '#D1D3D8',
+    },
+  };
+}
 
 // ──────── Semantic colors and premium metro lines ────────
 
@@ -124,51 +106,42 @@ interface AppTheme {
   semantic: SemanticColors;
   themeMode: ThemeMode;
   setThemeMode: (mode: ThemeMode) => void;
+  colorPaletteId: string;
+  setColorPalette: (id: string) => void;
 }
 
-const defaultSemanticLight: SemanticColors = {
-  success: lightPalette.success,
-  warning: lightPalette.warning,
-  error: lightPalette.error,
-  info: lightPalette.info,
-  interchange: lightPalette.interchange,
-  warningContainer: lightPalette.warningContainer,
-  successContainer: lightPalette.successContainer,
-  yellow_line: lightPalette.yellow_line,
-  blue_line: lightPalette.blue_line,
-  red_line: lightPalette.red_line,
-  green_line: lightPalette.green_line,
-  pink_line: lightPalette.pink_line,
-  purple_line: lightPalette.purple_line,
-  orange_line: lightPalette.orange_line,
-  brown_line: lightPalette.brown_line,
-};
+function buildSemantic(palette: PaletteDefinition, isDark: boolean): SemanticColors {
+  const p = isDark ? palette.dark : palette.light;
+  const basePalette = isDark ? darkPalette : lightPalette;
 
-const defaultSemanticDark: SemanticColors = {
-  success: darkPalette.success,
-  warning: darkPalette.warning,
-  error: darkPalette.error,
-  info: darkPalette.info,
-  interchange: darkPalette.interchange,
-  warningContainer: darkPalette.warningContainer,
-  successContainer: darkPalette.successContainer,
-  yellow_line: darkPalette.yellow_line,
-  blue_line: darkPalette.blue_line,
-  red_line: darkPalette.red_line,
-  green_line: darkPalette.green_line,
-  pink_line: darkPalette.pink_line,
-  purple_line: darkPalette.purple_line,
-  orange_line: darkPalette.orange_line,
-  brown_line: darkPalette.brown_line,
-};
+  return {
+    success: p.success,
+    warning: p.warning,
+    error: p.error,
+    info: p.info,
+    interchange: p.warning,
+    warningContainer: isDark ? basePalette.warningContainer : '#FEF3C7',
+    successContainer: isDark ? basePalette.successContainer : '#D1FAE5',
+    yellow_line: basePalette.yellow_line,
+    blue_line: basePalette.blue_line,
+    red_line: basePalette.red_line,
+    green_line: basePalette.green_line,
+    pink_line: basePalette.pink_line,
+    purple_line: basePalette.purple_line,
+    orange_line: basePalette.orange_line,
+    brown_line: basePalette.brown_line,
+  };
+}
 
 const ThemeContext = createContext<AppTheme>({
-  paperTheme: paperLightTheme,
+  paperTheme: MD3LightTheme,
   navTheme: NavigationDefaultTheme,
   isDark: false,
-  semantic: defaultSemanticLight,
+  semantic: {} as SemanticColors,
   themeMode: 'system',
-  setThemeMode: () => { },
+  setThemeMode: () => {},
+  colorPaletteId: DEFAULT_PALETTE_ID,
+  setColorPalette: () => {},
 });
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
@@ -178,70 +151,83 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   });
 
   const [themeMode, setThemeModeState] = useState<ThemeMode>('system');
+  const [colorPaletteId, setColorPaletteIdState] = useState<string>(DEFAULT_PALETTE_ID);
 
   useEffect(() => {
-    AsyncStorage.getItem(THEME_STORAGE_KEY).then((mode) => {
+    Promise.all([
+      AsyncStorage.getItem(THEME_STORAGE_KEY),
+      AsyncStorage.getItem(PALETTE_STORAGE_KEY),
+    ]).then(([mode, paletteId]) => {
       if (mode === 'light' || mode === 'dark' || mode === 'system') {
         setThemeModeState(mode as ThemeMode);
+      }
+      if (paletteId && palettes.some((p) => p.id === paletteId)) {
+        setColorPaletteIdState(paletteId);
       }
     });
   }, []);
 
   const setThemeMode = useCallback((mode: ThemeMode) => {
     setThemeModeState(mode);
-    AsyncStorage.setItem(THEME_STORAGE_KEY, mode).catch(() => { });
+    AsyncStorage.setItem(THEME_STORAGE_KEY, mode).catch(() => {});
+  }, []);
+
+  const setColorPalette = useCallback((id: string) => {
+    setColorPaletteIdState(id);
+    AsyncStorage.setItem(PALETTE_STORAGE_KEY, id).catch(() => {});
   }, []);
 
   const value = useMemo<AppTheme>(() => {
     const isDark = themeMode === 'dark' || (themeMode === 'system' && scheme === 'dark');
+    const palette = getPalette(colorPaletteId);
 
-    // Use premium bento-box palettes
-    const lightMaterialScheme: Partial<MD3Theme['colors']> = paperLightTheme.colors;
-    const darkMaterialScheme: Partial<MD3Theme['colors']> = paperDarkTheme.colors;
-
-    const materialLightTheme = createPaperTheme(false, lightMaterialScheme);
-    const materialDarkTheme = createPaperTheme(true, darkMaterialScheme);
+    const paperColors = buildPaperColors(palette, isDark);
+    const paperTheme = createPaperTheme(isDark, paperColors);
 
     const { LightTheme: navLight, DarkTheme: navDark } = adaptNavigationTheme({
       reactNavigationLight: NavigationDefaultTheme,
       reactNavigationDark: NavigationDarkTheme,
-      materialLight: materialLightTheme,
-      materialDark: materialDarkTheme,
+      materialLight: createPaperTheme(false, buildPaperColors(palette, false)),
+      materialDark: createPaperTheme(true, buildPaperColors(palette, true)),
     });
 
-    const navigationLightTheme: NavigationTheme = {
-      ...navLight,
-      colors: {
-        ...navLight.colors,
-        background: lightPalette.background,
-        card: lightPalette.surface,
-        text: lightPalette.onSurface,
-        border: lightPalette.surfaceVariant,
-        primary: lightPalette.primary,
-      },
-    };
+    const p = isDark ? palette.dark : palette.light;
 
-    const navigationDarkTheme: NavigationTheme = {
-      ...navDark,
-      colors: {
-        ...navDark.colors,
-        background: darkPalette.background,
-        card: darkPalette.elevation.level2,
-        text: darkPalette.onSurface,
-        border: darkPalette.surfaceVariant,
-        primary: darkPalette.primary,
-      },
-    };
+    const navTheme: NavigationTheme = isDark
+      ? {
+          ...navDark,
+          colors: {
+            ...navDark.colors,
+            background: p.background,
+            card: p.surface,
+            text: p.onSurface,
+            border: p.surfaceVariant,
+            primary: p.primary,
+          },
+        }
+      : {
+          ...navLight,
+          colors: {
+            ...navLight.colors,
+            background: p.background,
+            card: p.surface,
+            text: p.onSurface,
+            border: p.surfaceVariant,
+            primary: p.primary,
+          },
+        };
 
     return {
-      paperTheme: isDark ? materialDarkTheme : materialLightTheme,
-      navTheme: isDark ? navigationDarkTheme : navigationLightTheme,
+      paperTheme,
+      navTheme,
       isDark,
-      semantic: isDark ? defaultSemanticDark : defaultSemanticLight,
+      semantic: buildSemantic(palette, isDark),
       themeMode,
       setThemeMode,
+      colorPaletteId,
+      setColorPalette,
     };
-  }, [scheme, themeMode, setThemeMode]);
+  }, [scheme, themeMode, colorPaletteId, setThemeMode, setColorPalette]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
@@ -253,3 +239,8 @@ export function useAppTheme() {
 export const themeRuntimeConfig = {
   fallbackSourceColor: FALLBACK_SOURCE_COLOR,
 } as const;
+
+// Re-export the old static themes for backward compatibility
+export { palettes, getPalette };
+export const paperLightTheme = MD3LightTheme;
+export const paperDarkTheme = MD3DarkTheme;

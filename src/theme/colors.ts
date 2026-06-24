@@ -11,6 +11,7 @@
 /* ───────── Border Radius Tokens ───────── */
 export const bentoRadius = {
   card: 24,
+  large: 28,
   heroCard: 32,
   pill: 40,
   button: 20,
@@ -19,17 +20,45 @@ export const bentoRadius = {
   small: 12,
 } as const;
 
+/* ───────── Shadow Tokens ───────── */
+import { Platform } from 'react-native';
+
+export const bentoShadows = {
+  light: Platform.select({
+    ios: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.06,
+      shadowRadius: 8,
+    },
+    android: {
+      elevation: 3,
+    },
+  }),
+  dark: Platform.select({
+    ios: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.3,
+      shadowRadius: 6,
+    },
+    android: {
+      elevation: 4,
+    },
+  }),
+};
+
 /* ───────── Light Palette ───────── */
 export const lightPalette = {
-  // Backgrounds
-  background: '#F5F6F8', // Warm minimal gray — less strain
-  surface: '#F0F1F3',    // Soft off-white, not pure white
-  surfaceVariant: '#E8EAED',
+  // Backgrounds — crisp white on cool gray for card separation
+  background: '#F8FAFC',   // Cool off-white — easy on eyes
+  surface: '#FFFFFF',      // Pure white cards for maximum contrast
+  surfaceVariant: '#F1F5F9', // Subtle cool-gray tint
 
-  // Text
-  onBackground: '#111827',
-  onSurface: '#1F2937',
-  onSurfaceVariant: '#6B7280',
+  // Text — deeper, richer
+  onBackground: '#0F172A',
+  onSurface: '#1E293B',
+  onSurfaceVariant: '#64748B',
 
   // Premium Metro Lines
   yellow_line: '#F59E0B',
@@ -69,27 +98,27 @@ export const lightPalette = {
   aqua_line_bg: 'rgba(0,181,181,0.15)',
 
   // Semantic
-  primary: '#34A853',            // Forest green primary
-  success: '#10B981',
-  warning: '#F59E0B',
-  error: '#EF4444',
-  info: '#3B82F6',
-  interchange: '#F59E0B',
+  primary: '#16A34A',            // Richer, deeper green
+  success: '#059669',
+  warning: '#D97706',
+  error: '#DC2626',
+  info: '#2563EB',
+  interchange: '#D97706',
   warningContainer: '#FEF3C7',
   successContainer: '#D1FAE5',
 
-  // Component surface elevations
+  // Component surface elevations — subtle depth
   elevation: {
     level0: 'transparent',
-    level1: '#F0F1F3',
-    level2: '#EAEBEE',
-    level3: '#E4E5E9',
-    level4: '#DCDEE2',
-    level5: '#D1D3D8',
+    level1: '#FFFFFF',
+    level2: '#F8FAFC',
+    level3: '#F1F5F9',
+    level4: '#E2E8F0',
+    level5: '#CBD5E1',
   },
 
-  // Card shadow
-  shadow: 'transparent',
+  // Warm card shadow
+  shadow: 'rgba(15,23,42,0.04)',
 };
 
 /* ───────── Dark Palette ───────── */
