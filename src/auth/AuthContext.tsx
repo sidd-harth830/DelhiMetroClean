@@ -58,13 +58,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const redirectUrl = window.location.origin;
         // createOAuth2Session returns a URL object in SDK. In web, we redirect the window.
         const authUrl = account.createOAuth2Session(OAuthProvider.Google, redirectUrl, redirectUrl);
-        window.location.href = authUrl.toString();
+        if (authUrl) {
+          window.location.href = authUrl.toString();
+        }
         return; // Redirects page
       }
 
       // Mobile / Native flow
       const redirectUrl = 'com.siddharth.dmrc://auth';
       const authUrl = account.createOAuth2Token(OAuthProvider.Google, redirectUrl, redirectUrl);
+      
+      if (!authUrl) {
+        throw new Error('Could not generate authentication URL');
+      }
 
       console.log('Initiating OAuth login with URL:', authUrl.toString());
       console.log('Redirect URI:', redirectUrl);

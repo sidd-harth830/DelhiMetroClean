@@ -27,8 +27,13 @@ export class DmrcService {
     return this.apiClient.get<MetroLine[]>('/dmrc/lines');
   }
 
-  getNotifications(): Promise<PassengerNotification[]> {
-    return this.apiClient.get<PassengerNotification[]>('/dmrc/notifications');
+  async getNotifications(): Promise<PassengerNotification[]> {
+    try {
+      return await this.apiClient.get<PassengerNotification[]>('/dmrc/notifications');
+    } catch (error) {
+      console.warn('Failed to load notifications, falling back to empty list:', error);
+      return [];
+    }
   }
 
   searchStations(query: string): Promise<StationSearchResult[]> {
