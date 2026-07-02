@@ -28,4 +28,8 @@ export const queryKeys = {
   mapAssetById: (assetId: string) => ['dmrc', 'maps', 'asset-by-id', assetId] as const,
   stationsByLine: (lineCode: string) => ['dmrc', 'stations-by-line', lineCode] as const,
   stationDetail: (stationCode: string) => ['dmrc', 'station-detail', stationCode] as const,
+
+  // NMRC Keys
+  nmrcStations: ['nmrc', 'stations'] as const,
+  nmrcJourneyPlan: (from: string, to: string) => ['nmrc', 'journeyPlan', from, to] as const,
 };

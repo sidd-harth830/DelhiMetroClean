@@ -342,7 +342,7 @@ export function HomeScreen() {
           <>
             <SectionHeader title="Saved Routes" />
             <View style={styles.popularGrid}>
-              {savedRoutes.map((route, index) => (
+              {savedRoutes.map((route) => (
                 <Pressable
                   key={`${route.fromCode}-${route.toCode}`}
                   style={[
@@ -372,7 +372,7 @@ export function HomeScreen() {
           <>
             <SectionHeader title="Favorite Stations" />
             <View style={styles.popularGrid}>
-              {favoriteStations.map((station, index) => (
+              {favoriteStations.map((station) => (
                 <Pressable
                   key={station.code}
                   style={[

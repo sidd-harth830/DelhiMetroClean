@@ -1,16 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { useDI } from '../di/DIContext';
 
-export const nmrcQueryKeys = {
-  all: ['nmrc'] as const,
-  stations: () => [...nmrcQueryKeys.all, 'stations'] as const,
-  journeyPlan: (from: string, to: string) => [...nmrcQueryKeys.all, 'journeyPlan', from, to] as const,
-};
+import { queryKeys } from './queryKeys';
 
 export function useNmrcStationsQuery() {
   const { nmrcService } = useDI();
   return useQuery({
-    queryKey: nmrcQueryKeys.stations(),
+    queryKey: queryKeys.nmrcStations,
     queryFn: () => nmrcService.getStations(),
     staleTime: Infinity,
   });
@@ -22,7 +18,7 @@ export function useNmrcJourneyPlanQuery(
 ) {
   const { nmrcService } = useDI();
   return useQuery({
-    queryKey: nmrcQueryKeys.journeyPlan(fromStationId, toStationId),
+    queryKey: queryKeys.nmrcJourneyPlan(fromStationId, toStationId),
     queryFn: () => nmrcService.getJourneyPlan(fromStationId, toStationId),
     enabled: fromStationId.trim().length > 0 && toStationId.trim().length > 0,
   });

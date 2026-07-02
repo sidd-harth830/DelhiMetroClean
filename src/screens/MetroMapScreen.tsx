@@ -10,7 +10,7 @@ import { useMapFamilyPrimaryQuery } from '../hooks/useMapQueries';
 import { useAppTheme } from '../theme/ThemeContext';
 import { spacing } from '../theme';
 import { bentoRadius } from '../theme/colors';
-import { useDI } from '../di/DIContext';
+
 import { getApiKey, API_KEY_HEADER } from '../config/apiKeyProvider';
 import { env } from '../config/env';
 
@@ -46,7 +46,7 @@ export function MetroMapScreen() {
   const theme = useTheme();
   const { isDark } = useAppTheme();
   const insets = useSafeAreaInsets();
-  const { mapService } = useDI();
+
   
   const webviewRef = useRef<WebView>(null);
   
@@ -102,7 +102,7 @@ export function MetroMapScreen() {
       console.error('[MetroMapScreen] Map load failed:', e);
       setError(e.message || 'Failed to load interactive map.');
     }
-  }, [mapService]);
+  }, []);
 
   useEffect(() => {
     loadMap();

@@ -234,6 +234,7 @@ export function useNotificationsQuery() {
   return useQuery({
     queryKey: queryKeys.notifications,
     queryFn: () => dmrcService.getNotifications(),
+    staleTime: 10 * 60_000,
   });
 }
 

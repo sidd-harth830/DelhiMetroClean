@@ -1,3 +1,4 @@
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { StatusBar } from 'expo-status-bar';
@@ -39,8 +40,14 @@ function AppNavigator() {
   return <LoginScreen />;
 }
 
+import { startKeepAlive } from './src/utils/keepAlive';
+
 function AppInner() {
   const { paperTheme, navTheme } = useAppTheme();
+
+  React.useEffect(() => {
+    startKeepAlive();
+  }, []);
 
   return (
     <PaperProvider theme={paperTheme}>

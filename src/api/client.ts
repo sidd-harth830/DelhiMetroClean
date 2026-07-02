@@ -83,7 +83,7 @@ export class ApiClient {
   async get<T>(path: string, options?: RequestOptions): Promise<T> {
     const url = this.createUrl(path, options?.query);
     const timeoutMs = options?.timeoutMs ?? env.timeoutMs;
-    const maxRetries = options?.maxRetries ?? env.maxRetries;
+    const maxRetries = options?.maxRetries ?? 0;
 
     let lastError: unknown;
 

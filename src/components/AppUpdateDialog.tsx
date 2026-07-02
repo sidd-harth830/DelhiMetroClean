@@ -20,9 +20,9 @@ export function AppUpdateDialog() {
   
   const [isDownloading, setIsDownloading] = useState(false);
   
-  const updatesInfo = Updates.useUpdates() as any;
-  const downloadedBytes: number = updatesInfo?.downloadedBytes ?? 0;
-  const totalBytes: number = updatesInfo?.totalBytes ?? 0;
+  const updatesInfo = Updates.useUpdates();
+  const downloadedBytes: number = (updatesInfo as any)?.downloadedBytes ?? 0;
+  const totalBytes: number = (updatesInfo as any)?.totalBytes ?? 0;
 
   useEffect(() => {
     // Wrapped in a safety net: if the update check crashes for any reason,

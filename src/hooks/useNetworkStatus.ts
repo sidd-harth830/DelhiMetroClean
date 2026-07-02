@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
 import { onlineManager } from '@tanstack/react-query';
 
+import { env } from '../config/env';
+
 /**
  * Monitors network connectivity using React Query's `onlineManager`.
  *
@@ -26,7 +28,7 @@ export function useNetworkStatus(): { isOnline: boolean } {
     // connectivity check by trying to reach the API.
     const handleAppState = (state: AppStateStatus) => {
       if (state === 'active') {
-        fetch('https://delhi-metro-api.onrender.com/api/v2/dmrc/lines', {
+        fetch(`${env.apiBaseUrl}/dmrc/lines`, {
           method: 'HEAD',
           cache: 'no-store',
         })

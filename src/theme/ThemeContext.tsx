@@ -13,7 +13,6 @@ import {
 } from 'react-native-paper';
 import { typography } from './typography';
 import {
-  NavigationContainer,
   DarkTheme as NavigationDarkTheme,
   DefaultTheme as NavigationDefaultTheme,
   type Theme as NavigationTheme,
