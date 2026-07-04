@@ -1,10 +1,11 @@
-import React, { useState, useRef } from 'react';
-import { ScrollView, StyleSheet, View, Alert, Pressable } from 'react-native';
+import React, { useState, useRef, useCallback } from 'react';
+import { ScrollView, StyleSheet, View, Alert, Pressable, Animated as RNAnimated } from 'react-native';
 import { ActivityIndicator, List, SegmentedButtons, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQueryClient } from '@tanstack/react-query';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Updates from 'expo-updates';
+import { Ionicons } from '@expo/vector-icons';
 import { useAppTheme } from '../theme/ThemeContext';
 import { useAuth } from '../auth/AuthContext';
 import { spacing } from '../theme';
@@ -14,6 +15,102 @@ import Constants from 'expo-constants';
 import { databases } from '../config/appwrite';
 import { Query } from 'react-native-appwrite';
 import { classifyError } from '../api/errors';
+
+/* ─── Animated Palette Card ─── */
+function PaletteCard({
+    palette,
+    isActive,
+    isDark,
+    onPress,
+    themeColors,
+}: {
+    palette: (typeof palettes)[0];
+    isActive: boolean;
+    isDark: boolean;
+    onPress: () => void;
+    themeColors: any;
+}) {
+    const scaleAnim = useRef(new RNAnimated.Value(1)).current;
+    const colors = isDark ? palette.dark : palette.light;
+    const accentColor = colors.accent ?? colors.primary;
+
+    const handlePressIn = useCallback(() => {
+        RNAnimated.spring(scaleAnim, {
+            toValue: 0.95,
+            useNativeDriver: true,
+            friction: 8,
+            tension: 100,
+        }).start();
+    }, [scaleAnim]);
+
+    const handlePressOut = useCallback(() => {
+        RNAnimated.spring(scaleAnim, {
+            toValue: 1,
+            useNativeDriver: true,
+            friction: 5,
+            tension: 80,
+        }).start();
+    }, [scaleAnim]);
+
+    return (
+        <RNAnimated.View style={[styles.paletteCardWrapper, { transform: [{ scale: scaleAnim }] }]}>
+            <Pressable
+                onPress={onPress}
+                onPressIn={handlePressIn}
+                onPressOut={handlePressOut}
+                style={[
+                    styles.paletteCard,
+                    {
+                        backgroundColor: isDark ? colors.surface : colors.background,
+                        borderColor: isActive ? colors.primary : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'),
+                        borderWidth: isActive ? 2.5 : 1,
+                    },
+                ]}
+            >
+                {/* Active checkmark badge */}
+                {isActive && (
+                    <View style={[styles.checkBadge, { backgroundColor: colors.primary }]}>
+                        <Ionicons name="checkmark" size={12} color={colors.onPrimary ?? '#FFFFFF'} />
+                    </View>
+                )}
+
+                {/* Icon + Name row */}
+                <View style={styles.paletteHeader}>
+                    <View style={[styles.paletteIconCircle, { backgroundColor: `${colors.primary}20` }]}>
+                        <Ionicons
+                            name={(palette.icon || 'color-palette') as any}
+                            size={20}
+                            color={colors.primary}
+                        />
+                    </View>
+                    <Text
+                        style={[
+                            styles.paletteName,
+                            { color: isDark ? colors.onSurface : colors.onBackground },
+                        ]}
+                        numberOfLines={1}
+                    >
+                        {palette.name}
+                    </Text>
+                </View>
+
+                {/* Color preview strip */}
+                <View style={styles.colorStrip}>
+                    <View style={[styles.colorDot, { backgroundColor: colors.primary }]} />
+                    <View style={[styles.colorDot, { backgroundColor: accentColor }]} />
+                    <View style={[styles.colorDot, { backgroundColor: colors.success }]} />
+                    <View style={[styles.colorDot, { backgroundColor: colors.warning }]} />
+                    <View style={[styles.colorDot, { backgroundColor: colors.info }]} />
+                </View>
+
+                {/* Preview bar */}
+                <View style={[styles.previewBar, { backgroundColor: colors.primaryMuted }]}>
+                    <View style={[styles.previewAccent, { backgroundColor: colors.primary }]} />
+                </View>
+            </Pressable>
+        </RNAnimated.View>
+    );
+}
 
 export function SettingsScreen() {
     const theme = useTheme();
@@ -166,12 +263,22 @@ export function SettingsScreen() {
             style={[styles.container, { backgroundColor: theme.colors.background }]}
             contentContainerStyle={{ paddingTop: insets.top + spacing.lg, paddingBottom: insets.bottom + spacing.tabBarClearance }}
         >
-            <Text variant="headlineMedium" style={[styles.header, { color: theme.colors.onSurface }]}>
-                Settings
-            </Text>
+            {/* ─── Header ─── */}
+            <View style={styles.headerRow}>
+                <Text variant="headlineMedium" style={[styles.header, { color: theme.colors.onSurface }]}>
+                    Settings
+                </Text>
+                <View style={[styles.headerBadge, { backgroundColor: `${theme.colors.primary}15` }]}>
+                    <Ionicons name="settings" size={16} color={theme.colors.primary} />
+                </View>
+            </View>
 
+            {/* ─── Account Section ─── */}
             <List.Section style={styles.section}>
-                <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>Account</List.Subheader>
+                <View style={styles.sectionHeaderRow}>
+                    <Ionicons name="person" size={16} color={theme.colors.primary} />
+                    <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>Account</List.Subheader>
+                </View>
                 <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
                     <List.Item
                         title={user?.email ? "Logged in as" : "Guest Mode"}
@@ -188,9 +295,16 @@ export function SettingsScreen() {
                 </View>
             </List.Section>
 
+            {/* ─── Appearance Section ─── */}
             <List.Section style={styles.section}>
-                <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>Appearance</List.Subheader>
+                <View style={styles.sectionHeaderRow}>
+                    <Ionicons name="contrast" size={16} color={theme.colors.primary} />
+                    <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>Appearance</List.Subheader>
+                </View>
                 <View style={[styles.card, { backgroundColor: theme.colors.surface, padding: spacing.md }]}>
+                    <Text style={[styles.sectionSubtitle, { color: theme.colors.onSurfaceVariant }]}>
+                        Choose your preferred display mode
+                    </Text>
                     <SegmentedButtons
                         value={themeMode}
                         onValueChange={(value) => setThemeMode(value as any)}
@@ -198,6 +312,7 @@ export function SettingsScreen() {
                             {
                                 value: 'system',
                                 label: 'System',
+                                icon: 'theme-light-dark',
                                 checkedColor: theme.colors.onPrimary,
                                 uncheckedColor: theme.colors.onSurfaceVariant,
                                 style: {
@@ -210,6 +325,7 @@ export function SettingsScreen() {
                             {
                                 value: 'light',
                                 label: 'Light',
+                                icon: 'weather-sunny',
                                 checkedColor: theme.colors.onPrimary,
                                 uncheckedColor: theme.colors.onSurfaceVariant,
                                 style: {
@@ -222,6 +338,7 @@ export function SettingsScreen() {
                             {
                                 value: 'dark',
                                 label: 'Dark',
+                                icon: 'weather-night',
                                 checkedColor: theme.colors.onPrimary,
                                 uncheckedColor: theme.colors.onSurfaceVariant,
                                 style: {
@@ -236,40 +353,35 @@ export function SettingsScreen() {
                 </View>
             </List.Section>
 
+            {/* ─── Color Theme Grid ─── */}
             <List.Section style={styles.section}>
-                <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>Color Theme</List.Subheader>
-                <View style={[styles.card, { backgroundColor: theme.colors.surface, padding: spacing.md }]}>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingHorizontal: 4, paddingVertical: 8 }}>
-                        {palettes.map((p) => {
-                            const isActive = p.id === colorPaletteId;
-                            const swatchColor = isDark ? p.dark.primary : p.light.primary;
-                            return (
-                                <Pressable
-                                    key={p.id}
-                                    onPress={() => setColorPalette(p.id)}
-                                    style={[
-                                        styles.paletteSwatch,
-                                        {
-                                            borderColor: isActive ? swatchColor : 'transparent',
-                                            borderWidth: 3,
-                                        },
-                                    ]}
-                                >
-                                    <View style={[styles.paletteInner, { backgroundColor: swatchColor }]}>
-                                        <Text style={{ fontSize: 16 }}>{p.emoji}</Text>
-                                    </View>
-                                    <Text style={[styles.paletteLabel, { color: isActive ? theme.colors.onSurface : theme.colors.onSurfaceVariant }]}>
-                                        {p.name}
-                                    </Text>
-                                </Pressable>
-                            );
-                        })}
-                    </ScrollView>
+                <View style={styles.sectionHeaderRow}>
+                    <Ionicons name="color-palette" size={16} color={theme.colors.primary} />
+                    <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>Color Theme</List.Subheader>
+                </View>
+                <Text style={[styles.sectionSubtitle, { color: theme.colors.onSurfaceVariant, marginBottom: spacing.md, marginLeft: 2 }]}>
+                    Pick a palette that matches your style
+                </Text>
+                <View style={styles.paletteGrid}>
+                    {palettes.map((p) => (
+                        <PaletteCard
+                            key={p.id}
+                            palette={p}
+                            isActive={p.id === colorPaletteId}
+                            isDark={isDark}
+                            onPress={() => setColorPalette(p.id)}
+                            themeColors={theme.colors}
+                        />
+                    ))}
                 </View>
             </List.Section>
 
+            {/* ─── Data & Storage ─── */}
             <List.Section style={styles.section}>
-                <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>Data & Storage</List.Subheader>
+                <View style={styles.sectionHeaderRow}>
+                    <Ionicons name="server" size={16} color={theme.colors.primary} />
+                    <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>Data & Storage</List.Subheader>
+                </View>
                 <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
                     <List.Item
                         title="Clear Cache"
@@ -287,10 +399,12 @@ export function SettingsScreen() {
                 </View>
             </List.Section>
 
-
-
+            {/* ─── App Info ─── */}
             <List.Section style={styles.section}>
-                <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>App Info</List.Subheader>
+                <View style={styles.sectionHeaderRow}>
+                    <Ionicons name="information-circle" size={16} color={theme.colors.primary} />
+                    <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>App Info</List.Subheader>
+                </View>
                 <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
                     <List.Item
                         title="Version"
@@ -322,36 +436,106 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    header: {
-        fontWeight: '800',
+    headerRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
         paddingHorizontal: spacing.base,
         marginBottom: spacing.md,
+    },
+    header: {
+        fontWeight: '800',
+    },
+    headerBadge: {
+        width: 36,
+        height: 36,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     section: {
         marginHorizontal: spacing.base,
         marginBottom: spacing.sm,
     },
+    sectionHeaderRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        marginLeft: 4,
+    },
+    sectionSubtitle: {
+        fontSize: 13,
+        fontWeight: '500',
+        marginTop: 2,
+        marginBottom: spacing.md,
+    },
     card: {
         borderRadius: bentoRadius.card,
         overflow: 'hidden',
     },
-    paletteSwatch: {
-        alignItems: 'center',
-        borderRadius: 20,
-        padding: 3,
+    /* ─── Palette Grid ─── */
+    paletteGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: spacing.bentoGap,
     },
-    paletteInner: {
-        width: 48,
-        height: 48,
-        borderRadius: 16,
+    paletteCardWrapper: {
+        width: '47.5%',
+    },
+    paletteCard: {
+        borderRadius: bentoRadius.card,
+        padding: spacing.md,
+        gap: spacing.sm,
+        overflow: 'hidden',
+        position: 'relative',
+    },
+    checkBadge: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        width: 22,
+        height: 22,
+        borderRadius: 11,
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1,
+    },
+    paletteHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: spacing.sm,
+    },
+    paletteIconCircle: {
+        width: 36,
+        height: 36,
+        borderRadius: 12,
         justifyContent: 'center',
         alignItems: 'center',
     },
-    paletteLabel: {
-        fontSize: 10,
-        fontWeight: '600',
+    paletteName: {
+        fontWeight: '700',
+        fontSize: 13,
+        flex: 1,
+    },
+    colorStrip: {
+        flexDirection: 'row',
+        gap: 6,
         marginTop: 4,
-        textAlign: 'center',
-        maxWidth: 56,
+    },
+    colorDot: {
+        width: 16,
+        height: 16,
+        borderRadius: 8,
+    },
+    previewBar: {
+        height: 6,
+        borderRadius: 3,
+        overflow: 'hidden',
+        marginTop: 4,
+    },
+    previewAccent: {
+        height: '100%',
+        width: '60%',
+        borderRadius: 3,
     },
 });

@@ -1,5 +1,5 @@
-import { useCallback, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useCallback, useMemo, useState, useRef, useEffect } from 'react';
+import { Pressable, ScrollView, StyleSheet, View, Animated } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -19,11 +19,42 @@ import { FavoritesStorage, FavoriteStation, SavedRoute } from '../storage/favori
 
 type Nav = NativeStackNavigationProp<HomeStackParamList, 'Home'>;
 
+/* ─── Time-based greeting ─── */
+function getGreeting(): { text: string; icon: keyof typeof Ionicons.glyphMap } {
+  const hour = new Date().getHours();
+  if (hour < 5) return { text: 'Good Night', icon: 'moon' };
+  if (hour < 12) return { text: 'Good Morning', icon: 'sunny' };
+  if (hour < 17) return { text: 'Good Afternoon', icon: 'partly-sunny' };
+  if (hour < 21) return { text: 'Good Evening', icon: 'cloudy-night' };
+  return { text: 'Good Night', icon: 'moon' };
+}
+
 export function HomeScreen() {
   const navigation = useNavigation<Nav>();
   const insets = useSafeAreaInsets();
   const theme = useTheme();
   const { semantic, isDark, themeMode, setThemeMode } = useAppTheme();
+
+  const greeting = useMemo(() => getGreeting(), []);
+
+  // ─── Animated header entrance ───
+  const headerFade = useRef(new Animated.Value(0)).current;
+  const headerSlide = useRef(new Animated.Value(-20)).current;
+  const cardFade = useRef(new Animated.Value(0)).current;
+  const cardSlide = useRef(new Animated.Value(30)).current;
+
+  useEffect(() => {
+    Animated.stagger(150, [
+      Animated.parallel([
+        Animated.timing(headerFade, { toValue: 1, duration: 500, useNativeDriver: true }),
+        Animated.spring(headerSlide, { toValue: 0, useNativeDriver: true, friction: 8 }),
+      ]),
+      Animated.parallel([
+        Animated.timing(cardFade, { toValue: 1, duration: 400, useNativeDriver: true }),
+        Animated.spring(cardSlide, { toValue: 0, useNativeDriver: true, friction: 8 }),
+      ]),
+    ]).start();
+  }, []);
 
   const handleCycleTheme = () => {
     if (themeMode === 'system') {
@@ -137,31 +168,45 @@ export function HomeScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <Appbar.Header
-        elevated={false}
-        style={{
-          backgroundColor: theme.colors.background,
-          borderBottomWidth: 0,
-        }}
-      >
-        <Appbar.Content
-          title="Metro Planner"
-          subtitle="Delhi & Noida Metro"
-          titleStyle={{ fontWeight: '800', fontSize: 22, letterSpacing: -0.3 }}
-          subtitleStyle={{ fontWeight: '500', fontSize: 13, opacity: 0.7 }}
-        />
-        <Appbar.Action
-          icon={getThemeIcon()}
-          onPress={handleCycleTheme}
-          color={theme.colors.primary}
-        />
-      </Appbar.Header>
+      {/* ─── Premium Header ─── */}
+      <Animated.View style={{ opacity: headerFade, transform: [{ translateY: headerSlide }] }}>
+        <Appbar.Header
+          elevated={false}
+          style={{
+            backgroundColor: theme.colors.background,
+            borderBottomWidth: 0,
+          }}
+        >
+          <Appbar.Content
+            title="Metro Planner"
+            subtitle=""
+            titleStyle={{ fontWeight: '800', fontSize: 22, letterSpacing: -0.3 }}
+          />
+          <Appbar.Action
+            icon={getThemeIcon()}
+            onPress={handleCycleTheme}
+            color={theme.colors.primary}
+          />
+        </Appbar.Header>
+
+        {/* Greeting banner */}
+        <View style={[styles.greetingBanner, { backgroundColor: isDark ? `${theme.colors.primary}10` : `${theme.colors.primary}08` }]}>
+          <Ionicons name={greeting.icon as any} size={18} color={theme.colors.primary} />
+          <Text style={[styles.greetingText, { color: theme.colors.primary }]}>
+            {greeting.text}
+          </Text>
+          <Text style={[styles.greetingSubtext, { color: theme.colors.onSurfaceVariant }]}>
+            Delhi & Noida Metro
+          </Text>
+        </View>
+      </Animated.View>
       
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + spacing.tabBarClearance }]}
         keyboardShouldPersistTaps="handled"
       >
+        {/* ─── Time Chips ─── */}
         <View style={styles.timeSection}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexDirection: 'row', gap: spacing.sm, paddingHorizontal: 2 }}>
             <Chip
@@ -223,14 +268,16 @@ export function HomeScreen() {
           />
         )}
 
-        {/* DMRC Planner Card */}
-        <View
+        {/* ─── DMRC Planner Card ─── */}
+        <Animated.View
           style={[
             styles.plannerCard,
             {
               backgroundColor: isDark ? `${theme.colors.primary}12` : `${theme.colors.primary}0A`,
-              borderWidth: isDark ? 0 : 1,
-              borderColor: isDark ? 'transparent' : `${theme.colors.primary}20`,
+              borderWidth: isDark ? 1 : 1,
+              borderColor: isDark ? `${theme.colors.primary}20` : `${theme.colors.primary}15`,
+              opacity: cardFade,
+              transform: [{ translateY: cardSlide }],
             },
           ]}
         >
@@ -239,6 +286,9 @@ export function HomeScreen() {
               <Ionicons name="subway" size={16} color={theme.colors.onPrimary} />
             </View>
             <Text style={[styles.cardHeaderTitle, { color: theme.colors.primary }]}>Delhi Metro (DMRC)</Text>
+            <View style={[styles.networkBadge, { backgroundColor: isDark ? `${semantic.blue_line}20` : `${semantic.blue_line}15` }]}>
+              <Text style={{ fontSize: 10, fontWeight: '700', color: semantic.blue_line }}>11 Lines</Text>
+            </View>
           </View>
           
           <View style={styles.stationsBlock}>
@@ -250,12 +300,14 @@ export function HomeScreen() {
 
             <View style={styles.inputsColumn}>
               <Pressable style={[styles.stationInput, { backgroundColor: isDark ? `${semantic.blue_line}14` : `${semantic.blue_line}0A` }]} onPress={fromPickerDmrc.open}>
+                <Ionicons name="ellipse" size={8} color={semantic.success} style={{ marginRight: 4 }} />
                 <Text style={[{ flex: 1, color: fromPickerDmrc.station ? theme.colors.onSurface : theme.colors.onSurfaceVariant, fontWeight: fromPickerDmrc.station ? '700' : '500' }]} numberOfLines={1}>
                   {fromPickerDmrc.station?.name ?? 'Where from?'}
                 </Text>
               </Pressable>
 
               <Pressable style={[styles.stationInput, { backgroundColor: isDark ? `${semantic.green_line}14` : `${semantic.green_line}0A` }]} onPress={toPickerDmrc.open}>
+                <Ionicons name="location" size={10} color={semantic.error} style={{ marginRight: 4 }} />
                 <Text style={[{ flex: 1, color: toPickerDmrc.station ? theme.colors.onSurface : theme.colors.onSurfaceVariant, fontWeight: toPickerDmrc.station ? '700' : '500' }]} numberOfLines={1}>
                   {toPickerDmrc.station?.name ?? 'Where to?'}
                 </Text>
@@ -278,24 +330,27 @@ export function HomeScreen() {
           >
             Find DMRC Route
           </Button>
-        </View>
+        </Animated.View>
 
-        {/* NMRC Planner Card */}
+        {/* ─── NMRC Planner Card ─── */}
         <View
           style={[
             styles.plannerCard,
             {
-              backgroundColor: isDark ? `${theme.colors.primary}12` : `${theme.colors.primary}0A`,
-              borderWidth: isDark ? 0 : 1,
-              borderColor: isDark ? 'transparent' : `${theme.colors.primary}20`,
+              backgroundColor: isDark ? `${semantic.info}10` : `${semantic.info}06`,
+              borderWidth: 1,
+              borderColor: isDark ? `${semantic.info}20` : `${semantic.info}15`,
             },
           ]}
         >
-          <View style={[styles.cardHeaderRow, { backgroundColor: isDark ? `${theme.colors.primary}20` : `${theme.colors.primary}1A` }]}>
-            <View style={[styles.cardHeaderIcon, { backgroundColor: theme.colors.primary }]}>
-              <Ionicons name="subway" size={16} color={theme.colors.onPrimary} />
+          <View style={[styles.cardHeaderRow, { backgroundColor: isDark ? `${semantic.info}20` : `${semantic.info}1A` }]}>
+            <View style={[styles.cardHeaderIcon, { backgroundColor: semantic.info }]}>
+              <Ionicons name="subway" size={16} color="#FFFFFF" />
             </View>
-            <Text style={[styles.cardHeaderTitle, { color: theme.colors.primary }]}>Noida Metro (NMRC)</Text>
+            <Text style={[styles.cardHeaderTitle, { color: semantic.info }]}>Noida Metro (NMRC)</Text>
+            <View style={[styles.networkBadge, { backgroundColor: isDark ? 'rgba(0,209,209,0.20)' : 'rgba(0,181,181,0.15)' }]}>
+              <Text style={{ fontSize: 10, fontWeight: '700', color: isDark ? '#00D1D1' : '#00B5B5' }}>Aqua Line</Text>
+            </View>
           </View>
           
           <View style={styles.stationsBlock}>
@@ -307,20 +362,22 @@ export function HomeScreen() {
 
             <View style={styles.inputsColumn}>
               <Pressable style={[styles.stationInput, { backgroundColor: isDark ? `${semantic.blue_line}14` : `${semantic.blue_line}0A` }]} onPress={fromPickerNmrc.open}>
+                <Ionicons name="ellipse" size={8} color={semantic.success} style={{ marginRight: 4 }} />
                 <Text style={[{ flex: 1, color: fromPickerNmrc.station ? theme.colors.onSurface : theme.colors.onSurfaceVariant, fontWeight: fromPickerNmrc.station ? '700' : '500' }]} numberOfLines={1}>
                   {fromPickerNmrc.station?.name ?? 'Where from?'}
                 </Text>
               </Pressable>
 
               <Pressable style={[styles.stationInput, { backgroundColor: isDark ? `${semantic.green_line}14` : `${semantic.green_line}0A` }]} onPress={toPickerNmrc.open}>
+                <Ionicons name="location" size={10} color={semantic.error} style={{ marginRight: 4 }} />
                 <Text style={[{ flex: 1, color: toPickerNmrc.station ? theme.colors.onSurface : theme.colors.onSurfaceVariant, fontWeight: toPickerNmrc.station ? '700' : '500' }]} numberOfLines={1}>
                   {toPickerNmrc.station?.name ?? 'Where to?'}
                 </Text>
               </Pressable>
             </View>
 
-            <Pressable style={[styles.swapBtn, { backgroundColor: theme.colors.primary }]} onPress={handleSwapNmrc}>
-              <Ionicons name="swap-vertical" size={18} color={theme.colors.onPrimary} />
+            <Pressable style={[styles.swapBtn, { backgroundColor: semantic.info }]} onPress={handleSwapNmrc}>
+              <Ionicons name="swap-vertical" size={18} color="#FFFFFF" />
             </Pressable>
           </View>
 
@@ -332,12 +389,13 @@ export function HomeScreen() {
             style={[styles.findButton, { opacity: canSearchNmrc ? 1 : 0.6 }]}
             contentStyle={{ paddingVertical: 8 }}
             labelStyle={{ fontSize: 16, fontWeight: '700' }}
+            buttonColor={semantic.info}
           >
             Find NMRC Route
           </Button>
         </View>
 
-        {/* Saved Routes Section */}
+        {/* ─── Saved Routes Section ─── */}
         {savedRoutes.length > 0 && (
           <>
             <SectionHeader title="Saved Routes" />
@@ -349,8 +407,8 @@ export function HomeScreen() {
                     styles.popularCard,
                     {
                       backgroundColor: isDark ? `${semantic.blue_line}12` : `${semantic.blue_line}08`,
-                      borderWidth: isDark ? 0 : 1,
-                      borderColor: isDark ? 'transparent' : `${semantic.blue_line}20`,
+                      borderWidth: isDark ? 1 : 1,
+                      borderColor: isDark ? `${semantic.blue_line}20` : `${semantic.blue_line}12`,
                     },
                   ]}
                   onPress={() => handleSavedRoute(route.fromCode, route.toCode, route.fromName, route.toName)}
@@ -367,7 +425,7 @@ export function HomeScreen() {
           </>
         )}
 
-        {/* Favorite Stations Section */}
+        {/* ─── Favorite Stations Section ─── */}
         {favoriteStations.length > 0 && (
           <>
             <SectionHeader title="Favorite Stations" />
@@ -379,8 +437,8 @@ export function HomeScreen() {
                     styles.popularCard,
                     {
                       backgroundColor: isDark ? `${semantic.success}12` : `${semantic.success}08`,
-                      borderWidth: isDark ? 0 : 1,
-                      borderColor: isDark ? 'transparent' : `${semantic.success}20`,
+                      borderWidth: isDark ? 1 : 1,
+                      borderColor: isDark ? `${semantic.success}20` : `${semantic.success}12`,
                     },
                   ]}
                   onPress={() => navigation.navigate('StationDetail', { stationCode: station.code, stationName: station.name })}
@@ -411,6 +469,25 @@ const styles = StyleSheet.create({
     padding: spacing.base,
     gap: spacing.sectionGap,
   },
+  greetingBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: spacing.base,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: bentoRadius.badge,
+    gap: spacing.sm,
+    marginBottom: spacing.xs,
+  },
+  greetingText: {
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  greetingSubtext: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginLeft: 'auto',
+  },
   timeSection: {
     marginBottom: 0,
   },
@@ -440,6 +517,12 @@ const styles = StyleSheet.create({
   cardHeaderTitle: {
     fontWeight: '800',
     fontSize: 14,
+  },
+  networkBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    marginLeft: 4,
   },
   stationsBlock: {
     flexDirection: 'row',

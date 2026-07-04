@@ -3,7 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme, Text } from "react-native-paper";
-import { Animated, Pressable, StyleSheet, View, Dimensions } from "react-native";
+import { Animated, Pressable, StyleSheet, View, Dimensions, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
 
@@ -39,10 +39,8 @@ const TAB_ICONS: Record<
 };
 
 /**
- * Each tab item uses Animated API (NOT LayoutAnimation) to smoothly
- * transition the pill background. LayoutAnimation on Android was the
- * root cause of the rectangular-pill bug — it animated the flex change
- * without properly preserving borderRadius during the transition.
+ * Each tab item uses Animated API with elastic spring physics
+ * for a premium pill transition with a subtle glow effect.
  */
 function TabItem({ route, isFocused, descriptors, onPress, isDark, theme }: {
   route: any;
@@ -53,14 +51,24 @@ function TabItem({ route, isFocused, descriptors, onPress, isDark, theme }: {
   theme: any;
 }) {
   const anim = useRef(new Animated.Value(isFocused ? 1 : 0)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
+    // Elastic spring for pill background
     Animated.spring(anim, {
       toValue: isFocused ? 1 : 0,
       useNativeDriver: false,
-      friction: 10,
-      tension: 80,
+      friction: 7,       // slightly bouncier
+      tension: 100,      // snappier
     }).start();
+
+    // Subtle bounce effect on selection
+    if (isFocused) {
+      Animated.sequence([
+        Animated.timing(scaleAnim, { toValue: 0.92, duration: 80, useNativeDriver: true }),
+        Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, friction: 4, tension: 120 }),
+      ]).start();
+    }
   }, [isFocused]);
 
   const { options } = descriptors[route.key];
@@ -72,7 +80,7 @@ function TabItem({ route, isFocused, descriptors, onPress, isDark, theme }: {
     inputRange: [0, 1],
     outputRange: [
       'transparent',
-      isDark ? "rgba(190, 255, 108, 0.12)" : "rgba(21, 128, 61, 0.08)",
+      isDark ? `${theme.colors.primary}18` : `${theme.colors.primary}10`,
     ],
   });
 
@@ -80,13 +88,18 @@ function TabItem({ route, isFocused, descriptors, onPress, isDark, theme }: {
     inputRange: [0, 1],
     outputRange: [
       'transparent',
-      isDark ? "rgba(190, 255, 108, 0.2)" : "rgba(21, 128, 61, 0.15)",
+      isDark ? `${theme.colors.primary}30` : `${theme.colors.primary}20`,
     ],
   });
 
   const labelOpacity = anim.interpolate({
     inputRange: [0, 0.5, 1],
     outputRange: [0, 0, 1],
+  });
+
+  const iconScale = anim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 1.1],
   });
 
   return (
@@ -98,20 +111,40 @@ function TabItem({ route, isFocused, descriptors, onPress, isDark, theme }: {
             backgroundColor: pillBg,
             borderColor: pillBorderColor,
             borderWidth: 1,
+            transform: [{ scale: scaleAnim }],
           },
         ]}
       >
-        <Ionicons
-          name={iconName}
-          size={20}
-          color={
-            isFocused
-              ? theme.colors.primary
-              : isDark
-                ? "rgba(255, 255, 255, 0.5)"
-                : "rgba(0, 0, 0, 0.4)"
-          }
-        />
+        {/* Glow shadow for active tab */}
+        {isFocused && (
+          <View
+            style={[
+              styles.glowDot,
+              {
+                backgroundColor: theme.colors.primary,
+                ...(Platform.OS === 'ios' ? {
+                  shadowColor: theme.colors.primary,
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowOpacity: 0.4,
+                  shadowRadius: 8,
+                } : {}),
+              },
+            ]}
+          />
+        )}
+        <Animated.View style={{ transform: [{ scale: iconScale }] }}>
+          <Ionicons
+            name={iconName}
+            size={20}
+            color={
+              isFocused
+                ? theme.colors.primary
+                : isDark
+                  ? "rgba(255, 255, 255, 0.45)"
+                  : "rgba(0, 0, 0, 0.35)"
+            }
+          />
+        </Animated.View>
         {isFocused && (
           <Animated.View style={{ opacity: labelOpacity }}>
             <Text
@@ -164,8 +197,8 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
             styles.tabBarContent,
             {
               backgroundColor: isDark
-                ? "rgba(15, 15, 20, 0.95)"
-                : "rgba(252, 252, 254, 0.95)",
+                ? "rgba(12, 12, 16, 0.96)"
+                : "rgba(252, 252, 254, 0.96)",
               borderColor: isDark
                 ? "rgba(255, 255, 255, 0.08)"
                 : "rgba(0, 0, 0, 0.06)",
@@ -289,10 +322,10 @@ const styles = StyleSheet.create({
     position: "absolute",
     zIndex: 50,
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
   },
   blurView: {
     flex: 1,
@@ -320,8 +353,17 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderRadius: 999,
-    height: 38,
+    height: 40,
     overflow: 'hidden',
+    position: 'relative',
+  },
+  glowDot: {
+    position: 'absolute',
+    bottom: -2,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    opacity: 0.6,
   },
   tabLabel: {
     fontSize: 11,
