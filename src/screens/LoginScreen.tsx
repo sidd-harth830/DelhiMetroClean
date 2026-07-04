@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Alert, KeyboardAvoidingView, Platform, Animated, Dimensions } from 'react-native';
-import { Text, TextInput, Button, useTheme, ActivityIndicator } from 'react-native-paper';
+import React, { useState } from 'react';
+import { View, StyleSheet, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { Text, TextInput, Button, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppTheme } from '../theme/ThemeContext';
@@ -10,41 +10,6 @@ import { ID } from 'react-native-appwrite';
 import { spacing } from '../theme';
 import { bentoRadius } from '../theme/colors';
 import { classifyError } from '../api/errors';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
-/* ─── Decorative floating circle ─── */
-function FloatingCircle({ size, color, top, left, delay }: { size: number; color: string; top: number; left: number; delay: number }) {
-  const anim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.delay(delay),
-        Animated.timing(anim, { toValue: 1, duration: 3000, useNativeDriver: true }),
-        Animated.timing(anim, { toValue: 0, duration: 3000, useNativeDriver: true }),
-      ])
-    ).start();
-  }, []);
-
-  const translateY = anim.interpolate({ inputRange: [0, 1], outputRange: [0, -12] });
-  const scale = anim.interpolate({ inputRange: [0, 0.5, 1], outputRange: [1, 1.08, 1] });
-
-  return (
-    <Animated.View
-      style={{
-        position: 'absolute',
-        top,
-        left,
-        width: size,
-        height: size,
-        borderRadius: size / 2,
-        backgroundColor: color,
-        transform: [{ translateY }, { scale }],
-      }}
-    />
-  );
-}
 
 export function LoginScreen() {
   const theme = useTheme();
@@ -60,25 +25,6 @@ export function LoginScreen() {
   const [guestLoading, setGuestLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  // ─── Animated entrance ───
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(30)).current;
-  const formFade = useRef(new Animated.Value(0)).current;
-  const formSlide = useRef(new Animated.Value(40)).current;
-
-  useEffect(() => {
-    Animated.stagger(200, [
-      Animated.parallel([
-        Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
-        Animated.spring(slideAnim, { toValue: 0, useNativeDriver: true, friction: 8, tension: 60 }),
-      ]),
-      Animated.parallel([
-        Animated.timing(formFade, { toValue: 1, duration: 500, useNativeDriver: true }),
-        Animated.spring(formSlide, { toValue: 0, useNativeDriver: true, friction: 8, tension: 60 }),
-      ]),
-    ]).start();
-  }, []);
-
   const handleAuth = async () => {
     if (!email || !password || (!isLogin && !name)) {
       Alert.alert('Error', 'Please fill all required fields');
@@ -91,7 +37,6 @@ export function LoginScreen() {
         await account.createEmailPasswordSession(email, password);
       } else {
         await account.create(ID.unique(), email, password, name);
-        // Login immediately after register
         await account.createEmailPasswordSession(email, password);
       }
       await checkSession();
@@ -135,19 +80,16 @@ export function LoginScreen() {
   };
 
   const primaryColor = theme.colors.primary;
-  const accentBg = isDark ? `${primaryColor}15` : `${primaryColor}0A`;
 
   return (
     <KeyboardAvoidingView 
       style={[styles.container, { backgroundColor: theme.colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      {/* ─── Decorative floating circles ─── */}
-      <FloatingCircle size={120} color={isDark ? `${primaryColor}08` : `${primaryColor}06`} top={-20} left={-30} delay={0} />
-      <FloatingCircle size={80} color={isDark ? `${primaryColor}06` : `${primaryColor}05`} top={80} left={SCREEN_WIDTH - 60} delay={800} />
-      <FloatingCircle size={60} color={isDark ? `${primaryColor}0A` : `${primaryColor}08`} top={200} left={20} delay={400} />
-      <FloatingCircle size={100} color={isDark ? `${primaryColor}06` : `${primaryColor}04`} top={350} left={SCREEN_WIDTH - 80} delay={1200} />
-      <FloatingCircle size={50} color={isDark ? `${primaryColor}08` : `${primaryColor}06`} top={500} left={50} delay={600} />
+      {/* ─── Decorative static background circles ─── */}
+      <View style={[styles.bgCircle, { width: 140, height: 140, top: -40, left: -40, backgroundColor: `${primaryColor}06` }]} />
+      <View style={[styles.bgCircle, { width: 100, height: 100, top: 60, right: -30, backgroundColor: `${primaryColor}04` }]} />
+      <View style={[styles.bgCircle, { width: 80, height: 80, bottom: 120, left: 20, backgroundColor: `${primaryColor}05` }]} />
 
       <ScrollView 
         contentContainerStyle={[
@@ -156,9 +98,8 @@ export function LoginScreen() {
         ]}
       >
         {/* ─── Logo & Hero ─── */}
-        <Animated.View style={[styles.header, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-          <View style={[styles.logoContainer, { backgroundColor: accentBg }]}>
-            <View style={[styles.logoGlow, { backgroundColor: `${primaryColor}20` }]} />
+        <View style={styles.header}>
+          <View style={[styles.logoContainer, { backgroundColor: `${primaryColor}0A` }]}>
             <View style={[styles.logoCircle, { backgroundColor: theme.colors.primaryContainer }]}>
               <Ionicons name="train" size={32} color={theme.colors.primary} />
             </View>
@@ -169,17 +110,15 @@ export function LoginScreen() {
           <Text variant="bodyLarge" style={[styles.subtitle, { color: theme.colors.onSurfaceVariant }]}>
             {isLogin ? 'Log in to access your saved journeys.' : 'Sign up to sync your preferences across devices.'}
           </Text>
-        </Animated.View>
+        </View>
 
         {/* ─── Form Card ─── */}
-        <Animated.View style={[
+        <View style={[
           styles.card, 
           { 
             backgroundColor: theme.colors.surface,
             borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
             borderWidth: 1,
-            opacity: formFade, 
-            transform: [{ translateY: formSlide }],
           }
         ]}>
           {!isLogin && (
@@ -244,46 +183,44 @@ export function LoginScreen() {
           >
             {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Log in'}
           </Button>
-        </Animated.View>
+        </View>
 
         {/* ─── Divider ─── */}
-        <Animated.View style={[styles.divider, { opacity: formFade }]}>
+        <View style={styles.divider}>
           <View style={[styles.line, { backgroundColor: theme.colors.surfaceVariant }]} />
           <View style={[styles.orBadge, { backgroundColor: theme.colors.surfaceVariant }]}>
             <Text style={{ color: theme.colors.onSurfaceVariant, fontSize: 12, fontWeight: '600' }}>OR</Text>
           </View>
           <View style={[styles.line, { backgroundColor: theme.colors.surfaceVariant }]} />
-        </Animated.View>
+        </View>
 
         {/* ─── Social & Guest Buttons ─── */}
-        <Animated.View style={{ opacity: formFade }}>
-          <Button 
-            mode="contained-tonal" 
-            onPress={handleGoogleAuth}
-            style={styles.googleButton}
-            icon="google"
-            loading={googleLoading}
-            disabled={googleLoading || loading}
-            contentStyle={{ paddingVertical: 4 }}
-            labelStyle={{ fontWeight: '600' }}
-          >
-            Continue with Google
-          </Button>
+        <Button 
+          mode="contained-tonal" 
+          onPress={handleGoogleAuth}
+          style={styles.googleButton}
+          icon="google"
+          loading={googleLoading}
+          disabled={googleLoading || loading}
+          contentStyle={{ paddingVertical: 4 }}
+          labelStyle={{ fontWeight: '600' }}
+        >
+          Continue with Google
+        </Button>
 
-          <Button 
-            mode="outlined" 
-            onPress={handleGuest}
-            style={[styles.guestButton, { borderColor: theme.colors.surfaceVariant }]}
-            textColor={theme.colors.onSurface}
-            loading={guestLoading}
-            disabled={guestLoading || loading}
-            contentStyle={{ paddingVertical: 4 }}
-            labelStyle={{ fontWeight: '600' }}
-            icon="account-arrow-right"
-          >
-            Continue as Guest
-          </Button>
-        </Animated.View>
+        <Button 
+          mode="outlined" 
+          onPress={handleGuest}
+          style={[styles.guestButton, { borderColor: theme.colors.surfaceVariant }]}
+          textColor={theme.colors.onSurface}
+          loading={guestLoading}
+          disabled={guestLoading || loading}
+          contentStyle={{ paddingVertical: 4 }}
+          labelStyle={{ fontWeight: '600' }}
+          icon="account-arrow-right"
+        >
+          Continue as Guest
+        </Button>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -293,6 +230,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     overflow: 'hidden',
+  },
+  bgCircle: {
+    position: 'absolute',
+    borderRadius: 999,
   },
   scrollContent: {
     paddingHorizontal: spacing.xl,
@@ -310,13 +251,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: spacing.xl,
-    position: 'relative',
-  },
-  logoGlow: {
-    position: 'absolute',
-    width: 100,
-    height: 100,
-    borderRadius: 28,
   },
   logoCircle: {
     width: 72,

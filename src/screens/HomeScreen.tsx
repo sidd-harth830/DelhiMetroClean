@@ -33,44 +33,9 @@ export function HomeScreen() {
   const navigation = useNavigation<Nav>();
   const insets = useSafeAreaInsets();
   const theme = useTheme();
-  const { semantic, isDark, themeMode, setThemeMode } = useAppTheme();
+  const { semantic, isDark } = useAppTheme();
 
   const greeting = useMemo(() => getGreeting(), []);
-
-  // ─── Animated header entrance ───
-  const headerFade = useRef(new Animated.Value(0)).current;
-  const headerSlide = useRef(new Animated.Value(-20)).current;
-  const cardFade = useRef(new Animated.Value(0)).current;
-  const cardSlide = useRef(new Animated.Value(30)).current;
-
-  useEffect(() => {
-    Animated.stagger(150, [
-      Animated.parallel([
-        Animated.timing(headerFade, { toValue: 1, duration: 500, useNativeDriver: true }),
-        Animated.spring(headerSlide, { toValue: 0, useNativeDriver: true, friction: 8 }),
-      ]),
-      Animated.parallel([
-        Animated.timing(cardFade, { toValue: 1, duration: 400, useNativeDriver: true }),
-        Animated.spring(cardSlide, { toValue: 0, useNativeDriver: true, friction: 8 }),
-      ]),
-    ]).start();
-  }, []);
-
-  const handleCycleTheme = () => {
-    if (themeMode === 'system') {
-      setThemeMode('light');
-    } else if (themeMode === 'light') {
-      setThemeMode('dark');
-    } else {
-      setThemeMode('system');
-    }
-  };
-
-  const getThemeIcon = () => {
-    if (themeMode === 'system') return 'theme-light-dark';
-    if (themeMode === 'light') return 'weather-sunny';
-    return 'weather-night';
-  };
 
   // DMRC State
   const fromPickerDmrc = useStationPicker();
@@ -158,7 +123,7 @@ export function HomeScreen() {
 
   const handleSavedRoute = (fromCode: string, toCode: string, fromName: string, toName: string) => {
     navigation.navigate('JourneyResults', {
-      network: 'dmrc', // Assume saved routes are currently DMRC only
+      network: 'dmrc',
       fromCode,
       toCode,
       fromName,
@@ -166,40 +131,35 @@ export function HomeScreen() {
     });
   };
 
+  // ─── NMRC accent color (Aqua) ───
+  const nmrcAccent = isDark ? '#00D1D1' : '#0D9488';
+  const nmrcAccentBg = isDark ? 'rgba(0,209,209,0.08)' : 'rgba(13,148,136,0.05)';
+  const nmrcAccentBorder = isDark ? 'rgba(0,209,209,0.18)' : 'rgba(13,148,136,0.12)';
+  const nmrcBadgeBg = isDark ? 'rgba(0,209,209,0.15)' : 'rgba(13,148,136,0.10)';
+
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      {/* ─── Premium Header ─── */}
-      <Animated.View style={{ opacity: headerFade, transform: [{ translateY: headerSlide }] }}>
-        <Appbar.Header
-          elevated={false}
-          style={{
-            backgroundColor: theme.colors.background,
-            borderBottomWidth: 0,
-          }}
-        >
-          <Appbar.Content
-            title="Metro Planner"
-            subtitle=""
-            titleStyle={{ fontWeight: '800', fontSize: 22, letterSpacing: -0.3 }}
-          />
-          <Appbar.Action
-            icon={getThemeIcon()}
-            onPress={handleCycleTheme}
-            color={theme.colors.primary}
-          />
-        </Appbar.Header>
+      {/* ─── Header (no theme toggle — that's in Settings) ─── */}
+      <Appbar.Header
+        elevated={false}
+        style={{ backgroundColor: theme.colors.background, borderBottomWidth: 0 }}
+      >
+        <Appbar.Content
+          title="Metro Planner"
+          titleStyle={{ fontWeight: '800', fontSize: 22, letterSpacing: -0.3 }}
+        />
+      </Appbar.Header>
 
-        {/* Greeting banner */}
-        <View style={[styles.greetingBanner, { backgroundColor: isDark ? `${theme.colors.primary}10` : `${theme.colors.primary}08` }]}>
-          <Ionicons name={greeting.icon as any} size={18} color={theme.colors.primary} />
-          <Text style={[styles.greetingText, { color: theme.colors.primary }]}>
-            {greeting.text}
-          </Text>
-          <Text style={[styles.greetingSubtext, { color: theme.colors.onSurfaceVariant }]}>
-            Delhi & Noida Metro
-          </Text>
-        </View>
-      </Animated.View>
+      {/* ─── Greeting banner ─── */}
+      <View style={[styles.greetingBanner, { backgroundColor: isDark ? `${theme.colors.primary}0C` : `${theme.colors.primary}06` }]}>
+        <Ionicons name={greeting.icon as any} size={16} color={theme.colors.primary} />
+        <Text style={[styles.greetingText, { color: theme.colors.primary }]}>
+          {greeting.text}
+        </Text>
+        <Text style={[styles.greetingSubtext, { color: theme.colors.onSurfaceVariant }]}>
+          Delhi & Noida Metro
+        </Text>
+      </View>
       
       <ScrollView
         style={{ flex: 1 }}
@@ -269,26 +229,21 @@ export function HomeScreen() {
         )}
 
         {/* ─── DMRC Planner Card ─── */}
-        <Animated.View
+        <View
           style={[
             styles.plannerCard,
             {
-              backgroundColor: isDark ? `${theme.colors.primary}12` : `${theme.colors.primary}0A`,
-              borderWidth: isDark ? 1 : 1,
-              borderColor: isDark ? `${theme.colors.primary}20` : `${theme.colors.primary}15`,
-              opacity: cardFade,
-              transform: [{ translateY: cardSlide }],
+              backgroundColor: isDark ? `${theme.colors.primary}0A` : `${theme.colors.primary}05`,
+              borderWidth: 1,
+              borderColor: isDark ? `${theme.colors.primary}18` : `${theme.colors.primary}10`,
             },
           ]}
         >
-          <View style={[styles.cardHeaderRow, { backgroundColor: isDark ? `${theme.colors.primary}20` : `${theme.colors.primary}1A` }]}>
+          <View style={[styles.cardHeaderRow, { backgroundColor: isDark ? `${theme.colors.primary}15` : `${theme.colors.primary}0C` }]}>
             <View style={[styles.cardHeaderIcon, { backgroundColor: theme.colors.primary }]}>
               <Ionicons name="subway" size={16} color={theme.colors.onPrimary} />
             </View>
             <Text style={[styles.cardHeaderTitle, { color: theme.colors.primary }]}>Delhi Metro (DMRC)</Text>
-            <View style={[styles.networkBadge, { backgroundColor: isDark ? `${semantic.blue_line}20` : `${semantic.blue_line}15` }]}>
-              <Text style={{ fontSize: 10, fontWeight: '700', color: semantic.blue_line }}>11 Lines</Text>
-            </View>
           </View>
           
           <View style={styles.stationsBlock}>
@@ -299,15 +254,29 @@ export function HomeScreen() {
             </View>
 
             <View style={styles.inputsColumn}>
-              <Pressable style={[styles.stationInput, { backgroundColor: isDark ? `${semantic.blue_line}14` : `${semantic.blue_line}0A` }]} onPress={fromPickerDmrc.open}>
-                <Ionicons name="ellipse" size={8} color={semantic.success} style={{ marginRight: 4 }} />
+              <Pressable
+                style={[styles.stationInput, {
+                  backgroundColor: isDark ? theme.colors.surfaceVariant : theme.colors.surface,
+                  borderWidth: 1,
+                  borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                }]}
+                onPress={fromPickerDmrc.open}
+              >
+                <View style={[styles.inputDot, { backgroundColor: semantic.success }]} />
                 <Text style={[{ flex: 1, color: fromPickerDmrc.station ? theme.colors.onSurface : theme.colors.onSurfaceVariant, fontWeight: fromPickerDmrc.station ? '700' : '500' }]} numberOfLines={1}>
                   {fromPickerDmrc.station?.name ?? 'Where from?'}
                 </Text>
               </Pressable>
 
-              <Pressable style={[styles.stationInput, { backgroundColor: isDark ? `${semantic.green_line}14` : `${semantic.green_line}0A` }]} onPress={toPickerDmrc.open}>
-                <Ionicons name="location" size={10} color={semantic.error} style={{ marginRight: 4 }} />
+              <Pressable
+                style={[styles.stationInput, {
+                  backgroundColor: isDark ? theme.colors.surfaceVariant : theme.colors.surface,
+                  borderWidth: 1,
+                  borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                }]}
+                onPress={toPickerDmrc.open}
+              >
+                <View style={[styles.inputDot, { backgroundColor: semantic.error }]} />
                 <Text style={[{ flex: 1, color: toPickerDmrc.station ? theme.colors.onSurface : theme.colors.onSurfaceVariant, fontWeight: toPickerDmrc.station ? '700' : '500' }]} numberOfLines={1}>
                   {toPickerDmrc.station?.name ?? 'Where to?'}
                 </Text>
@@ -324,32 +293,32 @@ export function HomeScreen() {
             onPress={handleFindRouteDmrc}
             disabled={!canSearchDmrc}
             icon="navigation"
-            style={[styles.findButton, { opacity: canSearchDmrc ? 1 : 0.6 }]}
+            style={[styles.findButton, { opacity: canSearchDmrc ? 1 : 0.5 }]}
             contentStyle={{ paddingVertical: 8 }}
             labelStyle={{ fontSize: 16, fontWeight: '700' }}
           >
             Find DMRC Route
           </Button>
-        </Animated.View>
+        </View>
 
         {/* ─── NMRC Planner Card ─── */}
         <View
           style={[
             styles.plannerCard,
             {
-              backgroundColor: isDark ? `${semantic.info}10` : `${semantic.info}06`,
+              backgroundColor: nmrcAccentBg,
               borderWidth: 1,
-              borderColor: isDark ? `${semantic.info}20` : `${semantic.info}15`,
+              borderColor: nmrcAccentBorder,
             },
           ]}
         >
-          <View style={[styles.cardHeaderRow, { backgroundColor: isDark ? `${semantic.info}20` : `${semantic.info}1A` }]}>
-            <View style={[styles.cardHeaderIcon, { backgroundColor: semantic.info }]}>
+          <View style={[styles.cardHeaderRow, { backgroundColor: isDark ? 'rgba(0,209,209,0.12)' : 'rgba(13,148,136,0.08)' }]}>
+            <View style={[styles.cardHeaderIcon, { backgroundColor: nmrcAccent }]}>
               <Ionicons name="subway" size={16} color="#FFFFFF" />
             </View>
-            <Text style={[styles.cardHeaderTitle, { color: semantic.info }]}>Noida Metro (NMRC)</Text>
-            <View style={[styles.networkBadge, { backgroundColor: isDark ? 'rgba(0,209,209,0.20)' : 'rgba(0,181,181,0.15)' }]}>
-              <Text style={{ fontSize: 10, fontWeight: '700', color: isDark ? '#00D1D1' : '#00B5B5' }}>Aqua Line</Text>
+            <Text style={[styles.cardHeaderTitle, { color: nmrcAccent }]}>Noida Metro (NMRC)</Text>
+            <View style={[styles.networkBadge, { backgroundColor: nmrcBadgeBg }]}>
+              <Text style={{ fontSize: 10, fontWeight: '700', color: nmrcAccent }}>Aqua Line</Text>
             </View>
           </View>
           
@@ -361,22 +330,36 @@ export function HomeScreen() {
             </View>
 
             <View style={styles.inputsColumn}>
-              <Pressable style={[styles.stationInput, { backgroundColor: isDark ? `${semantic.blue_line}14` : `${semantic.blue_line}0A` }]} onPress={fromPickerNmrc.open}>
-                <Ionicons name="ellipse" size={8} color={semantic.success} style={{ marginRight: 4 }} />
+              <Pressable
+                style={[styles.stationInput, {
+                  backgroundColor: isDark ? theme.colors.surfaceVariant : theme.colors.surface,
+                  borderWidth: 1,
+                  borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                }]}
+                onPress={fromPickerNmrc.open}
+              >
+                <View style={[styles.inputDot, { backgroundColor: semantic.success }]} />
                 <Text style={[{ flex: 1, color: fromPickerNmrc.station ? theme.colors.onSurface : theme.colors.onSurfaceVariant, fontWeight: fromPickerNmrc.station ? '700' : '500' }]} numberOfLines={1}>
                   {fromPickerNmrc.station?.name ?? 'Where from?'}
                 </Text>
               </Pressable>
 
-              <Pressable style={[styles.stationInput, { backgroundColor: isDark ? `${semantic.green_line}14` : `${semantic.green_line}0A` }]} onPress={toPickerNmrc.open}>
-                <Ionicons name="location" size={10} color={semantic.error} style={{ marginRight: 4 }} />
+              <Pressable
+                style={[styles.stationInput, {
+                  backgroundColor: isDark ? theme.colors.surfaceVariant : theme.colors.surface,
+                  borderWidth: 1,
+                  borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                }]}
+                onPress={toPickerNmrc.open}
+              >
+                <View style={[styles.inputDot, { backgroundColor: semantic.error }]} />
                 <Text style={[{ flex: 1, color: toPickerNmrc.station ? theme.colors.onSurface : theme.colors.onSurfaceVariant, fontWeight: toPickerNmrc.station ? '700' : '500' }]} numberOfLines={1}>
                   {toPickerNmrc.station?.name ?? 'Where to?'}
                 </Text>
               </Pressable>
             </View>
 
-            <Pressable style={[styles.swapBtn, { backgroundColor: semantic.info }]} onPress={handleSwapNmrc}>
+            <Pressable style={[styles.swapBtn, { backgroundColor: nmrcAccent }]} onPress={handleSwapNmrc}>
               <Ionicons name="swap-vertical" size={18} color="#FFFFFF" />
             </Pressable>
           </View>
@@ -386,10 +369,11 @@ export function HomeScreen() {
             onPress={handleFindRouteNmrc}
             disabled={!canSearchNmrc}
             icon="navigation"
-            style={[styles.findButton, { opacity: canSearchNmrc ? 1 : 0.6 }]}
+            style={[styles.findButton, { opacity: canSearchNmrc ? 1 : 0.5 }]}
             contentStyle={{ paddingVertical: 8 }}
             labelStyle={{ fontSize: 16, fontWeight: '700' }}
-            buttonColor={semantic.info}
+            buttonColor={nmrcAccent}
+            textColor="#FFFFFF"
           >
             Find NMRC Route
           </Button>
@@ -406,15 +390,15 @@ export function HomeScreen() {
                   style={[
                     styles.popularCard,
                     {
-                      backgroundColor: isDark ? `${semantic.blue_line}12` : `${semantic.blue_line}08`,
-                      borderWidth: isDark ? 1 : 1,
-                      borderColor: isDark ? `${semantic.blue_line}20` : `${semantic.blue_line}12`,
+                      backgroundColor: theme.colors.surface,
+                      borderWidth: 1,
+                      borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
                     },
                   ]}
                   onPress={() => handleSavedRoute(route.fromCode, route.toCode, route.fromName, route.toName)}
                 >
-                  <View style={[styles.popularIcon, { backgroundColor: semantic.blue_line }]}>
-                    <Ionicons name="train" size={16} color="#FFFFFF" />
+                  <View style={[styles.popularIcon, { backgroundColor: isDark ? `${semantic.blue_line}20` : `${semantic.blue_line}12` }]}>
+                    <Ionicons name="train" size={16} color={semantic.blue_line} />
                   </View>
                   <Text style={{ fontWeight: '700', color: theme.colors.onSurface, fontSize: 13, flex: 1, flexWrap: 'wrap' }}>
                     {route.fromName} → {route.toName}
@@ -436,15 +420,15 @@ export function HomeScreen() {
                   style={[
                     styles.popularCard,
                     {
-                      backgroundColor: isDark ? `${semantic.success}12` : `${semantic.success}08`,
-                      borderWidth: isDark ? 1 : 1,
-                      borderColor: isDark ? `${semantic.success}20` : `${semantic.success}12`,
+                      backgroundColor: theme.colors.surface,
+                      borderWidth: 1,
+                      borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
                     },
                   ]}
                   onPress={() => navigation.navigate('StationDetail', { stationCode: station.code, stationName: station.name })}
                 >
-                  <View style={[styles.popularIcon, { backgroundColor: semantic.success }]}>
-                    <Ionicons name="business" size={16} color="#000000" />
+                  <View style={[styles.popularIcon, { backgroundColor: isDark ? `${semantic.warning}20` : `${semantic.warning}12` }]}>
+                    <Ionicons name="star" size={16} color={semantic.warning} />
                   </View>
                   <Text style={{ fontWeight: '700', color: theme.colors.onSurface, fontSize: 13 }} numberOfLines={1}>
                     {station.name}
@@ -557,6 +541,11 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: bentoRadius.button,
     gap: spacing.sm,
+  },
+  inputDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   swapBtn: {
     width: 44,

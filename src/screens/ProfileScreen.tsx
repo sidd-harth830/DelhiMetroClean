@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { ScrollView, StyleSheet, View, Alert, Animated } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { ScrollView, StyleSheet, View, Alert } from 'react-native';
 import { Avatar, List, Text, useTheme, Button } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -10,31 +10,21 @@ import { useAppTheme } from '../theme/ThemeContext';
 import { bentoRadius } from '../theme/colors';
 import { FavoritesStorage } from '../storage/favorites';
 
-/* ─── Animated stat counter ─── */
-function AnimatedStat({ value, label, icon, color, bgColor }: {
+/* ─── Stat card (no animation to avoid conflicts during theme switch) ─── */
+function StatCard({ value, label, icon, color, bgColor }: {
     value: number;
     label: string;
     icon: string;
     color: string;
     bgColor: string;
 }) {
-    const countAnim = useRef(new Animated.Value(0)).current;
-    const scaleAnim = useRef(new Animated.Value(0.9)).current;
     const theme = useTheme();
-
-    useEffect(() => {
-        Animated.parallel([
-            Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, friction: 6, tension: 80 }),
-            Animated.timing(countAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
-        ]).start();
-    }, [value]);
-
     return (
-        <Animated.View style={[styles.statCard, { backgroundColor: bgColor, transform: [{ scale: scaleAnim }] }]}>
+        <View style={[styles.statCard, { backgroundColor: bgColor }]}>
             <Ionicons name={icon as any} size={20} color={color} />
             <Text style={[styles.statValue, { color: theme.colors.onSurface }]}>{value}</Text>
             <Text style={[styles.statLabel, { color: theme.colors.onSurfaceVariant }]}>{label}</Text>
-        </Animated.View>
+        </View>
     );
 }
 
@@ -45,28 +35,9 @@ export function ProfileScreen() {
     const navigation = useNavigation<any>();
     const { user, logout } = useAuth();
 
-    const isGuest = !user || !user.email; // Appwrite anonymous users don't have emails
+    const isGuest = !user || !user.email;
     const [savedRoutesCount, setSavedRoutesCount] = useState(0);
     const [favoriteStationsCount, setFavoriteStationsCount] = useState(0);
-
-    // ─── Animated entrance ───
-    const headerFade = useRef(new Animated.Value(0)).current;
-    const headerScale = useRef(new Animated.Value(0.95)).current;
-    const contentFade = useRef(new Animated.Value(0)).current;
-    const contentSlide = useRef(new Animated.Value(20)).current;
-
-    useEffect(() => {
-        Animated.stagger(200, [
-            Animated.parallel([
-                Animated.timing(headerFade, { toValue: 1, duration: 500, useNativeDriver: true }),
-                Animated.spring(headerScale, { toValue: 1, useNativeDriver: true, friction: 8 }),
-            ]),
-            Animated.parallel([
-                Animated.timing(contentFade, { toValue: 1, duration: 400, useNativeDriver: true }),
-                Animated.spring(contentSlide, { toValue: 0, useNativeDriver: true, friction: 8 }),
-            ]),
-        ]).start();
-    }, []);
 
     useFocusEffect(
         useCallback(() => {
@@ -99,22 +70,18 @@ export function ProfileScreen() {
             style={[styles.container, { backgroundColor: theme.colors.background }]}
             contentContainerStyle={{ paddingTop: insets.top, paddingBottom: insets.bottom + spacing.tabBarClearance }}
         >
-            {/* ─── Gradient Hero Header ─── */}
-            <Animated.View style={[
+            {/* ─── Hero Header ─── */}
+            <View style={[
                 styles.heroHeader,
                 {
-                    backgroundColor: isDark ? `${primaryColor}10` : `${primaryColor}06`,
-                    opacity: headerFade,
-                    transform: [{ scale: headerScale }],
+                    backgroundColor: isDark ? `${primaryColor}08` : `${primaryColor}04`,
+                    borderWidth: 1,
+                    borderColor: isDark ? `${primaryColor}15` : `${primaryColor}08`,
                 },
             ]}>
-                {/* Decorative accent circle */}
-                <View style={[styles.heroAccentCircle, { backgroundColor: `${primaryColor}08`, top: -30, right: -30 }]} />
-                <View style={[styles.heroAccentCircle, { backgroundColor: `${primaryColor}06`, bottom: -20, left: -20, width: 100, height: 100 }]} />
-                
-                {/* Avatar with glowing ring */}
+                {/* Avatar with ring */}
                 <View style={styles.avatarContainer}>
-                    <View style={[styles.avatarGlowRing, { borderColor: `${primaryColor}30` }]}>
+                    <View style={[styles.avatarGlowRing, { borderColor: `${primaryColor}25` }]}>
                         <Avatar.Text 
                             size={80} 
                             label={isGuest ? 'G' : (user?.name ? user.name.charAt(0).toUpperCase() : 'U')} 
@@ -128,7 +95,7 @@ export function ProfileScreen() {
                     {isGuest ? 'Guest User' : (user?.name || 'User')}
                 </Text>
                 {!isGuest && user?.email && (
-                    <View style={[styles.emailBadge, { backgroundColor: isDark ? `${primaryColor}15` : `${primaryColor}08` }]}>
+                    <View style={[styles.emailBadge, { backgroundColor: isDark ? `${primaryColor}12` : `${primaryColor}06` }]}>
                         <Ionicons name="mail" size={12} color={primaryColor} />
                         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
                             {user.email}
@@ -138,40 +105,38 @@ export function ProfileScreen() {
 
                 {/* ─── Stats Row ─── */}
                 <View style={styles.statsRow}>
-                    <AnimatedStat
+                    <StatCard
                         value={savedRoutesCount}
                         label="Routes"
                         icon="bookmark"
                         color={semantic.info}
-                        bgColor={isDark ? `${semantic.info}15` : `${semantic.info}08`}
+                        bgColor={isDark ? `${semantic.info}12` : `${semantic.info}06`}
                     />
-                    <AnimatedStat
+                    <StatCard
                         value={favoriteStationsCount}
                         label="Favorites"
                         icon="star"
                         color={semantic.warning}
-                        bgColor={isDark ? `${semantic.warning}15` : `${semantic.warning}08`}
+                        bgColor={isDark ? `${semantic.warning}12` : `${semantic.warning}06`}
                     />
-                    <AnimatedStat
+                    <StatCard
                         value={isGuest ? 0 : 1}
                         label={isGuest ? 'Guest' : 'Synced'}
                         icon={isGuest ? 'person-outline' : 'cloud-done'}
                         color={semantic.success}
-                        bgColor={isDark ? `${semantic.success}15` : `${semantic.success}08`}
+                        bgColor={isDark ? `${semantic.success}12` : `${semantic.success}06`}
                     />
                 </View>
-            </Animated.View>
+            </View>
 
             {/* ─── Guest CTA ─── */}
             {isGuest && (
-                <Animated.View style={[
+                <View style={[
                     styles.card, 
                     { 
                         backgroundColor: theme.colors.surface, 
-                        borderColor: isDark ? `${primaryColor}20` : `${primaryColor}10`,
+                        borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
                         borderWidth: 1,
-                        opacity: contentFade,
-                        transform: [{ translateY: contentSlide }],
                     }
                 ]}>
                     <View style={styles.ctaHeader}>
@@ -185,7 +150,7 @@ export function ProfileScreen() {
                     </Text>
                     <Button 
                         mode="contained" 
-                        onPress={handleLogout} // Logging out of guest session returns to login screen
+                        onPress={handleLogout}
                         buttonColor={theme.colors.primary}
                         textColor={theme.colors.onPrimary}
                         style={{ borderRadius: bentoRadius.button }}
@@ -195,100 +160,98 @@ export function ProfileScreen() {
                     >
                         Create Account
                     </Button>
-                </Animated.View>
+                </View>
             )}
 
             {/* ─── Metro Features ─── */}
-            <Animated.View style={{ opacity: contentFade, transform: [{ translateY: contentSlide }] }}>
+            <List.Section style={styles.section}>
+                <View style={styles.sectionHeaderRow}>
+                    <Ionicons name="train" size={16} color={theme.colors.primary} />
+                    <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>Metro Features</List.Subheader>
+                </View>
+                <View style={[styles.listCard, { backgroundColor: theme.colors.surface }]}>
+                    <List.Item
+                        title="Metro Lines & Stations"
+                        description="Browse all metro lines and stations"
+                        left={(props) => <List.Icon {...props} icon="transit-connection" color={theme.colors.primary} />}
+                        right={(props) => <List.Icon {...props} icon="chevron-right" color={theme.colors.onSurfaceVariant} />}
+                        onPress={() => navigation.navigate('LinesStack')}
+                        titleStyle={{ color: theme.colors.onSurface, fontWeight: '600' }}
+                        descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
+                    />
+                    <List.Item
+                        title="Explore Delhi"
+                        description="Discover points of interest near stations"
+                        left={(props) => <List.Icon {...props} icon="map-marker-radius" color={theme.colors.primary} />}
+                        right={(props) => <List.Icon {...props} icon="chevron-right" color={theme.colors.onSurfaceVariant} />}
+                        onPress={() => navigation.navigate('ExploreStack')}
+                        titleStyle={{ color: theme.colors.onSurface, fontWeight: '600' }}
+                        descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
+                    />
+                </View>
+            </List.Section>
+
+            {/* ─── Preferences ─── */}
+            <List.Section style={styles.section}>
+                <View style={styles.sectionHeaderRow}>
+                    <Ionicons name="heart" size={16} color={theme.colors.primary} />
+                    <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>Preferences</List.Subheader>
+                </View>
+                <View style={[styles.listCard, { backgroundColor: theme.colors.surface }]}>
+                    <List.Item
+                        title="Saved Routes"
+                        description={savedRoutesCount > 0 ? `${savedRoutesCount} saved route${savedRoutesCount !== 1 ? 's' : ''}` : 'Quick access to your regular journeys'}
+                        left={(props) => <List.Icon {...props} icon="bookmark-outline" color={theme.colors.secondary} />}
+                        right={(props) => <List.Icon {...props} icon="chevron-right" color={theme.colors.onSurfaceVariant} />}
+                        onPress={() => navigation.navigate('SavedRoutes' as never)}
+                        titleStyle={{ color: theme.colors.onSurface, fontWeight: '600' }}
+                        descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
+                    />
+                    <List.Item
+                        title="Favorite Stations"
+                        description={favoriteStationsCount > 0 ? `${favoriteStationsCount} favorite station${favoriteStationsCount !== 1 ? 's' : ''}` : 'Your most visited stations'}
+                        left={(props) => <List.Icon {...props} icon="star-outline" color={semantic.warning} />}
+                        right={(props) => <List.Icon {...props} icon="chevron-right" color={theme.colors.onSurfaceVariant} />}
+                        onPress={() => navigation.navigate('FavoriteStations' as never)}
+                        titleStyle={{ color: theme.colors.onSurface, fontWeight: '600' }}
+                        descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
+                    />
+                </View>
+            </List.Section>
+
+            {/* ─── Admin ─── */}
+            {user?.email === 'leocarnivas@gmail.com' && (
                 <List.Section style={styles.section}>
                     <View style={styles.sectionHeaderRow}>
-                        <Ionicons name="train" size={16} color={theme.colors.primary} />
-                        <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>Metro Features</List.Subheader>
+                        <Ionicons name="shield-checkmark" size={16} color={theme.colors.error} />
+                        <List.Subheader style={{ color: theme.colors.error, fontWeight: '700' }}>Admin</List.Subheader>
                     </View>
                     <View style={[styles.listCard, { backgroundColor: theme.colors.surface }]}>
                         <List.Item
-                            title="Metro Lines & Stations"
-                            description="Browse all metro lines and stations"
-                            left={(props) => <List.Icon {...props} icon="transit-connection" color={theme.colors.primary} />}
+                            title="Admin Dashboard"
+                            description="Manage API key requests"
+                            left={(props) => <List.Icon {...props} icon="shield-check" color={theme.colors.error} />}
                             right={(props) => <List.Icon {...props} icon="chevron-right" color={theme.colors.onSurfaceVariant} />}
-                            onPress={() => navigation.navigate('LinesStack')}
-                            titleStyle={{ color: theme.colors.onSurface, fontWeight: '600' }}
-                            descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
-                        />
-                        <List.Item
-                            title="Explore Delhi"
-                            description="Discover points of interest near stations"
-                            left={(props) => <List.Icon {...props} icon="map-marker-radius" color={theme.colors.primary} />}
-                            right={(props) => <List.Icon {...props} icon="chevron-right" color={theme.colors.onSurfaceVariant} />}
-                            onPress={() => navigation.navigate('ExploreStack')}
+                            onPress={() => navigation.navigate('AdminDashboard')}
                             titleStyle={{ color: theme.colors.onSurface, fontWeight: '600' }}
                             descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
                         />
                     </View>
                 </List.Section>
+            )}
 
-                {/* ─── Preferences ─── */}
-                <List.Section style={styles.section}>
-                    <View style={styles.sectionHeaderRow}>
-                        <Ionicons name="heart" size={16} color={theme.colors.primary} />
-                        <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>Preferences</List.Subheader>
-                    </View>
-                    <View style={[styles.listCard, { backgroundColor: theme.colors.surface }]}>
-                        <List.Item
-                            title="Saved Routes"
-                            description={savedRoutesCount > 0 ? `${savedRoutesCount} saved route${savedRoutesCount !== 1 ? 's' : ''}` : 'Quick access to your regular journeys'}
-                            left={(props) => <List.Icon {...props} icon="bookmark-outline" color={theme.colors.secondary} />}
-                            right={(props) => <List.Icon {...props} icon="chevron-right" color={theme.colors.onSurfaceVariant} />}
-                            onPress={() => navigation.navigate('SavedRoutes' as never)}
-                            titleStyle={{ color: theme.colors.onSurface, fontWeight: '600' }}
-                            descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
-                        />
-                        <List.Item
-                            title="Favorite Stations"
-                            description={favoriteStationsCount > 0 ? `${favoriteStationsCount} favorite station${favoriteStationsCount !== 1 ? 's' : ''}` : 'Your most visited stations'}
-                            left={(props) => <List.Icon {...props} icon="star-outline" color={semantic.warning} />}
-                            right={(props) => <List.Icon {...props} icon="chevron-right" color={theme.colors.onSurfaceVariant} />}
-                            onPress={() => navigation.navigate('FavoriteStations' as never)}
-                            titleStyle={{ color: theme.colors.onSurface, fontWeight: '600' }}
-                            descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
-                        />
-                    </View>
-                </List.Section>
-
-                {/* ─── Admin ─── */}
-                {user?.email === 'leocarnivas@gmail.com' && (
-                    <List.Section style={styles.section}>
-                        <View style={styles.sectionHeaderRow}>
-                            <Ionicons name="shield-checkmark" size={16} color={theme.colors.error} />
-                            <List.Subheader style={{ color: theme.colors.error, fontWeight: '700' }}>Admin</List.Subheader>
-                        </View>
-                        <View style={[styles.listCard, { backgroundColor: theme.colors.surface }]}>
-                            <List.Item
-                                title="Admin Dashboard"
-                                description="Manage API key requests"
-                                left={(props) => <List.Icon {...props} icon="shield-check" color={theme.colors.error} />}
-                                right={(props) => <List.Icon {...props} icon="chevron-right" color={theme.colors.onSurfaceVariant} />}
-                                onPress={() => navigation.navigate('AdminDashboard')}
-                                titleStyle={{ color: theme.colors.onSurface, fontWeight: '600' }}
-                                descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
-                            />
-                        </View>
-                    </List.Section>
-                )}
-
-                {/* ─── Logout ─── */}
-                {!isGuest && (
-                    <Button 
-                        mode="outlined" 
-                        onPress={handleLogout}
-                        style={[styles.logoutButton, { borderColor: theme.colors.error }]}
-                        textColor={theme.colors.error}
-                        icon="logout"
-                    >
-                        Log Out
-                    </Button>
-                )}
-            </Animated.View>
+            {/* ─── Logout ─── */}
+            {!isGuest && (
+                <Button 
+                    mode="outlined" 
+                    onPress={handleLogout}
+                    style={[styles.logoutButton, { borderColor: theme.colors.error }]}
+                    textColor={theme.colors.error}
+                    icon="logout"
+                >
+                    Log Out
+                </Button>
+            )}
         </ScrollView>
     );
 }
@@ -305,13 +268,6 @@ const styles = StyleSheet.create({
         borderRadius: bentoRadius.heroCard,
         alignItems: 'center',
         overflow: 'hidden',
-        position: 'relative',
-    },
-    heroAccentCircle: {
-        position: 'absolute',
-        width: 140,
-        height: 140,
-        borderRadius: 70,
     },
     avatarContainer: {
         marginBottom: spacing.md,

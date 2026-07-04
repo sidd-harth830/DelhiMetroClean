@@ -39,8 +39,10 @@ const TAB_ICONS: Record<
 };
 
 /**
- * Each tab item uses Animated API with elastic spring physics
- * for a premium pill transition with a subtle glow effect.
+ * Tab item with smooth pill animation.
+ * IMPORTANT: All animated values use useNativeDriver: false
+ * because we animate both colors (JS-only) and transforms
+ * on the same Animated.View. Mixing drivers causes crashes.
  */
 function TabItem({ route, isFocused, descriptors, onPress, isDark, theme }: {
   route: any;
@@ -51,24 +53,14 @@ function TabItem({ route, isFocused, descriptors, onPress, isDark, theme }: {
   theme: any;
 }) {
   const anim = useRef(new Animated.Value(isFocused ? 1 : 0)).current;
-  const scaleAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    // Elastic spring for pill background
     Animated.spring(anim, {
       toValue: isFocused ? 1 : 0,
-      useNativeDriver: false,
-      friction: 7,       // slightly bouncier
-      tension: 100,      // snappier
+      useNativeDriver: false, // Must be false — we animate colors
+      friction: 7,
+      tension: 100,
     }).start();
-
-    // Subtle bounce effect on selection
-    if (isFocused) {
-      Animated.sequence([
-        Animated.timing(scaleAnim, { toValue: 0.92, duration: 80, useNativeDriver: true }),
-        Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, friction: 4, tension: 120 }),
-      ]).start();
-    }
   }, [isFocused]);
 
   const { options } = descriptors[route.key];
@@ -97,9 +89,9 @@ function TabItem({ route, isFocused, descriptors, onPress, isDark, theme }: {
     outputRange: [0, 0, 1],
   });
 
-  const iconScale = anim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [1, 1.1],
+  const pillScale = anim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [1, 0.96, 1],
   });
 
   return (
@@ -111,40 +103,21 @@ function TabItem({ route, isFocused, descriptors, onPress, isDark, theme }: {
             backgroundColor: pillBg,
             borderColor: pillBorderColor,
             borderWidth: 1,
-            transform: [{ scale: scaleAnim }],
+            transform: [{ scale: pillScale }],
           },
         ]}
       >
-        {/* Glow shadow for active tab */}
-        {isFocused && (
-          <View
-            style={[
-              styles.glowDot,
-              {
-                backgroundColor: theme.colors.primary,
-                ...(Platform.OS === 'ios' ? {
-                  shadowColor: theme.colors.primary,
-                  shadowOffset: { width: 0, height: 0 },
-                  shadowOpacity: 0.4,
-                  shadowRadius: 8,
-                } : {}),
-              },
-            ]}
-          />
-        )}
-        <Animated.View style={{ transform: [{ scale: iconScale }] }}>
-          <Ionicons
-            name={iconName}
-            size={20}
-            color={
-              isFocused
-                ? theme.colors.primary
-                : isDark
-                  ? "rgba(255, 255, 255, 0.45)"
-                  : "rgba(0, 0, 0, 0.35)"
-            }
-          />
-        </Animated.View>
+        <Ionicons
+          name={iconName}
+          size={20}
+          color={
+            isFocused
+              ? theme.colors.primary
+              : isDark
+                ? "rgba(255, 255, 255, 0.45)"
+                : "rgba(0, 0, 0, 0.35)"
+          }
+        />
         {isFocused && (
           <Animated.View style={{ opacity: labelOpacity }}>
             <Text
@@ -355,15 +328,6 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     height: 40,
     overflow: 'hidden',
-    position: 'relative',
-  },
-  glowDot: {
-    position: 'absolute',
-    bottom: -2,
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    opacity: 0.6,
   },
   tabLabel: {
     fontSize: 11,
