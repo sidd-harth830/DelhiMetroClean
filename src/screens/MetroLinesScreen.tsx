@@ -52,11 +52,11 @@ function LineRow({ line }: { line: MetroLine }) {
 }
 
 export function MetroLinesScreen() {
-  const { data, isLoading, isError, refetch } = useMetroLinesQuery();
+  const { data, isLoading, isError, error, refetch } = useMetroLinesQuery();
   const theme = useTheme();
 
   if (isLoading) return <LoadingState message="Loading metro lines..." />;
-  if (isError) return <ErrorState message="Could not load metro lines" onRetry={refetch} />;
+  if (isError) return <ErrorState message="Could not load metro lines" error={error} onRetry={refetch} />;
 
   return (
     <FlatList

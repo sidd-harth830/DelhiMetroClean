@@ -88,10 +88,10 @@ export function LineStationsScreen() {
   const route = useRoute<Route>();
   const theme = useTheme();
   const { lineCode, lineColor } = route.params;
-  const { data, isLoading, isError, refetch } = useStationsByLineQuery(lineCode);
+  const { data, isLoading, isError, error, refetch } = useStationsByLineQuery(lineCode);
 
   if (isLoading) return <LoadingState message="Loading stations..." />;
-  if (isError) return <ErrorState message="Could not load stations" onRetry={refetch} />;
+  if (isError) return <ErrorState message="Could not load stations" error={error} onRetry={refetch} />;
 
   return (
     <FlatList

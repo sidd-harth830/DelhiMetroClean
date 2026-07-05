@@ -158,14 +158,14 @@ export function JourneyResultsScreen() {
   }, [isNmrc, nmrcStations, nmrcQuery.data, fromCode, toCode]);
 
   if (isLoading) return <LoadingState message="Planning your journey..." />;
-  if (isError) return <ErrorState message="Could not plan this journey" onRetry={refetch} />;
+  if (isError) return <ErrorState message="Could not plan this journey" error={dmrcQuery.error || nmrcQuery.error} onRetry={refetch} />;
   
   // Safe access to data — no more non-null assertions
   const dmrcData = dmrcQuery.data;
   const nmrcData = nmrcQuery.data;
 
-  if (!isNmrc && !dmrcData) return <ErrorState message="No DMRC route data available" onRetry={refetch} />;
-  if (isNmrc && !nmrcData) return <ErrorState message="No NMRC route data available" onRetry={refetch} />;
+  if (!isNmrc && !dmrcData) return <ErrorState message="No DMRC route data available" error={dmrcQuery.error} onRetry={refetch} />;
+  if (isNmrc && !nmrcData) return <ErrorState message="No NMRC route data available" error={nmrcQuery.error} onRetry={refetch} />;
 
   // Get the active fare data based on strategy (with safe fallbacks)
   const activeDmrcFare = dmrcData

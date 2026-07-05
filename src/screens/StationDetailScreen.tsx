@@ -111,7 +111,7 @@ export function StationDetailScreen() {
   const { stationCode } = route.params;
   const theme = useTheme();
   const { semantic, isDark } = useAppTheme();
-  const { data: station, isLoading, isError, refetch } = useStationDetailQuery(stationCode);
+  const { data: station, isLoading, isError, error, refetch } = useStationDetailQuery(stationCode);
   const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
@@ -130,8 +130,8 @@ export function StationDetailScreen() {
   };
 
   if (isLoading) return <LoadingState message="Loading station details..." />;
-  if (isError) return <ErrorState message="Could not load station details" onRetry={refetch} />;
-  if (!station) return <ErrorState message="Station not found" />;
+  if (isError) return <ErrorState message="Could not load station details" error={error} onRetry={refetch} />;
+  if (!station) return <ErrorState message="Station not found" error={new Error("Station data is null or empty.")} />;
 
   const lineColor = station.metro_lines?.[0]?.primary_color_code ?? theme.colors.primary;
 

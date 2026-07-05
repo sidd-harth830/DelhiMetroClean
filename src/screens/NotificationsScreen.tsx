@@ -14,10 +14,10 @@ import { bentoRadius } from '../theme/colors';
 export function NotificationsScreen() {
   const theme = useTheme();
   const { isDark } = useAppTheme();
-  const { data, isLoading, isError, refetch, isRefetching } = useNotificationsQuery();
+  const { data, isLoading, isError, error, refetch, isRefetching } = useNotificationsQuery();
 
   if (isLoading) return <LoadingState message="Loading alerts..." />;
-  if (isError) return <ErrorState message="Could not load alerts" onRetry={refetch} />;
+  if (isError) return <ErrorState message="Could not load alerts" error={error} onRetry={refetch} />;
 
   const ListHeader = (
     <View>
