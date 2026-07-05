@@ -111,8 +111,12 @@ export class ApiClient {
         if (response.status === 401 || response.status === 403) {
           let detail: string | undefined;
           try {
-            const payload = (await response.json()) as { detail?: string };
-            detail = payload.detail;
+            const payload = (await response.json()) as any;
+            if (payload?.error?.message) {
+              detail = payload.error.description ? `${payload.error.message}: ${payload.error.description}` : payload.error.message;
+            } else {
+              detail = payload?.detail;
+            }
           } catch {
             detail = undefined;
           }
@@ -123,8 +127,12 @@ export class ApiClient {
         if (!response.ok) {
           let detail: string | undefined;
           try {
-            const payload = (await response.json()) as { detail?: string };
-            detail = payload.detail;
+            const payload = (await response.json()) as any;
+            if (payload?.error?.message) {
+              detail = payload.error.description ? `${payload.error.message}: ${payload.error.description}` : payload.error.message;
+            } else {
+              detail = payload?.detail;
+            }
           } catch {
             detail = undefined;
           }
