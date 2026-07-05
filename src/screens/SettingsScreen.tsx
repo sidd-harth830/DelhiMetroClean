@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { ScrollView, StyleSheet, View, Alert, Pressable, Animated as RNAnimated } from 'react-native';
-import { ActivityIndicator, List, SegmentedButtons, Text, useTheme } from 'react-native-paper';
+import { ActivityIndicator, List, SegmentedButtons, Text, useTheme, Portal, Dialog, TextInput, Button } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQueryClient } from '@tanstack/react-query';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -15,6 +15,7 @@ import Constants from 'expo-constants';
 import { databases } from '../config/appwrite';
 import { Query } from 'react-native-appwrite';
 import { classifyError } from '../api/errors';
+import * as Sentry from '@sentry/react-native';
 
 /* ─── Animated Palette Card ─── */
 function PaletteCard({
@@ -121,6 +122,10 @@ export function SettingsScreen() {
     
     const [isClearing, setIsClearing] = useState(false);
     const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
+    
+    const handleSendFeedback = () => {
+        Sentry.showFeedbackWidget();
+    };
 
     const isVersionGreater = (v1: string, v2: string) => {
         const p1 = v1.split('.').map(Number);
@@ -399,6 +404,24 @@ export function SettingsScreen() {
                 </View>
             </List.Section>
 
+            {/* ─── Support & Feedback ─── */}
+            <List.Section style={styles.section}>
+                <View style={styles.sectionHeaderRow}>
+                    <Ionicons name="chatbubbles" size={16} color={theme.colors.primary} />
+                    <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>Support</List.Subheader>
+                </View>
+                <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
+                    <List.Item
+                        title="Send Feedback"
+                        description="Report bugs or request new features"
+                        left={(props) => <List.Icon {...props} icon="message-draw" color={theme.colors.primary} />}
+                        onPress={handleSendFeedback}
+                        titleStyle={{ color: theme.colors.onSurface, fontWeight: '600' }}
+                        descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
+                    />
+                </View>
+            </List.Section>
+
             {/* ─── App Info ─── */}
             <List.Section style={styles.section}>
                 <View style={styles.sectionHeaderRow}>
@@ -428,6 +451,7 @@ export function SettingsScreen() {
                     />
                 </View>
             </List.Section>
+
         </ScrollView>
     );
 }

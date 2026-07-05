@@ -41,6 +41,26 @@ function AppNavigator() {
 }
 
 import { startKeepAlive } from './src/utils/keepAlive';
+import * as Sentry from '@sentry/react-native';
+
+Sentry.init({
+  dsn: 'https://04e3db0423db831be6fe4d7377daa73b@o4510950049775616.ingest.us.sentry.io/4510950052855808',
+
+  // Adds more context data to events (IP address, cookies, user, etc.)
+  // For more information, visit: https://docs.sentry.io/platforms/react-native/data-management/data-collected/
+  sendDefaultPii: true,
+
+  // Enable Logs
+  enableLogs: true,
+
+  // Configure Session Replay
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1,
+  integrations: [Sentry.mobileReplayIntegration(), Sentry.feedbackIntegration()],
+
+  // uncomment the line below to enable Spotlight (https://spotlightjs.com)
+  // spotlight: __DEV__,
+});
 
 function AppInner() {
   const { paperTheme, navTheme } = useAppTheme();
@@ -61,7 +81,7 @@ function AppInner() {
   );
 }
 
-export default function App() {
+export default Sentry.wrap(function App() {
   return (
     <ErrorBoundary>
       <SafeAreaProvider>
@@ -77,4 +97,4 @@ export default function App() {
       </SafeAreaProvider>
     </ErrorBoundary>
   );
-}
+});

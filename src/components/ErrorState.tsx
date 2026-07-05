@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
-import { Button, Text, useTheme, Surface } from 'react-native-paper';
+import { Button, Text, useTheme } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
+import * as Sentry from '@sentry/react-native';
 import { spacing } from '../theme';
 
 interface Props {
@@ -12,54 +13,53 @@ interface Props {
 export function ErrorState({ message, error, onRetry }: Props) {
   const theme = useTheme();
 
-  // Extract technical details if it's an API Error
-  const apiError = error as any;
-  const isDetailedError = apiError && apiError.message && (apiError.statusCode || apiError.detail);
+  const handleReportBug = () => {
+    if (error) {
+      // Send the raw error directly to Sentry in the background!
+      Sentry.captureException(error);
+    }
+    // Open the Sentry feedback dialog for the user to type what happened
+    Sentry.showFeedbackWidget();
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <Ionicons name="alert-circle-outline" size={56} color={theme.colors.error} />
+      <View style={[styles.iconContainer, { backgroundColor: `${theme.colors.error}15` }]}>
+        <Ionicons name="alert-circle" size={48} color={theme.colors.error} />
+      </View>
       
-      <Text variant="titleLarge" style={{ color: theme.colors.onSurface, textAlign: 'center', marginTop: spacing.md, fontWeight: 'bold' }}>
-        {message}
+      <Text variant="titleLarge" style={[styles.title, { color: theme.colors.onSurface }]}>
+        Oops! Something went wrong.
       </Text>
 
-      {isDetailedError && (
-        <Surface style={[styles.errorCard, { backgroundColor: theme.colors.errorContainer, borderColor: theme.colors.error }]} elevation={0}>
-           {apiError.statusCode && (
-             <Text variant="labelMedium" style={[styles.errorCode, { color: theme.colors.error }]}>
-               ERROR {apiError.statusCode}
-             </Text>
-           )}
-           <Text variant="titleMedium" style={{ color: theme.colors.onErrorContainer, fontWeight: '700', marginBottom: 6 }}>
-             {apiError.message}
-           </Text>
-           {apiError.detail ? (
-             <Text variant="bodyMedium" style={{ color: theme.colors.onErrorContainer, opacity: 0.9, lineHeight: 22 }}>
-               {apiError.detail}
-             </Text>
-           ) : null}
-        </Surface>
-      )}
+      <Text variant="bodyLarge" style={[styles.message, { color: theme.colors.onSurfaceVariant }]}>
+        {message || "We encountered an unexpected issue connecting to our servers."}
+      </Text>
 
-      {!isDetailedError && typeof error === 'object' && error !== null && (
-        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center', opacity: 0.8, marginTop: spacing.sm }}>
-          {(error as Error).message || 'An unexpected error occurred.'}
-        </Text>
-      )}
-
-      {onRetry ? (
+      <View style={styles.buttonRow}>
+        {onRetry && (
+          <Button 
+            mode="contained" 
+            icon="refresh"
+            onPress={onRetry} 
+            buttonColor={theme.colors.primary} 
+            textColor={theme.colors.onPrimary}
+            style={styles.actionButton}
+          >
+            Try Again
+          </Button>
+        )}
         <Button 
           mode="contained-tonal" 
-          icon="refresh"
-          onPress={onRetry} 
-          buttonColor={theme.colors.secondaryContainer} 
-          textColor={theme.colors.onSecondaryContainer}
-          style={styles.retryButton}
+          icon="bug"
+          onPress={handleReportBug} 
+          buttonColor={theme.colors.errorContainer} 
+          textColor={theme.colors.onErrorContainer}
+          style={styles.actionButton}
         >
-          Try Again
+          Report Bug
         </Button>
-      ) : null}
+      </View>
     </View>
   );
 }
@@ -71,21 +71,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: spacing.xl,
   },
-  errorCard: {
-    marginTop: spacing.lg,
-    padding: spacing.lg,
-    borderRadius: 16,
-    borderWidth: 1,
-    width: '100%',
-    maxWidth: 400,
+  iconContainer: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing.xl,
   },
-  errorCode: {
-    marginBottom: 6,
-    letterSpacing: 1,
+  title: {
     fontWeight: '800',
+    textAlign: 'center',
+    marginBottom: spacing.md,
   },
-  retryButton: {
-    marginTop: spacing.xl,
-    paddingHorizontal: spacing.lg,
+  message: {
+    textAlign: 'center',
+    opacity: 0.8,
+    lineHeight: 24,
+    maxWidth: 320,
+    marginBottom: spacing.xl,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  actionButton: {
+    minWidth: 140,
   }
 });
