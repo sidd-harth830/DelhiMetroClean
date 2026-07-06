@@ -37,8 +37,7 @@ export function NotificationCard({ notification }: Props) {
     outputRange: ['0deg', '180deg']
   });
 
-  const cardBg = isDark ? `${semantic.pink_line}1A` : `${semantic.pink_line}0D`;
-  const expandedBg = isDark ? `${semantic.pink_line}08` : `${theme.colors.surface}`;
+  const expandedBg = isDark ? `${theme.colors.elevation.level1}` : `${theme.colors.surfaceVariant}`;
 
   return (
     <View style={styles.wrapper}>
@@ -52,9 +51,9 @@ export function NotificationCard({ notification }: Props) {
           style={[
             styles.container,
             {
-              backgroundColor: cardBg,
-              borderWidth: isDark ? 0 : 1,
-              borderColor: isDark ? 'transparent' : 'rgba(0,0,0,0.04)',
+              backgroundColor: theme.colors.surface,
+              borderWidth: 1,
+              borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
             },
           ]}
         >

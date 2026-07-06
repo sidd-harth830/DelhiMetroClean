@@ -25,9 +25,6 @@ export function StationCard({ station, onPress, showChevron = true }: Props) {
   const { isDark, semantic } = useAppTheme();
 
   const primaryLineColor = station.metro_lines?.[0]?.primary_color_code ?? theme.colors.primary;
-  const cardBgColor = isDark
-    ? `${primaryLineColor}14`
-    : `${primaryLineColor}0C`;
 
   return (
     <View style={styles.wrapper}>
@@ -42,7 +39,9 @@ export function StationCard({ station, onPress, showChevron = true }: Props) {
           style={[
             styles.card,
             {
-              backgroundColor: cardBgColor,
+              backgroundColor: theme.colors.surface,
+              borderWidth: 1,
+              borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
             },
           ]}
         >

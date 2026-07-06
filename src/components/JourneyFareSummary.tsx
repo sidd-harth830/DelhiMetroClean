@@ -24,16 +24,14 @@ function FareCard({
   const theme = useTheme();
   const { isDark } = useAppTheme();
 
-  const cardBgColor = isDark ? `${color}1A` : `${color}12`;
-
   return (
     <View
       style={[
         styles.fareCard,
         {
-          backgroundColor: cardBgColor,
-          borderWidth: isDark ? 0 : 1,
-          borderColor: isDark ? 'transparent' : `${color}20`,
+          backgroundColor: theme.colors.surface,
+          borderWidth: 1,
+          borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
           overflow: 'hidden',
         },
       ]}

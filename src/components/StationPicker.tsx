@@ -102,8 +102,6 @@ export function StationPicker({ visible, onSelect, onClose, title = 'Select Stat
             contentContainerStyle={styles.list}
             renderItem={({ item }) => {
               const lineColor = item.metro_lines?.[0]?.primary_color_code ?? theme.colors.primary;
-              const cardBg = isDark ? `${lineColor}12` : `${lineColor}08`;
-
               return (
                 <View style={styles.resultWrapper}>
                   <TouchableRipple
@@ -116,7 +114,9 @@ export function StationPicker({ visible, onSelect, onClose, title = 'Select Stat
                       style={[
                         styles.resultCard,
                         {
-                          backgroundColor: cardBg,
+                          backgroundColor: theme.colors.surface,
+                          borderWidth: 1,
+                          borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
                         },
                       ]}
                     >

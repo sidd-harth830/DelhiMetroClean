@@ -108,13 +108,11 @@ export function NmrcStationPicker({ visible, onSelect, onClose, title = 'Select 
             contentContainerStyle={styles.list}
             renderItem={({ item }) => {
               const lineColor = theme.colors.primary;
-              const cardBg = isDark ? `${lineColor}12` : `${lineColor}08`;
-
               return (
                 <View style={styles.resultWrapper}>
                   <TouchableRipple
                     onPress={() => handleSelect(item)}
-                    rippleColor={lineColor}
+                    rippleColor={theme.colors.primary}
                     borderless
                     style={styles.resultRipple}
                   >
@@ -122,7 +120,9 @@ export function NmrcStationPicker({ visible, onSelect, onClose, title = 'Select 
                       style={[
                         styles.resultCard,
                         {
-                          backgroundColor: cardBg,
+                          backgroundColor: theme.colors.surface,
+                          borderWidth: 1,
+                          borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
                         },
                       ]}
                     >
