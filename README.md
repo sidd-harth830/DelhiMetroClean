@@ -112,14 +112,14 @@ For a deeper dive into the system design, data flow, and components, please expl
 
 ---
 
-## 📱 Screenshots
+<!-- ## 📱 Screenshots
 
 <div align="center">
   <img src="https://via.placeholder.com/250x500?text=Home+Screen" width="22%" />
   <img src="https://via.placeholder.com/250x500?text=Route+Results" width="22%" />
   <img src="https://via.placeholder.com/250x500?text=Station+Details" width="22%" />
   <img src="https://via.placeholder.com/250x500?text=Metro+Map" width="22%" />
-</div>
+</div> -->
 
 ---
 
