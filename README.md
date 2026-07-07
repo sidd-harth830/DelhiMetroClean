@@ -15,6 +15,8 @@ Welcome to the **Delhi Metro App**, a comprehensive, cross-platform mobile appli
 - [✨ Features](#-features)
 - [📥 Download & Access](#-download--access)
 - [🏗 Architecture Diagram](#-architecture-diagram)
+- [🗺️ User Flow](#️-user-flow)
+- [📚 Detailed Documentation](#-detailed-documentation)
 - [📱 Screenshots](#-screenshots)
 - [🛠 Tech Stack](#-tech-stack)
 - [📂 Project Structure](#-project-structure)
@@ -59,29 +61,54 @@ You can download and experience the app through various channels. Ensure you cli
 
 Below is the high-level architecture diagram representing the data flow and component structure of the Delhi Metro App.
 
-```text
-                          +-------------------------+
-                          |   🚇 Delhi Metro App    |
-                          +------------+------------+
-                                       |
-          +----------------------------+-----------------------------+
-          |                            |                             |
- +--------v--------+          +--------v--------+           +--------v--------+
- |    UI Layer     |          |  State & Data   |           |    Services     |
- | - Navigation    |          | - React Hooks   |           | - API Layer     |
- | - Screens       |          | - React Query   |           | - DMRC Services |
- | - Components    |          |                 |           | - Auth Service  |
- +--------+--------+          +--------+--------+           +--------+--------+
-          |                            |                             |
-          +----------------------------+-----------------------------+
-                                       |
-          +----------------------------+-----------------------------+
-          |                            |                             |
- +--------v--------+          +--------v--------+           +--------v--------+
- |  Async Storage  |          |  Expo SQLite    |           | Appwrite Backend|
- |  (Local Config) |          | (Offline Data)  |           | (Auth & Cloud)  |
- +-----------------+          +-----------------+           +-----------------+
+```mermaid
+graph TD
+    classDef primary fill:#61DAFB,stroke:#20232A,stroke-width:2px,color:#20232A;
+    classDef secondary fill:#FD366E,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef storage fill:#007ACC,stroke:#fff,stroke-width:2px,color:#fff;
+
+    App((📱 Delhi Metro App)):::primary --> UI[UI Layer - Navigation & Screens]
+    UI --> State{State & Data - React Hooks/Query}
+    
+    State --> Services[Services Layer - API, Auth, DMRC]
+    
+    Services --> Cache[(Async Storage - Local Config)]:::storage
+    Services --> DB[(Expo SQLite - Offline Data)]:::storage
+    Services --> Backend[Appwrite Backend - Auth & Cloud]:::secondary
+    
+    click Backend "https://appwrite.io" "Go to Appwrite"
 ```
+
+---
+
+## 🗺️ User Flow
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant App as Mobile App
+    participant Cache as Local Cache
+    participant API as Backend Services
+
+    User->>App: Opens App & Enters Journey
+    App->>Cache: Check for Cached Route?
+    alt Cache Hit
+        Cache-->>App: Return Cached Route Data
+    else Cache Miss
+        App->>API: Request Route Details
+        API-->>App: Return Optimized Route
+        App->>Cache: Save Route to Cache
+    end
+    App-->>User: Display Journey Plan & Fare
+```
+
+---
+
+## 📚 Detailed Documentation
+
+For a deeper dive into the system design, data flow, and components, please explore our detailed documentation:
+- 📖 [System Architecture & Design (C4 Model)](docs/SYSTEM_DESIGN.md)
+- 🗄️ [Data Models & ERD](docs/DATA_MODELS.md)
 
 ---
 
@@ -118,12 +145,17 @@ The application is built using modern, scalable technologies:
 
 ## 📂 Project Structure
 
-A quick look at how the files and directories are organized in `src/`:
+A quick look at how the files and directories are organized in `src/`. Click below to expand the full structure:
+
+<details>
+<summary><b>Click to Expand Project Directory</b></summary>
+<br>
 
 ```bash
 DelhiMetroClean/
 ├── .github/          # GitHub Actions (EAS Builds, Releases)
 ├── assets/           # App icons, splash screens, map images
+├── docs/             # Detailed system architecture and data models
 ├── src/
 │   ├── api/          # Network layer, HTTP clients, queries
 │   ├── auth/         # Authentication logic and context
@@ -141,6 +173,7 @@ DelhiMetroClean/
 ├── app.json          # Expo configuration file
 └── package.json      # Dependencies and scripts
 ```
+</details>
 
 ---
 
