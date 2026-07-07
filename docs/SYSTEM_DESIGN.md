@@ -14,11 +14,11 @@ The context diagram shows how the app interacts with external entities and users
 
 ```mermaid
 graph TD
-    User([Delhi/Noida Commuter]) --> |Plans Journey, Checks Fares| App[Delhi Metro App]
+    User(["Delhi/Noida Commuter"]) -->|Plans Journey, Checks Fares| App["Delhi Metro App"]
     
-    App --> |Fetches Routing & Station Data| Backend[(Appwrite Backend / DMRC APIs)]
-    App --> |Stores Offline Data| LocalDb[(Local SQLite / AsyncStorage)]
-    App --> |Reports Crashes & Logs| Sentry[Sentry SDK]
+    App -->|Fetches Routing & Station Data| Backend[("Appwrite Backend / DMRC APIs")]
+    App -->|Stores Offline Data| LocalDb[("Local SQLite / AsyncStorage")]
+    App -->|Reports Crashes & Logs| Sentry["Sentry SDK"]
     
     classDef person fill:#08427b,stroke:#052e56,stroke-width:2px,color:#fff;
     classDef system fill:#1168bd,stroke:#0b4884,stroke-width:2px,color:#fff;
@@ -26,7 +26,8 @@ graph TD
     
     class User person;
     class App system;
-    class Backend,LocalDb external;
+    class Backend external;
+    class LocalDb external;
     class Sentry external;
 ```
 
@@ -36,26 +37,26 @@ A look inside the React Native application boundaries.
 
 ```mermaid
 graph LR
-    subgraph UI [UI Components & Navigation]
-        Nav[React Navigation Tabs]
-        Screens[Screens: Home, Map, Profile]
+    subgraph UI ["UI Components & Navigation"]
+        Nav["React Navigation Tabs"]
+        Screens["Screens: Home, Map, Profile"]
         Nav --> Screens
     end
     
-    subgraph State [State & Caching]
-        RQ[React Query]
+    subgraph State ["State & Caching"]
+        RQ["React Query"]
     end
     
-    subgraph Services [Service Layer]
-        DmrcSvc[DmrcService]
-        NmrcSvc[NmrcService]
-        AuthSvc[AuthService]
+    subgraph Services ["Service Layer"]
+        DmrcSvc["DmrcService"]
+        NmrcSvc["NmrcService"]
+        AuthSvc["AuthService"]
     end
     
-    subgraph Core [Core & Persistence]
-        API[ApiClient Wrapper]
-        Async[AsyncStorage]
-        SQLite[Expo SQLite]
+    subgraph Core ["Core & Persistence"]
+        API["ApiClient Wrapper"]
+        Async["AsyncStorage"]
+        SQLite["Expo SQLite"]
     end
 
     Screens --> RQ

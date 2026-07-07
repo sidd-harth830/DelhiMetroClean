@@ -67,14 +67,14 @@ graph TD
     classDef secondary fill:#FD366E,stroke:#fff,stroke-width:2px,color:#fff;
     classDef storage fill:#007ACC,stroke:#fff,stroke-width:2px,color:#fff;
 
-    App((📱 Delhi Metro App)):::primary --> UI[UI Layer - Navigation & Screens]
-    UI --> State{State & Data - React Hooks/Query}
+    App(("📱 Delhi Metro App")):::primary --> UI["UI Layer - Navigation & Screens"]
+    UI --> State{"State & Data - React Hooks/Query"}
     
-    State --> Services[Services Layer - API, Auth, DMRC]
+    State --> Services["Services Layer - API, Auth, DMRC"]
     
-    Services --> Cache[(Async Storage - Local Config)]:::storage
-    Services --> DB[(Expo SQLite - Offline Data)]:::storage
-    Services --> Backend[Appwrite Backend - Auth & Cloud]:::secondary
+    Services --> Cache[("Async Storage - Local Config")]:::storage
+    Services --> DB[("Expo SQLite - Offline Data")]:::storage
+    Services --> Backend["Appwrite Backend - Auth & Cloud"]:::secondary
     
     click Backend "https://appwrite.io" "Go to Appwrite"
 ```
