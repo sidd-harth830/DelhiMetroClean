@@ -107,8 +107,8 @@ sequenceDiagram
 ## 📚 Detailed Documentation
 
 For a deeper dive into the system design, data flow, and components, please explore our detailed documentation:
-- 📖 [System Architecture & Design (C4 Model)](docs/SYSTEM_DESIGN.md)
-- 🗄️ [Data Models & ERD](docs/DATA_MODELS.md)
+- 📖 [System Architecture & Design (C4 Model)](SYSTEM_DESIGN.md)
+- 🗄️ [Data Models & ERD](DATA_MODELS.md)
 
 ---
 
@@ -155,7 +155,6 @@ A quick look at how the files and directories are organized in `src/`. Click bel
 DelhiMetroClean/
 ├── .github/          # GitHub Actions (EAS Builds, Releases)
 ├── assets/           # App icons, splash screens, map images
-├── docs/             # Detailed system architecture and data models
 ├── src/
 │   ├── api/          # Network layer, HTTP clients, queries
 │   ├── auth/         # Authentication logic and context
@@ -171,6 +170,10 @@ DelhiMetroClean/
 │   └── types/        # TypeScript interfaces and types
 ├── App.tsx           # Application entry point wrapper
 ├── app.json          # Expo configuration file
+├── ARCHITECTURE.md   # Architectural overview for agents
+├── DATA_MODELS.md    # Detailed data models and ERD
+├── SYSTEM_DESIGN.md  # System design and C4 diagrams
+├── LICENSE.md        # MIT License
 └── package.json      # Dependencies and scripts
 ```
 </details>
