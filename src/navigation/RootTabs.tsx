@@ -217,6 +217,7 @@ function TabNavigator() {
         headerShown: false,
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
+        animation: 'shift',
       })}
       tabBar={(props) => <CustomTabBar {...props} />}
     >
