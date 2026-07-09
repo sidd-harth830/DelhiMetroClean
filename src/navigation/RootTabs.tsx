@@ -6,6 +6,7 @@ import { useTheme, Text } from "react-native-paper";
 import { Animated, Pressable, StyleSheet, View, Dimensions, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
+import { useUnreadNotifications } from "../hooks";
 
 import { HomeStack } from "./HomeStack";
 import { ExploreStack } from "./ExploreStack";
@@ -44,13 +45,14 @@ const TAB_ICONS: Record<
  * because we animate both colors (JS-only) and transforms
  * on the same Animated.View. Mixing drivers causes crashes.
  */
-function TabItem({ route, isFocused, descriptors, onPress, isDark, theme }: {
+function TabItem({ route, isFocused, descriptors, onPress, isDark, theme, unreadCount }: {
   route: any;
   isFocused: boolean;
   descriptors: any;
   onPress: () => void;
   isDark: boolean;
   theme: any;
+  unreadCount?: number;
 }) {
   const anim = useRef(new Animated.Value(isFocused ? 1 : 0)).current;
 
@@ -118,6 +120,11 @@ function TabItem({ route, isFocused, descriptors, onPress, isDark, theme }: {
                 : "rgba(0, 0, 0, 0.35)"
           }
         />
+        {!!unreadCount && unreadCount > 0 && (
+          <View style={[styles.badgeContainer, { backgroundColor: theme.colors.error }]}>
+            <Text style={styles.badgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
+          </View>
+        )}
         {isFocused && (
           <Animated.View style={{ opacity: labelOpacity }}>
             <Text
@@ -144,6 +151,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { isDark } = useAppTheme();
+  const { unreadIds } = useUnreadNotifications();
 
   const TAB_BAR_HEIGHT = 68;
   const PILL_WIDTH = Math.min(SCREEN_WIDTH - 24, 400);
@@ -199,6 +207,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
                 }}
                 isDark={isDark}
                 theme={theme}
+                unreadCount={route.name === 'AlertsTab' ? unreadIds.length : 0}
               />
             );
           })}
@@ -333,5 +342,22 @@ const styles = StyleSheet.create({
   tabLabel: {
     fontSize: 11,
     textAlign: 'center',
+  },
+  badgeContainer: {
+    position: 'absolute',
+    top: 4,
+    right: 8,
+    borderRadius: 8,
+    minWidth: 16,
+    height: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+    zIndex: 10,
+  },
+  badgeText: {
+    color: 'white',
+    fontSize: 9,
+    fontWeight: 'bold',
   },
 });

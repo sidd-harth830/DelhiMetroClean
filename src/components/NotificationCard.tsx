@@ -9,9 +9,11 @@ import { bentoRadius } from '../theme/colors';
 
 interface Props {
   notification: PassengerNotification;
+  isUnread?: boolean;
+  onRead?: () => void;
 }
 
-export function NotificationCard({ notification }: Props) {
+export function NotificationCard({ notification, isUnread, onRead }: Props) {
   const theme = useTheme();
   const { isDark, semantic } = useAppTheme();
   const [expanded, setExpanded] = useState(false);
@@ -25,6 +27,9 @@ export function NotificationCard({ notification }: Props) {
       delete: { type: 'easeInEaseOut', property: 'opacity' },
     });
     setExpanded(!expanded);
+    if (!expanded && onRead) {
+      onRead();
+    }
     Animated.timing(rotateAnim, {
       toValue: expanded ? 0 : 1,
       duration: 300,
@@ -83,10 +88,15 @@ export function NotificationCard({ notification }: Props) {
               </Text>
             </View>
 
-            <View style={styles.chevronWrap}>
-              <Animated.View style={{ transform: [{ rotate: spin }] }}>
-                <Ionicons name="chevron-down" size={20} color={semantic.pink_line} />
-              </Animated.View>
+            <View style={styles.rightActions}>
+              {isUnread && (
+                <View style={[styles.unreadDot, { backgroundColor: theme.colors.primary }]} />
+              )}
+              <View style={styles.chevronWrap}>
+                <Animated.View style={{ transform: [{ rotate: spin }] }}>
+                  <Ionicons name="chevron-down" size={20} color={semantic.pink_line} />
+                </Animated.View>
+              </View>
             </View>
           </View>
 
@@ -152,6 +162,16 @@ const styles = StyleSheet.create({
   },
   headerTextWrap: {
     flex: 1,
+  },
+  rightActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  unreadDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   chevronWrap: {
     justifyContent: 'center',

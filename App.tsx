@@ -17,6 +17,7 @@ import { AppUpdateDialog } from './src/components/AppUpdateDialog';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { OfflineBanner } from './src/components/OfflineBanner';
 import { View, ActivityIndicator } from 'react-native';
+import { UnreadNotificationsProvider } from './src/hooks/useUnreadNotifications';
 
 const container = createServiceContainer(apiClient);
 
@@ -89,7 +90,9 @@ export default Sentry.wrap(function App() {
           <DIProvider container={container}>
             <QueryClientProvider client={queryClient}>
               <AuthProvider>
-                <AppInner />
+                <UnreadNotificationsProvider>
+                  <AppInner />
+                </UnreadNotificationsProvider>
               </AuthProvider>
             </QueryClientProvider>
           </DIProvider>

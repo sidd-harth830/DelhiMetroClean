@@ -10,11 +10,13 @@ import { EmptyState } from '../components/EmptyState';
 import { useAppTheme } from '../theme/ThemeContext';
 import { spacing } from '../theme';
 import { bentoRadius } from '../theme/colors';
+import { useUnreadNotifications } from '../hooks';
 
 export function NotificationsScreen() {
   const theme = useTheme();
   const { isDark } = useAppTheme();
   const { data, isLoading, isError, error, refetch, isRefetching } = useNotificationsQuery();
+  const { unreadIds, markAsRead } = useUnreadNotifications();
 
   if (isLoading) return <LoadingState message="Loading alerts..." />;
   if (isError) return <ErrorState message="Could not load alerts" error={error} onRetry={refetch} />;
@@ -47,7 +49,13 @@ export function NotificationsScreen() {
       style={{ backgroundColor: theme.colors.background }}
       contentContainerStyle={styles.list}
       ListHeaderComponent={ListHeader}
-      renderItem={({ item }) => <NotificationCard notification={item} />}
+      renderItem={({ item }) => (
+        <NotificationCard
+          notification={item}
+          isUnread={unreadIds.includes(item.id)}
+          onRead={() => markAsRead(item.id)}
+        />
+      )}
       refreshing={isRefetching}
       onRefresh={refetch}
       ListEmptyComponent={
