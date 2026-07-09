@@ -108,21 +108,6 @@ export function MetroMapScreen() {
     loadMap();
   }, [loadMap]);
 
-  const handleZoomIn = () => {
-    webviewRef.current?.injectJavaScript(`
-      window.zoomScale = (window.zoomScale || 1) * 1.25;
-      document.querySelector('svg').style.transform = 'scale(' + window.zoomScale + ')';
-      true;
-    `);
-  };
-
-  const handleZoomOut = () => {
-    webviewRef.current?.injectJavaScript(`
-      window.zoomScale = (window.zoomScale || 1) / 1.25;
-      document.querySelector('svg').style.transform = 'scale(' + window.zoomScale + ')';
-      true;
-    `);
-  };
 
   const handleDownload = async () => {
     try {
@@ -189,7 +174,7 @@ export function MetroMapScreen() {
   <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=0.5, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0, minimum-scale=0.5, user-scalable=yes">
     <style>
       body, html {
         margin: 0;
@@ -199,11 +184,10 @@ export function MetroMapScreen() {
         background-color: ${theme.colors.surface};
         background-image: radial-gradient(${theme.colors.onSurfaceVariant}30 1.5px, transparent 1.5px);
         background-size: 25px 25px;
-        overflow: auto;
       }
       #wrapper {
-        width: 100vw;
-        height: 100vh;
+        width: 100%;
+        height: 100%;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -219,8 +203,6 @@ export function MetroMapScreen() {
         width: 100% !important;
         height: 100% !important;
         object-fit: contain;
-        transform-origin: center center;
-        transition: transform 0.2s ease-out;
       }
       /* Override black text for dark mode */
       text {
@@ -261,22 +243,7 @@ export function MetroMapScreen() {
           scalesPageToFit={true}
         />
         
-        {/* Zoom controls overlay */}
-        <View style={[styles.zoomControls, { bottom: insets.bottom + spacing['2xl'] + 80 }]} pointerEvents="box-none">
-          <Pressable
-            style={[styles.zoomBtn, { backgroundColor: isDark ? theme.colors.elevation.level4 : theme.colors.surface }]}
-            onPress={handleZoomIn}
-          >
-            <Ionicons name="add" size={22} color={theme.colors.onSurface} />
-          </Pressable>
-          <Pressable
-            style={[styles.zoomBtn, { backgroundColor: isDark ? theme.colors.elevation.level4 : theme.colors.surface }]}
-            onPress={handleZoomOut}
-          >
-            <Ionicons name="remove" size={22} color={theme.colors.onSurface} />
-          </Pressable>
-        </View>
-
+        {/* Zoom controls removed in favor of native pinch-to-zoom */}
         {/* Legend FAB */}
         <Pressable
           style={[

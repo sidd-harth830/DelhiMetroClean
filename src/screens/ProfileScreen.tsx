@@ -150,7 +150,13 @@ export function ProfileScreen() {
                     </Text>
                     <Button 
                         mode="contained" 
-                        onPress={handleLogout}
+                        onPress={async () => {
+                            try {
+                                await logout();
+                            } catch (error) {
+                                Alert.alert('Error', 'Failed to log out.');
+                            }
+                        }}
                         buttonColor={theme.colors.primary}
                         textColor={theme.colors.onPrimary}
                         style={{ borderRadius: bentoRadius.button }}
