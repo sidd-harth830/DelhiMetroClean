@@ -1,5 +1,5 @@
 import { FlatList, StyleSheet, View } from 'react-native';
-import { Text, useTheme } from 'react-native-paper';
+import { Text, useTheme, Button } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { useNotificationsQuery } from '../hooks';
 import { NotificationCard } from '../components/NotificationCard';
@@ -16,7 +16,7 @@ export function NotificationsScreen() {
   const theme = useTheme();
   const { isDark } = useAppTheme();
   const { data, isLoading, isError, error, refetch, isRefetching } = useNotificationsQuery();
-  const { unreadIds, markAsRead } = useUnreadNotifications();
+  const { unreadIds, markAsRead, markAllAsRead } = useUnreadNotifications();
 
   if (isLoading) return <LoadingState message="Loading alerts..." />;
   if (isError) return <ErrorState message="Could not load alerts" error={error} onRetry={refetch} />;
@@ -28,10 +28,23 @@ export function NotificationsScreen() {
         <View style={[styles.noticeIconWrap, { backgroundColor: isDark ? theme.colors.elevation.level3 : theme.colors.surfaceVariant }]}>
           <Ionicons name="megaphone-outline" size={16} color={theme.colors.primary} />
         </View>
-        <Text variant="titleSmall" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
+        <Text variant="titleSmall" style={{ color: theme.colors.onSurface, fontWeight: '700', flex: 1 }}>
           Passenger Notices
         </Text>
-        {!!data?.length && (
+        
+        {unreadIds.length > 0 && (
+          <Button 
+            mode="text" 
+            onPress={markAllAsRead} 
+            compact 
+            textColor={theme.colors.primary}
+            labelStyle={{ fontSize: 12, fontWeight: '600' }}
+          >
+            Mark all read
+          </Button>
+        )}
+        
+        {!!data?.length && unreadIds.length === 0 && (
           <View style={[styles.countBadge, { backgroundColor: theme.colors.primaryContainer }]}>
             <Text variant="labelSmall" style={{ color: theme.colors.onPrimaryContainer, fontWeight: '700' }}>
               {data.length}
@@ -91,7 +104,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   countBadge: {
-    marginLeft: 'auto',
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 999,
