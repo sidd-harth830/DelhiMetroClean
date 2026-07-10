@@ -1,5 +1,8 @@
-import { Client, Account, Databases, OAuthProvider } from 'react-native-appwrite';
+// 1. MUST BE FIRST: Import URL polyfill for React Native
 import 'react-native-url-polyfill/auto';
+
+// 2. Import the React Native specific SDK
+import { Client, Account, Databases, OAuthProvider } from 'react-native-appwrite';
 import { Platform } from 'react-native';
 
 const endpoint = process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT || 'https://cloud.appwrite.io/v1';
@@ -14,7 +17,6 @@ if (Platform.OS !== 'web') {
 }
 
 export const appwriteClient = client;
-
 export const account = new Account(client);
 export const databases = new Databases(client);
 export { OAuthProvider };
