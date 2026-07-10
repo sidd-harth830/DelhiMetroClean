@@ -50,25 +50,31 @@ function AppNavigator() {
 
 import { startKeepAlive } from './src/utils/keepAlive';
 import * as Sentry from '@sentry/react-native';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
+import { HostFunctionErrorBoundary } from './src/components/HostFunctionErrorBoundary';
 
-Sentry.init({
-  dsn: 'https://04e3db0423db831be6fe4d7377daa73b@o4510950049775616.ingest.us.sentry.io/4510950052855808',
+const isExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
 
-  // Adds more context data to events (IP address, cookies, user, etc.)
-  // For more information, visit: https://docs.sentry.io/platforms/react-native/data-management/data-collected/
-  sendDefaultPii: true,
+if (!isExpoGo) {
+  Sentry.init({
+    dsn: 'https://04e3db0423db831be6fe4d7377daa73b@o4510950049775616.ingest.us.sentry.io/4510950052855808',
 
-  // Enable Logs
-  enableLogs: true,
+    // Adds more context data to events (IP address, cookies, user, etc.)
+    // For more information, visit: https://docs.sentry.io/platforms/react-native/data-management/data-collected/
+    sendDefaultPii: true,
 
-  // Configure Session Replay
-  replaysSessionSampleRate: 0.1,
-  replaysOnErrorSampleRate: 1,
-  integrations: [Sentry.mobileReplayIntegration(), Sentry.feedbackIntegration()],
+    // Enable Logs
+    enableLogs: true,
 
-  // uncomment the line below to enable Spotlight (https://spotlightjs.com)
-  // spotlight: __DEV__,
-});
+    // Configure Session Replay
+    replaysSessionSampleRate: 0.1,
+    replaysOnErrorSampleRate: 1,
+    integrations: [Sentry.mobileReplayIntegration(), Sentry.feedbackIntegration()],
+
+    // uncomment the line below to enable Spotlight (https://spotlightjs.com)
+    // spotlight: __DEV__,
+  });
+}
 
 function AppInner() {
   const { paperTheme, navTheme } = useAppTheme();
@@ -93,7 +99,7 @@ import * as SplashScreen from 'expo-splash-screen';
 
 SplashScreen.preventAutoHideAsync();
 
-export default Sentry.wrap(function App() {
+function App() {
   const [fontsLoaded] = useFonts({
     // Acorn — heading / display font
     'Acorn-Regular': require('./assets/fonts/Acorn-Regular.ttf'),
@@ -118,20 +124,24 @@ export default Sentry.wrap(function App() {
   }
 
   return (
-    <ErrorBoundary>
-      <SafeAreaProvider>
-        <ThemeProvider>
-          <DIProvider container={container}>
-            <QueryClientProvider client={queryClient}>
-              <AuthProvider>
-                <UnreadNotificationsProvider>
-                  <AppInner />
-                </UnreadNotificationsProvider>
-              </AuthProvider>
-            </QueryClientProvider>
-          </DIProvider>
-        </ThemeProvider>
-      </SafeAreaProvider>
-    </ErrorBoundary>
+    <HostFunctionErrorBoundary>
+      <ErrorBoundary>
+        <SafeAreaProvider>
+          <ThemeProvider>
+            <DIProvider container={container}>
+              <QueryClientProvider client={queryClient}>
+                <AuthProvider>
+                  <UnreadNotificationsProvider>
+                    <AppInner />
+                  </UnreadNotificationsProvider>
+                </AuthProvider>
+              </QueryClientProvider>
+            </DIProvider>
+          </ThemeProvider>
+        </SafeAreaProvider>
+      </ErrorBoundary>
+    </HostFunctionErrorBoundary>
   );
-});
+}
+
+export default isExpoGo ? App : Sentry.wrap(App);
