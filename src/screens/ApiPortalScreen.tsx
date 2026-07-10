@@ -248,7 +248,7 @@ export function ApiPortalScreen() {
           </View>
         )}
 
-        <Surface style={[styles.card, isDark ? bentoShadows.dark : bentoShadows.light, { backgroundColor: colors.cardBackground }]}>
+        <Surface style={[styles.card, isDark ? bentoShadows.dark.soft : bentoShadows.light.soft, { backgroundColor: colors.cardBackground }]}>
           <Text style={[styles.cardTitle, { color: colors.primary }]}>Metro Route Premium API</Text>
           <Text style={[styles.bodyText, { color: colors.onSurfaceVariant }]}>
             Get programmatic access to live Delhi and Noida Metro data, routes, and station details. 
@@ -257,7 +257,7 @@ export function ApiPortalScreen() {
         </Surface>
 
         {requestStatus === 'none' && (
-          <Surface style={[styles.card, isDark ? bentoShadows.dark : bentoShadows.light, { backgroundColor: colors.cardBackground }]}>
+          <Surface style={[styles.card, isDark ? bentoShadows.dark.soft : bentoShadows.light.soft, { backgroundColor: colors.cardBackground }]}>
             <Text style={[styles.cardTitle, { color: colors.onSurface }]}>Request Access</Text>
             <Text style={[styles.bodyText, { color: colors.onSurfaceVariant, marginBottom: 16 }]}>
               Please describe what you plan to build with our API. Our admin will review your request.
@@ -312,7 +312,7 @@ export function ApiPortalScreen() {
         )}
 
         {requestStatus === 'approved' && apiKey && (
-          <Surface style={[styles.card, isDark ? bentoShadows.dark : bentoShadows.light, { backgroundColor: colors.cardBackground }]}>
+          <Surface style={[styles.card, isDark ? bentoShadows.dark.soft : bentoShadows.light.soft, { backgroundColor: colors.cardBackground }]}>
             <View style={styles.approvedHeader}>
               <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
               <Text style={[styles.cardTitle, { color: colors.onSurface, marginLeft: 8 }]}>Access Granted</Text>

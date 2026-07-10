@@ -150,7 +150,7 @@ function TabItem({ route, isFocused, descriptors, onPress, isDark, theme, unread
 function CustomTabBar({ state, descriptors, navigation }: any) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const { isDark } = useAppTheme();
+  const { isDark, shadows } = useAppTheme();
   const { unreadIds } = useUnreadNotifications();
 
   const TAB_BAR_HEIGHT = 68;
@@ -165,11 +165,12 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
           bottom: Math.max(insets.bottom, 12) + 4,
           left: HORIZONTAL_MARGIN,
           width: PILL_WIDTH,
+          ...shadows.heavy,
         },
       ]}
     >
       <BlurView
-        intensity={isDark ? 50 : 80}
+        intensity={isDark ? 60 : 90}
         tint={isDark ? "dark" : "light"}
         style={styles.blurView}
       >
@@ -178,10 +179,10 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
             styles.tabBarContent,
             {
               backgroundColor: isDark
-                ? "rgba(12, 12, 16, 0.96)"
-                : "rgba(252, 252, 254, 0.96)",
+                ? "rgba(12, 12, 16, 0.85)"
+                : "rgba(252, 252, 254, 0.80)",
               borderColor: isDark
-                ? "rgba(255, 255, 255, 0.08)"
+                ? "rgba(255, 255, 255, 0.12)"
                 : "rgba(0, 0, 0, 0.06)",
               height: TAB_BAR_HEIGHT,
             },
@@ -304,11 +305,6 @@ const styles = StyleSheet.create({
   tabBarContainer: {
     position: "absolute",
     zIndex: 50,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 8,
   },
   blurView: {
     flex: 1,

@@ -6,6 +6,7 @@ import type { PassengerNotification } from '../types';
 import { useAppTheme } from '../theme/ThemeContext';
 import { spacing } from '../theme';
 import { bentoRadius } from '../theme/colors';
+import { GlassCard } from './GlassCard';
 
 interface Props {
   notification: PassengerNotification;
@@ -15,7 +16,7 @@ interface Props {
 
 export function NotificationCard({ notification, isUnread, onRead }: Props) {
   const theme = useTheme();
-  const { isDark, semantic } = useAppTheme();
+  const { isDark, semantic, fonts } = useAppTheme();
   const [expanded, setExpanded] = useState(false);
   const rotateAnim = useRef(new Animated.Value(0)).current;
 
@@ -49,18 +50,11 @@ export function NotificationCard({ notification, isUnread, onRead }: Props) {
       <TouchableRipple
         onPress={toggleExpand}
         rippleColor={isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)'}
-        borderless
-        style={styles.ripple}
       >
-        <View
-          style={[
-            styles.container,
-            {
-              backgroundColor: theme.colors.surface,
-              borderWidth: 1,
-              borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-            },
-          ]}
+        <GlassCard
+          padding={spacing.md}
+          borderRadius={bentoRadius.card}
+          style={[styles.container]}
         >
           <View style={[styles.accentStrip, { backgroundColor: semantic.pink_line }]} />
 
@@ -112,6 +106,7 @@ export function NotificationCard({ notification, isUnread, onRead }: Props) {
                 {
                   color: theme.colors.onSurface,
                   lineHeight: 22,
+                  fontFamily: fonts.heading,
                 },
                 expanded && styles.messageTextExpanded
               ]}
@@ -119,7 +114,7 @@ export function NotificationCard({ notification, isUnread, onRead }: Props) {
               {notification.title}
             </Text>
           </View>
-        </View>
+        </GlassCard>
       </TouchableRipple>
     </View>
   );
@@ -134,8 +129,6 @@ const styles = StyleSheet.create({
     borderRadius: bentoRadius.card,
   },
   container: {
-    borderRadius: bentoRadius.card,
-    padding: spacing.md,
     gap: spacing.sm,
     overflow: 'hidden',
   },

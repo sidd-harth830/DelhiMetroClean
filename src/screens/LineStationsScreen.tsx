@@ -11,6 +11,7 @@ import { useAppTheme } from '../theme/ThemeContext';
 import type { StationByLineItem } from '../types';
 import type { LinesStackParamList } from '../navigation/types';
 import { spacing } from '../theme';
+import { GradientBackground } from '../components/GradientBackground';
 
 type Nav = NativeStackNavigationProp<LinesStackParamList, 'LineStations'>;
 type Route = RouteProp<LinesStackParamList, 'LineStations'>;
@@ -29,7 +30,7 @@ function StationTimelineRow({
   onPress: () => void;
 }) {
   const theme = useTheme();
-  const { semantic } = useAppTheme();
+  const { semantic, fonts } = useAppTheme();
 
   return (
     <TouchableRipple onPress={onPress} rippleColor={theme.colors.surfaceVariant}>
@@ -57,7 +58,7 @@ function StationTimelineRow({
         </View>
 
         <View style={styles.stationInfo}>
-          <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
+          <Text variant="bodyMedium" style={{ color: theme.colors.onSurface, fontFamily: fonts.heading }}>
             {station.station_name}
           </Text>
           <View style={styles.meta}>
@@ -94,10 +95,11 @@ export function LineStationsScreen() {
   if (isError) return <ErrorState message="Could not load stations" error={error} onRetry={refetch} />;
 
   return (
+    <GradientBackground>
     <FlatList
       data={data}
       keyExtractor={(item) => String(item.id)}
-      style={{ backgroundColor: theme.colors.background }}
+      style={{ flex: 1 }}
       contentContainerStyle={styles.list}
       renderItem={({ item, index }) => (
         <StationTimelineRow
@@ -114,6 +116,7 @@ export function LineStationsScreen() {
         />
       )}
     />
+    </GradientBackground>
   );
 }
 

@@ -12,10 +12,12 @@ import { RouteSegmentView } from '../components/RouteSegmentView';
 import { FirstLastTrainCard } from '../components/FirstLastTrainCard';
 import { LoadingState } from '../components/LoadingState';
 import { ErrorState } from '../components/ErrorState';
+import { GlassCard } from '../components/GlassCard';
+import { GradientBackground } from '../components/GradientBackground';
 import { useAppTheme } from '../theme/ThemeContext';
 import type { RouteStrategy, JourneyRouteSegment } from '../types';
 import type { HomeStackParamList } from '../navigation/types';
-import { spacing } from '../theme';
+import { spacing, fontFamily } from '../theme';
 import { bentoRadius, lightPalette, darkPalette } from '../theme/colors';
 import { FavoritesStorage } from '../storage/favorites';
 
@@ -31,7 +33,7 @@ export function JourneyResultsScreen() {
   const navigation = useNavigation<Nav>();
   const { network = 'dmrc', fromCode, toCode, fromName, toName, journeyTime } = route.params;
   const theme = useTheme();
-  const { semantic, isDark } = useAppTheme();
+  const { semantic, isDark, fonts, shadows } = useAppTheme();
   const [strategy, setStrategy] = useState<RouteStrategy>('least-distance');
   const [isSaved, setIsSaved] = useState(false);
 
@@ -183,21 +185,13 @@ export function JourneyResultsScreen() {
   const themeColor = theme.colors.primary;
 
   return (
+    <GradientBackground>
     <View style={{ flex: 1 }} {...panResponder.panHandlers}>
     <ScrollView
-      style={{ flex: 1, backgroundColor: theme.colors.background }}
+      style={{ flex: 1 }}
       contentContainerStyle={styles.content}
     >
-      <View
-        style={[
-          styles.heroCard,
-          {
-            backgroundColor: theme.colors.surface,
-            borderWidth: isDark ? 1 : 1,
-            borderColor: isDark ? theme.colors.outlineVariant : 'rgba(0,0,0,0.06)',
-          },
-        ]}
-      >
+      <GlassCard borderRadius={bentoRadius.heroCard} padding={spacing.lg}>
         <View style={styles.heroStations}>
           <View style={[styles.heroStationRow, { justifyContent: 'space-between' }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, gap: spacing.md }}>
@@ -209,6 +203,7 @@ export function JourneyResultsScreen() {
                   color: theme.colors.onSurface,
                   fontWeight: '900',
                   letterSpacing: 0.3,
+                  fontFamily: fonts.heading,
                 }}
                 numberOfLines={1}
               >
@@ -243,6 +238,7 @@ export function JourneyResultsScreen() {
                 color: theme.colors.onSurface,
                 fontWeight: '900',
                 letterSpacing: 0.3,
+                fontFamily: fonts.heading,
               }}
               numberOfLines={1}
             >
@@ -275,7 +271,7 @@ export function JourneyResultsScreen() {
             <Ionicons name={isSaved ? "star" : "star-outline"} size={18} color={isSaved ? themeColor : theme.colors.onSurfaceVariant} />
           </Pressable>
         </View>
-      </View>
+      </GlassCard>
 
       {!isNmrc && (
         <Animated.View style={{ transform: [{ translateX: swipeHint }] }}>
@@ -317,10 +313,10 @@ export function JourneyResultsScreen() {
       </View>
 
       {/* Fare section */}
-      <View style={[styles.fareCard, { backgroundColor: theme.colors.surface }]}>
+      <GlassCard borderRadius={bentoRadius.card} padding={spacing.base}>
          <View style={styles.fareRow}>
-           <Text style={{ color: theme.colors.onSurfaceVariant, fontWeight: '600' }}>Total Fare</Text>
-           <Text style={{ fontSize: 24, fontWeight: '800', color: themeColor }}>
+           <Text style={{ color: theme.colors.onSurfaceVariant, fontWeight: '600', fontFamily: fonts.bodyMedium }}>Total Fare</Text>
+           <Text style={{ fontSize: 24, fontWeight: '800', color: themeColor, fontFamily: fonts.heading }}>
              ₹{isNmrc ? (nmrcData?.fare ?? '—') : (activeDmrcFare?.weekday_fare ?? '—')}
            </Text>
          </View>
@@ -332,18 +328,9 @@ export function JourneyResultsScreen() {
              </Text>
            </View>
          )}
-      </View>
+      </GlassCard>
 
-      <View
-        style={[
-          styles.routeCard,
-          {
-            backgroundColor: theme.colors.surface,
-            borderWidth: isDark ? 0 : 1,
-            borderColor: isDark ? 'transparent' : 'rgba(0,0,0,0.06)',
-          },
-        ]}
-      >
+      <GlassCard borderRadius={bentoRadius.card} padding={spacing.base}>
         <View style={styles.routeHeader}>
           <Ionicons name="navigate-outline" size={18} color={themeColor} />
           <Text variant="titleSmall" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
@@ -381,13 +368,14 @@ export function JourneyResultsScreen() {
             ))
           )}
         </View>
-      </View>
+      </GlassCard>
 
       {!isNmrc && activeDmrcTrain && (
         <FirstLastTrainCard data={activeDmrcTrain} />
       )}
     </ScrollView>
     </View>
+    </GradientBackground>
   );
 }
 

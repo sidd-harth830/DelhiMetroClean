@@ -10,6 +10,8 @@ import { useAppTheme } from '../theme/ThemeContext';
 import { spacing } from '../theme';
 import { bentoRadius } from '../theme/colors';
 import { EmptyState } from '../components/EmptyState';
+import { GlassCard } from '../components/GlassCard';
+import { GradientBackground } from '../components/GradientBackground';
 
 type Nav = NativeStackNavigationProp<any>;
 
@@ -17,7 +19,7 @@ export function FavoriteStationsScreen() {
   const navigation = useNavigation<Nav>();
   const insets = useSafeAreaInsets();
   const theme = useTheme();
-  const { isDark, semantic } = useAppTheme();
+  const { isDark, semantic, fonts } = useAppTheme();
   const [stations, setStations] = useState<FavoriteStation[]>([]);
 
   const loadStations = useCallback(() => {
@@ -52,30 +54,28 @@ export function FavoriteStationsScreen() {
 
   if (stations.length === 0) {
     return (
-      <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <GradientBackground>
+      <View style={{ flex: 1 }}>
         <EmptyState title="No favorite stations yet" subtitle="Star a station from its detail page to add it here." />
       </View>
+      </GradientBackground>
     );
   }
 
   return (
+    <GradientBackground>
     <ScrollView
-      style={{ flex: 1, backgroundColor: theme.colors.background }}
+      style={{ flex: 1 }}
       contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + spacing.tabBarClearance }]}
     >
       {stations.map((station) => (
-        <Pressable
+        <GlassCard
           key={station.code}
-          style={[
-            styles.stationCard,
-            {
-              backgroundColor: isDark
-                ? theme.colors.surface
-                : theme.colors.surface,
-              borderWidth: isDark ? 0 : 1,
-              borderColor: isDark ? 'transparent' : 'rgba(0,0,0,0.06)',
-            },
-          ]}
+          padding={0}
+          borderRadius={bentoRadius.card}
+        >
+        <Pressable
+          style={styles.stationCard}
           onPress={() => handleNavigate(station)}
           onLongPress={() => handleRemove(station.code, station.name)}
         >
@@ -91,7 +91,7 @@ export function FavoriteStationsScreen() {
           <View style={styles.stationInfo}>
             <Text
               variant="bodyLarge"
-              style={{ color: theme.colors.onSurface, fontWeight: '700' }}
+              style={{ color: theme.colors.onSurface, fontWeight: '700', fontFamily: fonts.heading }}
               numberOfLines={1}
             >
               {station.name}
@@ -119,6 +119,7 @@ export function FavoriteStationsScreen() {
             </Pressable>
           </View>
         </Pressable>
+        </GlassCard>
       ))}
 
       <Text
@@ -128,6 +129,7 @@ export function FavoriteStationsScreen() {
         Long press a station to remove it
       </Text>
     </ScrollView>
+    </GradientBackground>
   );
 }
 
@@ -137,7 +139,6 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   stationCard: {
-    borderRadius: bentoRadius.card,
     padding: spacing.lg,
     flexDirection: 'row',
     alignItems: 'center',

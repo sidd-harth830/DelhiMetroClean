@@ -8,6 +8,8 @@ import { useNavigation } from '@react-navigation/native';
 import { useAppTheme } from '../theme/ThemeContext';
 import { bentoRadius, bentoShadows } from '../theme/colors';
 import { PortalThemeService, PortalThemeDefinition, defaultPortalThemes } from '../theme/portalThemes';
+import { GlassCard } from '../components/GlassCard';
+import { GradientBackground } from '../components/GradientBackground';
 
 const DATABASE_ID = process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID || '';
 const COLLECTION_ID = 'ApiKeys';
@@ -27,7 +29,7 @@ type ActiveTab = 'requests' | 'themes';
 export function AdminDashboardScreen() {
   const { user } = useAuth();
   const theme = useTheme();
-  const { isDark } = useAppTheme();
+  const { isDark, fonts } = useAppTheme();
   const navigation = useNavigation<any>();
 
   // Global state
@@ -206,8 +208,8 @@ export function AdminDashboardScreen() {
   };
 
   const renderRequestItem = ({ item }: { item: any }) => (
-    <Surface style={[styles.card, isDark ? bentoShadows.dark : bentoShadows.light, { backgroundColor: theme.colors.elevation.level1 }]}>
-      <Text style={[styles.email, { color: theme.colors.onSurface }]}>{item.email}</Text>
+    <GlassCard padding={16} borderRadius={bentoRadius.large} style={styles.card}>
+      <Text style={[styles.email, { color: theme.colors.onSurface, fontFamily: fonts.heading }]}>{item.email}</Text>
       <Text style={[styles.date, { color: theme.colors.onSurfaceVariant }]}>
         Requested: {new Date(item.$createdAt).toLocaleDateString()}
       </Text>
@@ -234,16 +236,16 @@ export function AdminDashboardScreen() {
           Approve
         </Button>
       </View>
-    </Surface>
+    </GlassCard>
   );
 
   const renderThemeItem = ({ item }: { item: PortalThemeDefinition }) => {
     const isSystemTheme = defaultPortalThemes.some(t => t.$id === item.$id);
     return (
-      <Surface style={[styles.card, isDark ? bentoShadows.dark : bentoShadows.light, { backgroundColor: theme.colors.elevation.level1 }]}>
+      <GlassCard padding={16} borderRadius={bentoRadius.large} style={styles.card}>
         <View style={styles.themeHeaderRow}>
           <View style={styles.themeInfoCol}>
-            <Text style={[styles.email, { color: theme.colors.onSurface }]}>
+            <Text style={[styles.email, { color: theme.colors.onSurface, fontFamily: fonts.heading }]}>
               {item.emoji} {item.name}
             </Text>
             <Text style={{ color: theme.colors.onSurfaceVariant, fontSize: 12 }}>
@@ -283,15 +285,16 @@ export function AdminDashboardScreen() {
             Edit
           </Button>
         </View>
-      </Surface>
+      </GlassCard>
     );
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <View style={[styles.header, { backgroundColor: theme.colors.elevation.level2 }]}>
+    <GradientBackground>
+    <View style={styles.container}>
+      <View style={[styles.header, { backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.2)' }]}>
         <IconButton icon="arrow-left" onPress={() => navigation.goBack()} />
-        <Text style={styles.headerTitle}>Admin Dashboard</Text>
+        <Text style={[styles.headerTitle, { fontFamily: fonts.heading, color: theme.colors.onSurface }]}>Admin Dashboard</Text>
         <IconButton icon="refresh" onPress={loadData} />
       </View>
 
@@ -309,7 +312,7 @@ export function AdminDashboardScreen() {
 
       {editingTheme ? (
         <ScrollView style={styles.editForm} contentContainerStyle={{ paddingBottom: 100 }}>
-          <Text style={styles.sectionTitle}>{editingTheme.$id ? 'Edit Portal Theme' : 'Create Custom Theme'}</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.onSurface, fontFamily: fonts.heading }]}>{editingTheme.$id ? 'Edit Portal Theme' : 'Create Custom Theme'}</Text>
           
           <TextInput
             label="Theme Name"
@@ -429,6 +432,7 @@ export function AdminDashboardScreen() {
         </View>
       )}
     </View>
+    </GradientBackground>
   );
 }
 
@@ -467,8 +471,6 @@ const styles = StyleSheet.create({
     paddingBottom: 120,
   },
   card: {
-    borderRadius: bentoRadius.large,
-    padding: 16,
     marginBottom: 16,
   },
   email: {

@@ -8,9 +8,11 @@ import { useStationDetailQuery } from '../hooks';
 import { LineBadge } from '../components/LineBadge';
 import { LoadingState } from '../components/LoadingState';
 import { ErrorState } from '../components/ErrorState';
+import { GlassCard } from '../components/GlassCard';
+import { GradientBackground } from '../components/GradientBackground';
 import { useAppTheme } from '../theme/ThemeContext';
 import type { HomeStackParamList } from '../navigation/types';
-import { spacing } from '../theme';
+import { spacing, fontFamily } from '../theme';
 import { bentoRadius } from '../theme/colors';
 import { FavoritesStorage } from '../storage/favorites';
 
@@ -30,16 +32,16 @@ function Section({
   defaultExpanded?: boolean;
 }) {
   const theme = useTheme();
-  const { isDark } = useAppTheme();
+  const { isDark, fonts } = useAppTheme();
   const [expanded, setExpanded] = useState(defaultExpanded);
 
   return (
-    <Surface style={styles.section} elevation={1}>
+    <GlassCard borderRadius={bentoRadius.card} padding={0} style={{ marginBottom: spacing.md }}>
       <Pressable style={styles.sectionHeader} onPress={() => setExpanded(!expanded)}>
         <View style={[styles.sectionIconCircle, { backgroundColor: isDark ? theme.colors.elevation.level3 : theme.colors.primaryContainer }]}>
           <Ionicons name={icon} size={16} color={theme.colors.primary} />
         </View>
-        <Text variant="titleSmall" style={{ flex: 1, color: theme.colors.onSurface, fontWeight: '700' }}>
+        <Text variant="titleSmall" style={{ flex: 1, color: theme.colors.onSurface, fontWeight: '700', fontFamily: fonts.heading }}>
           {title}
         </Text>
         {count !== undefined && (
@@ -61,7 +63,7 @@ function Section({
           <View style={styles.sectionContent}>{children}</View>
         </>
       )}
-    </Surface>
+    </GlassCard>
   );
 }
 
@@ -110,7 +112,7 @@ export function StationDetailScreen() {
   const route = useRoute<Route>();
   const { stationCode } = route.params;
   const theme = useTheme();
-  const { semantic, isDark } = useAppTheme();
+  const { semantic, isDark, fonts, shadows } = useAppTheme();
   const { data: station, isLoading, isError, error, refetch } = useStationDetailQuery(stationCode);
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -136,18 +138,13 @@ export function StationDetailScreen() {
   const lineColor = station.metro_lines?.[0]?.primary_color_code ?? theme.colors.primary;
 
   return (
+    <GradientBackground>
     <ScrollView
-      style={{ flex: 1, backgroundColor: theme.colors.background }}
+      style={{ flex: 1 }}
       contentContainerStyle={styles.content}
     >
       {/* Hero header */}
-      <Surface
-        style={[
-          styles.heroCard,
-          { backgroundColor: isDark ? theme.colors.elevation.level3 : theme.colors.primaryContainer },
-        ]}
-        elevation={0}
-      >
+      <GlassCard borderRadius={bentoRadius.heroCard} padding={spacing.lg}>
         <View style={styles.heroTop}>
           <View style={[styles.codeBox, { backgroundColor: isDark ? theme.colors.elevation.level5 : 'rgba(255,255,255,0.8)' }]}>
             <Text variant="titleMedium" style={{ color: theme.colors.primary, fontWeight: '800', fontVariant: ['tabular-nums'] }}>
@@ -157,7 +154,7 @@ export function StationDetailScreen() {
           <View style={[styles.heroInfo, { flex: 1 }]}>
             <Text
               variant="headlineSmall"
-              style={{ color: isDark ? theme.colors.onSurface : theme.colors.onPrimaryContainer, fontWeight: '800' }}
+              style={{ color: isDark ? theme.colors.onSurface : theme.colors.onPrimaryContainer, fontWeight: '800', fontFamily: fonts.heading }}
               numberOfLines={2}
             >
               {station.station_name}
@@ -207,7 +204,7 @@ export function StationDetailScreen() {
             ))}
           </View>
         )}
-      </Surface>
+      </GlassCard>
 
       {/* Contact & Location */}
       <Section title="Station Info" icon="information-circle-outline">
@@ -343,6 +340,7 @@ export function StationDetailScreen() {
         </Section>
       )}
     </ScrollView>
+    </GradientBackground>
   );
 }
 

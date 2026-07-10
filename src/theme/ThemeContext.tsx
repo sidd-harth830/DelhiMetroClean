@@ -11,13 +11,13 @@ import {
   adaptNavigationTheme,
   type MD3Theme,
 } from 'react-native-paper';
-import { typography } from './typography';
+import { typography, fontFamily } from './typography';
 import {
   DarkTheme as NavigationDarkTheme,
   DefaultTheme as NavigationDefaultTheme,
   type Theme as NavigationTheme,
 } from '@react-navigation/native';
-import { lightPalette, darkPalette } from './colors';
+import { lightPalette, darkPalette, bentoShadows, bentoGradients, type ShadowStyle } from './colors';
 import { palettes, getPalette, DEFAULT_PALETTE_ID, type PaletteDefinition } from './palettes';
 
 const FALLBACK_SOURCE_COLOR = '#BEFF6C'; // Neon lime green primary
@@ -98,11 +98,45 @@ export interface SemanticColors {
   brown_line: string;
 }
 
+// ──────── New glassmorphism types ────────
+
+export interface ThemeGradients {
+  /** Full-screen background gradient stops */
+  background: readonly string[];
+  /** Glass card overlay gradient */
+  card: readonly string[];
+  /** CTA button gradient (primary → accent) */
+  cta: readonly string[];
+}
+
+export interface ThemeShadows {
+  soft: ShadowStyle;
+  medium: ShadowStyle;
+  heavy: ShadowStyle;
+}
+
+export interface ThemeFonts {
+  heading: string;
+  headingSemiBold: string;
+  headingMedium: string;
+  headingRegular: string;
+  body: string;
+  bodyMedium: string;
+  bodySemiBold: string;
+  bodyBold: string;
+}
+
 interface AppTheme {
   paperTheme: MD3Theme;
   navTheme: NavigationTheme;
   isDark: boolean;
   semantic: SemanticColors;
+  /** Gradient stop arrays derived from the active palette */
+  gradients: ThemeGradients;
+  /** 3-tier shadow system (soft / medium / heavy) */
+  shadows: ThemeShadows;
+  /** Font family map (heading = Acorn, body = Inter) */
+  fonts: ThemeFonts;
   themeMode: ThemeMode;
   setThemeMode: (mode: ThemeMode) => void;
   colorPaletteId: string;
@@ -132,11 +166,47 @@ function buildSemantic(palette: PaletteDefinition, isDark: boolean): SemanticCol
   };
 }
 
+function buildGradients(palette: PaletteDefinition, isDark: boolean): ThemeGradients {
+  const p = isDark ? palette.dark : palette.light;
+  return {
+    background: isDark ? palette.gradientStops.dark : palette.gradientStops.light,
+    card: isDark ? bentoGradients.glassDark : bentoGradients.glassLight,
+    cta: [p.primary, p.accent],
+  };
+}
+
+function buildShadows(isDark: boolean): ThemeShadows {
+  const tier = isDark ? bentoShadows.dark : bentoShadows.light;
+  return {
+    soft: tier.soft,
+    medium: tier.medium,
+    heavy: tier.heavy,
+  };
+}
+
+const defaultFonts: ThemeFonts = {
+  heading: fontFamily.heading,
+  headingSemiBold: fontFamily.headingSemiBold,
+  headingMedium: fontFamily.headingMedium,
+  headingRegular: fontFamily.headingRegular,
+  body: fontFamily.body,
+  bodyMedium: fontFamily.bodyMedium,
+  bodySemiBold: fontFamily.bodySemiBold,
+  bodyBold: fontFamily.bodyBold,
+};
+
 const ThemeContext = createContext<AppTheme>({
   paperTheme: MD3LightTheme,
   navTheme: NavigationDefaultTheme,
   isDark: false,
   semantic: {} as SemanticColors,
+  gradients: {
+    background: bentoGradients.backgroundLight,
+    card: bentoGradients.glassLight,
+    cta: ['#16A34A', '#0D9488'],
+  },
+  shadows: bentoShadows.light,
+  fonts: defaultFonts,
   themeMode: 'system',
   setThemeMode: () => {},
   colorPaletteId: DEFAULT_PALETTE_ID,
@@ -221,6 +291,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       navTheme,
       isDark,
       semantic: buildSemantic(palette, isDark),
+      gradients: buildGradients(palette, isDark),
+      shadows: buildShadows(isDark),
+      fonts: defaultFonts,
       themeMode,
       setThemeMode,
       colorPaletteId,

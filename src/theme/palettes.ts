@@ -1,7 +1,8 @@
 /**
  * Curated color palette presets for Metro Routes.
  *
- * Each palette defines both light and dark mode colors.
+ * Each palette defines both light and dark mode colors,
+ * plus unique gradient stop arrays for background screens.
  * The user can switch between palettes in Settings.
  * Icons reference Ionicons names for the theme picker UI.
  */
@@ -16,6 +17,11 @@ export interface PaletteColors {
   info: string;
 }
 
+export interface GradientStops {
+  light: readonly string[];
+  dark: readonly string[];
+}
+
 export interface PaletteDefinition {
   id: string;
   name: string;
@@ -23,6 +29,8 @@ export interface PaletteDefinition {
   icon: string;
   /** Fallback emoji (used in minimal contexts) */
   emoji: string;
+  /** Unique gradient background stops */
+  gradientStops: GradientStops;
   light: PaletteColors & {
     background: string;
     surface: string;
@@ -51,6 +59,10 @@ export const palettes: PaletteDefinition[] = [
     name: 'Metro Green',
     icon: 'leaf',
     emoji: '🌿',
+    gradientStops: {
+      light: ['#E8F5E9', '#F1F8E9', '#E0F2F1', '#F5F5F5'],
+      dark: ['#0A120C', '#0C140A', '#0A0F0E', '#090A0C'],
+    },
     light: {
       primary: '#16A34A',
       primaryMuted: 'rgba(22,163,74,0.08)',
@@ -89,6 +101,10 @@ export const palettes: PaletteDefinition[] = [
     name: 'Arctic Blue',
     icon: 'snow',
     emoji: '🧊',
+    gradientStops: {
+      light: ['#E3F2FD', '#E8EAF6', '#E0F7FA', '#F5F5F5'],
+      dark: ['#0A0E18', '#0C0E1A', '#0A1018', '#090A0C'],
+    },
     light: {
       primary: '#2563EB',
       primaryMuted: 'rgba(37,99,235,0.08)',
@@ -127,6 +143,10 @@ export const palettes: PaletteDefinition[] = [
     name: 'Ember Red',
     icon: 'flame',
     emoji: '🔥',
+    gradientStops: {
+      light: ['#FFEBEE', '#FBE9E7', '#FFF3E0', '#F5F5F5'],
+      dark: ['#1A0A0A', '#1A0E0A', '#180E0A', '#0C0A0A'],
+    },
     light: {
       primary: '#DC2626',
       primaryMuted: 'rgba(220,38,38,0.08)',
@@ -165,6 +185,10 @@ export const palettes: PaletteDefinition[] = [
     name: 'Violet Dream',
     icon: 'diamond',
     emoji: '💜',
+    gradientStops: {
+      light: ['#F3E5F5', '#EDE7F6', '#E8EAF6', '#FCE4EC'],
+      dark: ['#140A1A', '#100E1A', '#0E0A1A', '#1A0A14'],
+    },
     light: {
       primary: '#7C3AED',
       primaryMuted: 'rgba(124,58,237,0.08)',
@@ -203,6 +227,10 @@ export const palettes: PaletteDefinition[] = [
     name: 'Golden Hour',
     icon: 'sunny',
     emoji: '🌅',
+    gradientStops: {
+      light: ['#FFF8E1', '#FFF3E0', '#FFFDE7', '#F5F5F5'],
+      dark: ['#1A140A', '#1A100A', '#18140A', '#0C0A08'],
+    },
     light: {
       primary: '#B45309',
       primaryMuted: 'rgba(180,83,9,0.08)',
@@ -241,6 +269,10 @@ export const palettes: PaletteDefinition[] = [
     name: 'Midnight Teal',
     icon: 'water',
     emoji: '🌊',
+    gradientStops: {
+      light: ['#E0F2F1', '#E0F7FA', '#E8F5E9', '#F5F5F5'],
+      dark: ['#0A1412', '#0A1418', '#0A120E', '#0A0C0C'],
+    },
     light: {
       primary: '#0D9488',
       primaryMuted: 'rgba(13,148,136,0.08)',
@@ -274,12 +306,15 @@ export const palettes: PaletteDefinition[] = [
       onPrimary: '#090A0C',
     },
   },
-  // ─────────── NEW PALETTES ───────────
   {
     id: 'rose_quartz',
     name: 'Rose Quartz',
     icon: 'rose',
     emoji: '🌸',
+    gradientStops: {
+      light: ['#FCE4EC', '#F8BBD0', '#FFF0F5', '#FFF5F5'],
+      dark: ['#1A0A10', '#180A12', '#140A10', '#0C0608'],
+    },
     light: {
       primary: '#E11D48',
       primaryMuted: 'rgba(225,29,72,0.08)',
@@ -318,6 +353,10 @@ export const palettes: PaletteDefinition[] = [
     name: 'Charcoal Slate',
     icon: 'cube',
     emoji: '🪨',
+    gradientStops: {
+      light: ['#ECEFF1', '#E0E0E0', '#EEEEEE', '#F5F5F5'],
+      dark: ['#0E1012', '#10121A', '#0E1014', '#0A0B0D'],
+    },
     light: {
       primary: '#475569',
       primaryMuted: 'rgba(71,85,105,0.08)',
@@ -356,6 +395,10 @@ export const palettes: PaletteDefinition[] = [
     name: 'Neon Cyan',
     icon: 'flash',
     emoji: '⚡',
+    gradientStops: {
+      light: ['#E0F7FA', '#E0F2F1', '#E8F5E9', '#F0FDFA'],
+      dark: ['#04101A', '#061418', '#041210', '#040D12'],
+    },
     light: {
       primary: '#0891B2',
       primaryMuted: 'rgba(8,145,178,0.08)',
@@ -394,6 +437,10 @@ export const palettes: PaletteDefinition[] = [
     name: 'Forest Moss',
     icon: 'leaf',
     emoji: '🌲',
+    gradientStops: {
+      light: ['#E8F5E9', '#C8E6C9', '#DCEDC8', '#F1F8E9'],
+      dark: ['#061208', '#08140A', '#061008', '#040D06'],
+    },
     light: {
       primary: '#166534',
       primaryMuted: 'rgba(22,101,52,0.08)',
@@ -432,6 +479,10 @@ export const palettes: PaletteDefinition[] = [
     name: 'Lavender Haze',
     icon: 'sparkles',
     emoji: '🔮',
+    gradientStops: {
+      light: ['#F3E5F5', '#E8EAF6', '#FCE4EC', '#FAF5FF'],
+      dark: ['#10061A', '#0E0A1A', '#140818', '#0A0612'],
+    },
     light: {
       primary: '#7E22CE',
       primaryMuted: 'rgba(126,34,206,0.08)',
@@ -470,6 +521,10 @@ export const palettes: PaletteDefinition[] = [
     name: 'Coral Sunset',
     icon: 'bonfire',
     emoji: '🪸',
+    gradientStops: {
+      light: ['#FFF3E0', '#FFCCBC', '#FFE0B2', '#FFF7ED'],
+      dark: ['#1A0E06', '#180A06', '#14100A', '#0D0704'],
+    },
     light: {
       primary: '#EA580C',
       primaryMuted: 'rgba(234,88,12,0.08)',
@@ -503,6 +558,91 @@ export const palettes: PaletteDefinition[] = [
       onPrimary: '#0D0704',
     },
   },
+  // ─────────── NEW THEMES (from reference images) ───────────
+  {
+    id: 'berry_cream',
+    name: 'Berry Cream',
+    icon: 'ice-cream',
+    emoji: '🍨',
+    gradientStops: {
+      light: ['#F8E8EE', '#F2DDE4', '#FAEEF2', '#FFF5F7'],
+      dark: ['#1A0A12', '#1E0C16', '#160A10', '#0E060A'],
+    },
+    light: {
+      primary: '#8B2252',
+      primaryMuted: 'rgba(139,34,82,0.08)',
+      accent: '#C2185B',
+      success: '#059669',
+      warning: '#D97706',
+      error: '#B91C1C',
+      info: '#6366F1',
+      background: '#FFF5F7',
+      surface: '#FFFFFF',
+      surfaceVariant: '#FCE4EC',
+      onBackground: '#1A0A12',
+      onSurface: '#2E1018',
+      onSurfaceVariant: '#8B6F7A',
+      onPrimary: '#FFFFFF',
+    },
+    dark: {
+      primary: '#F48FB1',
+      primaryMuted: 'rgba(244,143,177,0.1)',
+      accent: '#F06292',
+      success: '#34D399',
+      warning: '#FBBF24',
+      error: '#F87171',
+      info: '#818CF8',
+      background: '#0E060A',
+      surface: '#1E1016',
+      surfaceVariant: '#301822',
+      onBackground: '#FFF5F7',
+      onSurface: '#F8D7E0',
+      onSurfaceVariant: '#CE93A8',
+      onPrimary: '#0E060A',
+    },
+  },
+  {
+    id: 'ultra_violet',
+    name: 'Ultra Violet',
+    icon: 'planet',
+    emoji: '🪐',
+    gradientStops: {
+      light: ['#E8DEF8', '#D0BCFF', '#E6D4FF', '#F3E8FF'],
+      dark: ['#1A0E2E', '#20103A', '#160C28', '#0E0618'],
+    },
+    light: {
+      primary: '#6200EA',
+      primaryMuted: 'rgba(98,0,234,0.08)',
+      accent: '#B388FF',
+      success: '#059669',
+      warning: '#D97706',
+      error: '#DC2626',
+      info: '#651FFF',
+      background: '#F5F0FF',
+      surface: '#FFFFFF',
+      surfaceVariant: '#E8DEF8',
+      onBackground: '#1A0A3E',
+      onSurface: '#2E1065',
+      onSurfaceVariant: '#7C6F99',
+      onPrimary: '#FFFFFF',
+    },
+    dark: {
+      primary: '#D0BCFF',
+      primaryMuted: 'rgba(208,188,255,0.12)',
+      accent: '#B388FF',
+      success: '#34D399',
+      warning: '#FBBF24',
+      error: '#F87171',
+      info: '#A78BFA',
+      background: '#0E0618',
+      surface: '#1C1030',
+      surfaceVariant: '#2A1A42',
+      onBackground: '#F5F0FF',
+      onSurface: '#E8DEF8',
+      onSurfaceVariant: '#B39DDB',
+      onPrimary: '#0E0618',
+    },
+  },
 ];
 
 export const DEFAULT_PALETTE_ID = 'metro_green';
@@ -510,4 +650,3 @@ export const DEFAULT_PALETTE_ID = 'metro_green';
 export function getPalette(id: string): PaletteDefinition {
   return palettes.find((p) => p.id === id) ?? palettes[0];
 }
-

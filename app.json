@@ -57,7 +57,8 @@
           "project": "react-native",
           "organization": "siddharth-4t"
         }
-      ]
+      ],
+      "expo-font"
     ],
     "splash": {
       "image": "./assets/new-splash-icon.svg",

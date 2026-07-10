@@ -11,15 +11,18 @@ import type { MetroLine } from '../types';
 import type { LinesStackParamList } from '../navigation/types';
 import { spacing } from '../theme';
 import { bentoRadius } from '../theme/colors';
+import { GlassCard } from '../components/GlassCard';
+import { GradientBackground } from '../components/GradientBackground';
 
 type Nav = NativeStackNavigationProp<LinesStackParamList, 'MetroLines'>;
 
 function LineRow({ line }: { line: MetroLine }) {
   const navigation = useNavigation<Nav>();
   const theme = useTheme();
-  const { isDark } = useAppTheme();
+  const { isDark, fonts } = useAppTheme();
 
   return (
+    <GlassCard padding={0} borderRadius={bentoRadius.card} style={{ marginBottom: spacing.sm, marginHorizontal: spacing.base }}>
     <TouchableRipple
       onPress={() =>
         navigation.navigate('LineStations', {
@@ -33,7 +36,7 @@ function LineRow({ line }: { line: MetroLine }) {
       <View style={styles.row}>
         <View style={[styles.colorStrip, { backgroundColor: line.primary_color_code }]} />
         <View style={styles.rowContent}>
-          <Text variant="bodyLarge" style={{ color: theme.colors.onSurface, fontWeight: '600' }} numberOfLines={1}>
+          <Text variant="bodyLarge" style={{ color: theme.colors.onSurface, fontWeight: '600', fontFamily: fonts.heading }} numberOfLines={1}>
             {line.name}
           </Text>
           <Text variant="bodySmall" style={{ color: theme.colors.outline }} numberOfLines={1}>
@@ -48,6 +51,7 @@ function LineRow({ line }: { line: MetroLine }) {
         <Ionicons name="chevron-forward" size={18} color={theme.colors.outline} />
       </View>
     </TouchableRipple>
+    </GlassCard>
   );
 }
 
@@ -59,14 +63,16 @@ export function MetroLinesScreen() {
   if (isError) return <ErrorState message="Could not load metro lines" error={error} onRetry={refetch} />;
 
   return (
+    <GradientBackground>
     <FlatList
       data={data}
       keyExtractor={(item) => String(item.id)}
-      style={{ backgroundColor: theme.colors.background }}
+      style={{ flex: 1 }}
       renderItem={({ item }) => <LineRow line={item} />}
       contentContainerStyle={styles.list}
-      ItemSeparatorComponent={() => <Divider style={{ marginLeft: spacing.base, opacity: 0.3 }} />}
+      showsVerticalScrollIndicator={false}
     />
+    </GradientBackground>
   );
 }
 

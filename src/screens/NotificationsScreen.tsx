@@ -11,10 +11,11 @@ import { useAppTheme } from '../theme/ThemeContext';
 import { spacing } from '../theme';
 import { bentoRadius } from '../theme/colors';
 import { useUnreadNotifications } from '../hooks';
+import { GradientBackground } from '../components/GradientBackground';
 
 export function NotificationsScreen() {
   const theme = useTheme();
-  const { isDark } = useAppTheme();
+  const { isDark, fonts } = useAppTheme();
   const { data, isLoading, isError, error, refetch, isRefetching } = useNotificationsQuery();
   const { unreadIds, markAsRead, markAllAsRead } = useUnreadNotifications();
 
@@ -28,7 +29,7 @@ export function NotificationsScreen() {
         <View style={[styles.noticeIconWrap, { backgroundColor: isDark ? theme.colors.elevation.level3 : theme.colors.surfaceVariant }]}>
           <Ionicons name="megaphone-outline" size={16} color={theme.colors.primary} />
         </View>
-        <Text variant="titleSmall" style={{ color: theme.colors.onSurface, fontWeight: '700', flex: 1 }}>
+        <Text variant="titleSmall" style={{ color: theme.colors.onSurface, fontWeight: '700', flex: 1, fontFamily: fonts.heading }}>
           Passenger Notices
         </Text>
         
@@ -56,10 +57,11 @@ export function NotificationsScreen() {
   );
 
   return (
+    <GradientBackground>
     <FlatList
       data={data}
       keyExtractor={(item) => String(item.id)}
-      style={{ backgroundColor: theme.colors.background }}
+      style={{ flex: 1 }}
       contentContainerStyle={styles.list}
       ListHeaderComponent={ListHeader}
       renderItem={({ item }) => (
@@ -79,6 +81,7 @@ export function NotificationsScreen() {
         />
       }
     />
+    </GradientBackground>
   );
 }
 

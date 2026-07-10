@@ -1,52 +1,127 @@
 /**
- * Premium Bento-Box color system for Delhi Metro Clean.
+ * Premium Glassmorphism color system for Delhi Metro Clean.
  *
- * Light mode  — forest green and crisp white
- * Dark mode   — near-black base, neon lime green primary
+ * Light mode  — warm rose → lavender → cool blue gradients
+ * Dark mode   — deep maroon → purple → midnight gradients
  *
- * Inspired by modern bento-grid app designs with color-blocked
- * cards, bold metric typography, and floating glass navigation.
+ * Inspired by frosted-glass UI with layered depth, soft shadows,
+ * and rich multi-stop gradient backgrounds.
  */
+
+import { Platform } from 'react-native';
 
 /* ───────── Border Radius Tokens ───────── */
 export const bentoRadius = {
-  card: 24,
-  large: 28,
-  heroCard: 32,
-  pill: 40,
-  button: 20,
-  icon: 16,
-  badge: 14,
+  /** Small elements like tags */
   small: 12,
+  /** Badges, inline chips */
+  badge: 14,
+  /** Icon containers */
+  icon: 16,
+  /** Buttons, inputs */
+  button: 20,
+  /** Standard cards */
+  card: 24,
+  /** Large cards, modals */
+  large: 28,
+  /** Hero/featured cards */
+  heroCard: 32,
+  /** Pill-shaped elements (buttons, tab bar, chips) */
+  pill: 40,
+  /** Full circle */
+  full: 999,
 } as const;
 
-/* ───────── Shadow Tokens ───────── */
-import { Platform } from 'react-native';
+/* ───────── Shadow Tokens — 3-Tier System ───────── */
+
+export type ShadowStyle = {
+  shadowColor: string;
+  shadowOffset: { width: number; height: number };
+  shadowOpacity: number;
+  shadowRadius: number;
+  elevation: number;
+};
+
+/** Soft shadow — subtle lift for cards and containers */
+const shadowSoft: ShadowStyle = {
+  shadowColor: '#000000',
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.08,
+  shadowRadius: 16,
+  elevation: 3,
+};
+
+/** Medium shadow — prominent lift for interactive cards */
+const shadowMedium: ShadowStyle = {
+  shadowColor: '#000000',
+  shadowOffset: { width: 0, height: 8 },
+  shadowOpacity: 0.12,
+  shadowRadius: 24,
+  elevation: 6,
+};
+
+/** Heavy shadow — dramatic lift for floating elements (tab bar, modals) */
+const shadowHeavy: ShadowStyle = {
+  shadowColor: '#000000',
+  shadowOffset: { width: 0, height: 12 },
+  shadowOpacity: 0.20,
+  shadowRadius: 32,
+  elevation: 10,
+};
+
+/** Dark-mode optimized shadows (increased opacity for visibility on dark bg) */
+const shadowSoftDark: ShadowStyle = {
+  shadowColor: '#000000',
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.30,
+  shadowRadius: 16,
+  elevation: 4,
+};
+
+const shadowMediumDark: ShadowStyle = {
+  shadowColor: '#000000',
+  shadowOffset: { width: 0, height: 8 },
+  shadowOpacity: 0.40,
+  shadowRadius: 24,
+  elevation: 8,
+};
+
+const shadowHeavyDark: ShadowStyle = {
+  shadowColor: '#000000',
+  shadowOffset: { width: 0, height: 12 },
+  shadowOpacity: 0.55,
+  shadowRadius: 32,
+  elevation: 12,
+};
 
 export const bentoShadows = {
-  light: Platform.select({
-    ios: {
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.06,
-      shadowRadius: 8,
-    },
-    android: {
-      elevation: 3,
-    },
-  }),
-  dark: Platform.select({
-    ios: {
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.3,
-      shadowRadius: 6,
-    },
-    android: {
-      elevation: 4,
-    },
-  }),
-};
+  light: {
+    soft: shadowSoft,
+    medium: shadowMedium,
+    heavy: shadowHeavy,
+  },
+  dark: {
+    soft: shadowSoftDark,
+    medium: shadowMediumDark,
+    heavy: shadowHeavyDark,
+  },
+} as const;
+
+/* ───────── Gradient Tokens ───────── */
+
+export const bentoGradients = {
+  /** Glass card overlay (light mode) */
+  glassLight: ['rgba(255,255,255,0.25)', 'rgba(255,255,255,0.08)'] as const,
+  /** Glass card overlay (dark mode) */
+  glassDark: ['rgba(255,255,255,0.12)', 'rgba(255,255,255,0.03)'] as const,
+  /** Glass card border shimmer */
+  glassBorderLight: 'rgba(255,255,255,0.35)',
+  glassBorderDark: 'rgba(255,255,255,0.10)',
+  /** Default background gradient (light) — warm rose → lavender → cool blue */
+  backgroundLight: ['#F8E8EE', '#F0E6F6', '#E8EEF8', '#F4F0FA'] as const,
+  /** Default background gradient (dark) — deep maroon → purple → midnight */
+  backgroundDark: ['#1A0A14', '#140E1E', '#0E0E1E', '#0A0E1A'] as const,
+} as const;
 
 /* ───────── Light Palette ───────── */
 export const lightPalette = {

@@ -10,6 +10,8 @@ import { useAppTheme } from '../theme/ThemeContext';
 import { spacing } from '../theme';
 import { bentoRadius } from '../theme/colors';
 import { EmptyState } from '../components/EmptyState';
+import { GlassCard } from '../components/GlassCard';
+import { GradientBackground } from '../components/GradientBackground';
 
 type Nav = NativeStackNavigationProp<any>;
 
@@ -17,7 +19,7 @@ export function SavedRoutesScreen() {
   const navigation = useNavigation<Nav>();
   const insets = useSafeAreaInsets();
   const theme = useTheme();
-  const { isDark, semantic } = useAppTheme();
+  const { isDark, semantic, fonts } = useAppTheme();
   const [routes, setRoutes] = useState<SavedRoute[]>([]);
 
   const loadRoutes = useCallback(() => {
@@ -54,30 +56,28 @@ export function SavedRoutesScreen() {
 
   if (routes.length === 0) {
     return (
-      <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <GradientBackground>
+      <View style={{ flex: 1 }}>
         <EmptyState title="No saved routes yet" subtitle="Star a route from journey results to save it here." />
       </View>
+      </GradientBackground>
     );
   }
 
   return (
+    <GradientBackground>
     <ScrollView
-      style={{ flex: 1, backgroundColor: theme.colors.background }}
+      style={{ flex: 1 }}
       contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + spacing.tabBarClearance }]}
     >
       {routes.map((route) => (
-        <Pressable
+        <GlassCard
           key={`${route.fromCode}-${route.toCode}`}
-          style={[
-            styles.routeCard,
-            {
-              backgroundColor: isDark
-                ? theme.colors.surface
-                : theme.colors.surface,
-              borderWidth: isDark ? 0 : 1,
-              borderColor: isDark ? 'transparent' : 'rgba(0,0,0,0.06)',
-            },
-          ]}
+          padding={0}
+          borderRadius={bentoRadius.card}
+        >
+        <Pressable
+          style={styles.routeCard}
           onPress={() => handleNavigate(route)}
           onLongPress={() => handleRemove(route.fromCode, route.toCode)}
         >
@@ -87,7 +87,7 @@ export function SavedRoutesScreen() {
               <View style={[styles.dot, { backgroundColor: semantic.success }]} />
               <Text
                 variant="bodyLarge"
-                style={{ color: theme.colors.onSurface, fontWeight: '700', flex: 1 }}
+                style={{ color: theme.colors.onSurface, fontWeight: '700', flex: 1, fontFamily: fonts.heading }}
                 numberOfLines={1}
               >
                 {route.fromName}
@@ -104,7 +104,7 @@ export function SavedRoutesScreen() {
               <View style={[styles.dot, { backgroundColor: semantic.error }]} />
               <Text
                 variant="bodyLarge"
-                style={{ color: theme.colors.onSurface, fontWeight: '700', flex: 1 }}
+                style={{ color: theme.colors.onSurface, fontWeight: '700', flex: 1, fontFamily: fonts.heading }}
                 numberOfLines={1}
               >
                 {route.toName}
@@ -127,6 +127,7 @@ export function SavedRoutesScreen() {
             </Pressable>
           </View>
         </Pressable>
+        </GlassCard>
       ))}
 
       <Text
@@ -136,6 +137,7 @@ export function SavedRoutesScreen() {
         Long press a route to remove it
       </Text>
     </ScrollView>
+    </GradientBackground>
   );
 }
 
@@ -145,7 +147,6 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   routeCard: {
-    borderRadius: bentoRadius.card,
     padding: spacing.lg,
     flexDirection: 'row',
     alignItems: 'center',

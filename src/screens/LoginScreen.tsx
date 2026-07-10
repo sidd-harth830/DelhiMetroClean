@@ -10,10 +10,12 @@ import { ID } from 'react-native-appwrite';
 import { spacing } from '../theme';
 import { bentoRadius } from '../theme/colors';
 import { classifyError } from '../api/errors';
+import { GlassCard } from '../components/GlassCard';
+import { GradientBackground } from '../components/GradientBackground';
 
 export function LoginScreen() {
   const theme = useTheme();
-  const { isDark } = useAppTheme();
+  const { isDark, fonts } = useAppTheme();
   const insets = useSafeAreaInsets();
   const { loginAnonymous, loginWithGoogle, checkSession } = useAuth();
   
@@ -82,8 +84,9 @@ export function LoginScreen() {
   const primaryColor = theme.colors.primary;
 
   return (
+    <GradientBackground>
     <KeyboardAvoidingView 
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       {/* ─── Decorative static background circles ─── */}
@@ -104,7 +107,7 @@ export function LoginScreen() {
               <Ionicons name="train" size={32} color={theme.colors.primary} />
             </View>
           </View>
-          <Text variant="headlineLarge" style={[styles.title, { color: theme.colors.onSurface }]}>
+          <Text variant="headlineLarge" style={[styles.title, { color: theme.colors.onSurface, fontFamily: fonts.heading }]}>
             {isLogin ? 'Welcome Back' : 'Create Account'}
           </Text>
           <Text variant="bodyLarge" style={[styles.subtitle, { color: theme.colors.onSurfaceVariant }]}>
@@ -113,14 +116,7 @@ export function LoginScreen() {
         </View>
 
         {/* ─── Form Card ─── */}
-        <View style={[
-          styles.card, 
-          { 
-            backgroundColor: theme.colors.surface,
-            borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-            borderWidth: 1,
-          }
-        ]}>
+        <GlassCard padding={spacing.xl} borderRadius={bentoRadius.heroCard} style={styles.card}>
           {!isLogin && (
             <TextInput
               label="Name"
@@ -183,7 +179,7 @@ export function LoginScreen() {
           >
             {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Log in'}
           </Button>
-        </View>
+        </GlassCard>
 
         {/* ─── Divider ─── */}
         <View style={styles.divider}>
@@ -223,6 +219,7 @@ export function LoginScreen() {
         </Button>
       </ScrollView>
     </KeyboardAvoidingView>
+    </GradientBackground>
   );
 }
 
@@ -269,8 +266,6 @@ const styles = StyleSheet.create({
     maxWidth: 300,
   },
   card: {
-    borderRadius: bentoRadius.heroCard,
-    padding: spacing.xl,
     marginBottom: spacing.xl,
   },
   input: {

@@ -9,6 +9,8 @@ import { useAuth } from '../auth/AuthContext';
 import { useAppTheme } from '../theme/ThemeContext';
 import { bentoRadius } from '../theme/colors';
 import { FavoritesStorage } from '../storage/favorites';
+import { GlassCard } from '../components/GlassCard';
+import { GradientBackground } from '../components/GradientBackground';
 
 /* ─── Stat card (no animation to avoid conflicts during theme switch) ─── */
 function StatCard({ value, label, icon, color, bgColor }: {
@@ -19,18 +21,19 @@ function StatCard({ value, label, icon, color, bgColor }: {
     bgColor: string;
 }) {
     const theme = useTheme();
+    const { fonts } = useAppTheme();
     return (
         <View style={[styles.statCard, { backgroundColor: bgColor }]}>
             <Ionicons name={icon as any} size={20} color={color} />
-            <Text style={[styles.statValue, { color: theme.colors.onSurface }]}>{value}</Text>
-            <Text style={[styles.statLabel, { color: theme.colors.onSurfaceVariant }]}>{label}</Text>
+            <Text style={[styles.statValue, { color: theme.colors.onSurface, fontFamily: fonts.heading }]}>{value}</Text>
+            <Text style={[styles.statLabel, { color: theme.colors.onSurfaceVariant, fontFamily: fonts.bodyMedium }]}>{label}</Text>
         </View>
     );
 }
 
 export function ProfileScreen() {
     const theme = useTheme();
-    const { isDark, semantic } = useAppTheme();
+    const { isDark, semantic, fonts } = useAppTheme();
     const insets = useSafeAreaInsets();
     const navigation = useNavigation<any>();
     const { user, logout } = useAuth();
@@ -66,19 +69,21 @@ export function ProfileScreen() {
     const primaryColor = theme.colors.primary;
 
     return (
+        <GradientBackground>
         <ScrollView
-            style={[styles.container, { backgroundColor: theme.colors.background }]}
+            style={styles.container}
             contentContainerStyle={{ paddingTop: insets.top, paddingBottom: insets.bottom + spacing.tabBarClearance }}
         >
             {/* ─── Hero Header ─── */}
-            <View style={[
-                styles.heroHeader,
-                {
-                    backgroundColor: isDark ? `${primaryColor}08` : `${primaryColor}04`,
-                    borderWidth: 1,
-                    borderColor: isDark ? `${primaryColor}15` : `${primaryColor}08`,
-                },
-            ]}>
+            <GlassCard
+                padding={spacing.lg}
+                borderRadius={bentoRadius.heroCard}
+                style={{
+                    marginHorizontal: spacing.base,
+                    marginBottom: spacing.xl,
+                    alignItems: 'center',
+                }}
+            >
                 {/* Avatar with ring */}
                 <View style={styles.avatarContainer}>
                     <View style={[styles.avatarGlowRing, { borderColor: `${primaryColor}25` }]}>
@@ -86,12 +91,12 @@ export function ProfileScreen() {
                             size={80} 
                             label={isGuest ? 'G' : (user?.name ? user.name.charAt(0).toUpperCase() : 'U')} 
                             style={{ backgroundColor: theme.colors.primaryContainer }}
-                            labelStyle={{ color: theme.colors.primary, fontWeight: '800' }}
+                            labelStyle={{ color: theme.colors.primary, fontWeight: '800', fontFamily: fonts.heading }}
                         />
                     </View>
                 </View>
 
-                <Text variant="headlineSmall" style={[styles.name, { color: theme.colors.onSurface }]}>
+                <Text variant="headlineSmall" style={[styles.name, { color: theme.colors.onSurface, fontFamily: fonts.heading }]}>
                     {isGuest ? 'Guest User' : (user?.name || 'User')}
                 </Text>
                 {!isGuest && user?.email && (
@@ -127,21 +132,18 @@ export function ProfileScreen() {
                         bgColor={isDark ? `${semantic.success}12` : `${semantic.success}06`}
                     />
                 </View>
-            </View>
+            </GlassCard>
 
             {/* ─── Guest CTA ─── */}
             {isGuest && (
-                <View style={[
-                    styles.card, 
-                    { 
-                        backgroundColor: theme.colors.surface, 
-                        borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-                        borderWidth: 1,
-                    }
-                ]}>
+                <GlassCard
+                    padding={spacing.lg}
+                    borderRadius={bentoRadius.card}
+                    style={{ marginHorizontal: spacing.base, marginBottom: spacing.xl }}
+                >
                     <View style={styles.ctaHeader}>
                         <Ionicons name="sparkles" size={20} color={primaryColor} />
-                        <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
+                        <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: '700', fontFamily: fonts.heading }}>
                             Unlock Full Features
                         </Text>
                     </View>
@@ -166,16 +168,16 @@ export function ProfileScreen() {
                     >
                         Create Account
                     </Button>
-                </View>
+                </GlassCard>
             )}
 
             {/* ─── Metro Features ─── */}
             <List.Section style={styles.section}>
                 <View style={styles.sectionHeaderRow}>
                     <Ionicons name="train" size={16} color={theme.colors.primary} />
-                    <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>Metro Features</List.Subheader>
+                    <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700', fontFamily: fonts.heading }}>Metro Features</List.Subheader>
                 </View>
-                <View style={[styles.listCard, { backgroundColor: theme.colors.surface }]}>
+                <GlassCard padding={0} borderRadius={bentoRadius.card}>
                     <List.Item
                         title="Metro Lines & Stations"
                         description="Browse all metro lines and stations"
@@ -194,16 +196,16 @@ export function ProfileScreen() {
                         titleStyle={{ color: theme.colors.onSurface, fontWeight: '600' }}
                         descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
                     />
-                </View>
+                </GlassCard>
             </List.Section>
 
             {/* ─── Preferences ─── */}
             <List.Section style={styles.section}>
                 <View style={styles.sectionHeaderRow}>
                     <Ionicons name="heart" size={16} color={theme.colors.primary} />
-                    <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>Preferences</List.Subheader>
+                    <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700', fontFamily: fonts.heading }}>Preferences</List.Subheader>
                 </View>
-                <View style={[styles.listCard, { backgroundColor: theme.colors.surface }]}>
+                <GlassCard padding={0} borderRadius={bentoRadius.card}>
                     <List.Item
                         title="Saved Routes"
                         description={savedRoutesCount > 0 ? `${savedRoutesCount} saved route${savedRoutesCount !== 1 ? 's' : ''}` : 'Quick access to your regular journeys'}
@@ -222,7 +224,7 @@ export function ProfileScreen() {
                         titleStyle={{ color: theme.colors.onSurface, fontWeight: '600' }}
                         descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
                     />
-                </View>
+                </GlassCard>
             </List.Section>
 
             {/* ─── Admin ─── */}
@@ -230,9 +232,9 @@ export function ProfileScreen() {
                 <List.Section style={styles.section}>
                     <View style={styles.sectionHeaderRow}>
                         <Ionicons name="shield-checkmark" size={16} color={theme.colors.error} />
-                        <List.Subheader style={{ color: theme.colors.error, fontWeight: '700' }}>Admin</List.Subheader>
+                        <List.Subheader style={{ color: theme.colors.error, fontWeight: '700', fontFamily: fonts.heading }}>Admin</List.Subheader>
                     </View>
-                    <View style={[styles.listCard, { backgroundColor: theme.colors.surface }]}>
+                    <GlassCard padding={0} borderRadius={bentoRadius.card}>
                         <List.Item
                             title="Admin Dashboard"
                             description="Manage API key requests"
@@ -242,7 +244,7 @@ export function ProfileScreen() {
                             titleStyle={{ color: theme.colors.onSurface, fontWeight: '600' }}
                             descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
                         />
-                    </View>
+                    </GlassCard>
                 </List.Section>
             )}
 
@@ -259,6 +261,7 @@ export function ProfileScreen() {
                 </Button>
             )}
         </ScrollView>
+        </GradientBackground>
     );
 }
 

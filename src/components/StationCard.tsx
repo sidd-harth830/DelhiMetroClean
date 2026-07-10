@@ -6,6 +6,7 @@ import { useAppTheme } from '../theme/ThemeContext';
 import { spacing } from '../theme';
 import { bentoRadius } from '../theme/colors';
 import type { StationLineBadge } from '../types';
+import { GlassCard } from './GlassCard';
 
 interface StationLike {
   station_name: string;
@@ -22,7 +23,7 @@ interface Props {
 
 export function StationCard({ station, onPress, showChevron = true }: Props) {
   const theme = useTheme();
-  const { isDark, semantic } = useAppTheme();
+  const { isDark, semantic, fonts } = useAppTheme();
 
   const primaryLineColor = station.metro_lines?.[0]?.primary_color_code ?? theme.colors.primary;
 
@@ -32,18 +33,11 @@ export function StationCard({ station, onPress, showChevron = true }: Props) {
         onPress={onPress}
         disabled={!onPress}
         rippleColor={theme.colors.primary}
-        borderless
-        style={styles.ripple}
       >
-        <View
-          style={[
-            styles.card,
-            {
-              backgroundColor: theme.colors.surface,
-              borderWidth: 1,
-              borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-            },
-          ]}
+        <GlassCard
+          padding={spacing.md}
+          borderRadius={bentoRadius.card}
+          style={[styles.card]}
         >
           {/* Colored left accent strip */}
           <View style={[styles.accentStrip, { backgroundColor: primaryLineColor }]} />
@@ -71,6 +65,7 @@ export function StationCard({ station, onPress, showChevron = true }: Props) {
                   color: theme.colors.onSurface,
                   fontWeight: '700',
                   flex: 1,
+                  fontFamily: fonts.heading,
                 }}
                 numberOfLines={1}
               >
@@ -129,7 +124,7 @@ export function StationCard({ station, onPress, showChevron = true }: Props) {
           {showChevron && onPress ? (
             <Ionicons name="chevron-forward" size={16} color={theme.colors.onSurfaceVariant} />
           ) : null}
-        </View>
+        </GlassCard>
       </TouchableRipple>
     </View>
   );
@@ -144,8 +139,6 @@ const styles = StyleSheet.create({
     borderRadius: bentoRadius.card,
   },
   card: {
-    borderRadius: bentoRadius.card,
-    padding: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,

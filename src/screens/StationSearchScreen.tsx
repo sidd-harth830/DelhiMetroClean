@@ -11,6 +11,8 @@ import { useAppTheme } from '../theme/ThemeContext';
 import type { ExploreStackParamList } from '../navigation/types';
 import { spacing } from '../theme';
 import { bentoRadius } from '../theme/colors';
+import { GradientBackground } from '../components/GradientBackground';
+import { GlassCard } from '../components/GlassCard';
 
 type Nav = NativeStackNavigationProp<ExploreStackParamList, 'StationSearch'>;
 
@@ -23,13 +25,14 @@ export function StationSearchScreen() {
   const { data: results, isLoading } = useStationSearchQuery(debouncedQuery);
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <GradientBackground>
+    <View style={styles.container}>
       <Searchbar
         placeholder="Station name..."
         value={searchText}
         onChangeText={setSearchText}
         autoCapitalize="characters"
-        style={[styles.searchbar, { backgroundColor: theme.colors.elevation.level3 }]}
+        style={[styles.searchbar, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.7)' }]}
         inputStyle={{ color: theme.colors.onSurface }}
         placeholderTextColor={theme.colors.outline}
         elevation={0}
@@ -37,7 +40,7 @@ export function StationSearchScreen() {
 
       {isLoading ? (
         <View style={styles.loadingContainer}>
-          <View style={[styles.loadingCard, { backgroundColor: isDark ? theme.colors.elevation.level2 : theme.colors.surfaceVariant }]}>
+          <GlassCard padding={spacing.lg} borderRadius={bentoRadius.card} style={styles.loadingCard}>
             <View style={[styles.loadingIcon, { backgroundColor: isDark ? theme.colors.elevation.level4 : theme.colors.primaryContainer }]}>
               <Ionicons name="train-outline" size={22} color={theme.colors.primary} />
             </View>
@@ -45,7 +48,7 @@ export function StationSearchScreen() {
             <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '500' }}>
               Searching stations...
             </Text>
-          </View>
+          </GlassCard>
           {[0.6, 0.4, 0.25].map((opacity, i) => (
             <View key={i} style={[styles.skeletonRow, { opacity }]}>
               <View style={[styles.skeletonCircle, { backgroundColor: isDark ? theme.colors.elevation.level3 : theme.colors.surfaceVariant }]} />
@@ -86,6 +89,7 @@ export function StationSearchScreen() {
         />
       )}
     </View>
+    </GradientBackground>
   );
 }
 
@@ -109,8 +113,6 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
   },
   loadingCard: {
-    borderRadius: bentoRadius.card,
-    padding: spacing.lg,
     alignItems: 'center',
     gap: spacing.md,
   },

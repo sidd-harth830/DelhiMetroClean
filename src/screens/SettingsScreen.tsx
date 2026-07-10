@@ -11,6 +11,8 @@ import { useAuth } from '../auth/AuthContext';
 import { spacing } from '../theme';
 import { bentoRadius } from '../theme/colors';
 import { palettes } from '../theme/palettes';
+import { GlassCard } from '../components/GlassCard';
+import { GradientBackground } from '../components/GradientBackground';
 import Constants from 'expo-constants';
 import { databases } from '../config/appwrite';
 import { Query } from 'react-native-appwrite';
@@ -31,6 +33,7 @@ function PaletteCard({
     onPress: () => void;
     themeColors: any;
 }) {
+    const { shadows } = useAppTheme();
     const scaleAnim = useRef(new RNAnimated.Value(1)).current;
     const colors = isDark ? palette.dark : palette.light;
     const accentColor = colors.accent ?? colors.primary;
@@ -62,6 +65,7 @@ function PaletteCard({
                 style={[
                     styles.paletteCard,
                     {
+                        ...shadows.soft,
                         backgroundColor: isDark ? colors.surface : colors.background,
                         borderColor: isActive ? colors.primary : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'),
                         borderWidth: isActive ? 2.5 : 1,
@@ -116,7 +120,7 @@ function PaletteCard({
 export function SettingsScreen() {
     const theme = useTheme();
     const insets = useSafeAreaInsets();
-    const { themeMode, setThemeMode, isDark, colorPaletteId, setColorPalette } = useAppTheme();
+    const { themeMode, setThemeMode, isDark, colorPaletteId, setColorPalette, fonts } = useAppTheme();
     const queryClient = useQueryClient();
     const { user, logout } = useAuth();
     
@@ -264,13 +268,14 @@ export function SettingsScreen() {
     };
 
     return (
+        <GradientBackground>
         <ScrollView
-            style={[styles.container, { backgroundColor: theme.colors.background }]}
+            style={styles.container}
             contentContainerStyle={{ paddingTop: insets.top + spacing.lg, paddingBottom: insets.bottom + spacing.tabBarClearance }}
         >
             {/* ─── Header ─── */}
             <View style={styles.headerRow}>
-                <Text variant="headlineMedium" style={[styles.header, { color: theme.colors.onSurface }]}>
+                <Text variant="headlineMedium" style={[styles.header, { color: theme.colors.onSurface, fontFamily: fonts.heading }]}>
                     Settings
                 </Text>
                 <View style={[styles.headerBadge, { backgroundColor: `${theme.colors.primary}15` }]}>
@@ -282,9 +287,9 @@ export function SettingsScreen() {
             <List.Section style={styles.section}>
                 <View style={styles.sectionHeaderRow}>
                     <Ionicons name="person" size={16} color={theme.colors.primary} />
-                    <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>Account</List.Subheader>
+                    <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700', fontFamily: fonts.heading }}>Account</List.Subheader>
                 </View>
-                <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
+                <GlassCard padding={0} borderRadius={bentoRadius.card}>
                     <List.Item
                         title={user?.email ? "Logged in as" : "Guest Mode"}
                         description={user?.email || "Local storage only"}
@@ -297,16 +302,16 @@ export function SettingsScreen() {
                         titleStyle={{ color: theme.colors.onSurface, fontWeight: '600' }}
                         descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
                     />
-                </View>
+                </GlassCard>
             </List.Section>
 
             {/* ─── Appearance Section ─── */}
             <List.Section style={styles.section}>
                 <View style={styles.sectionHeaderRow}>
                     <Ionicons name="contrast" size={16} color={theme.colors.primary} />
-                    <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>Appearance</List.Subheader>
+                    <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700', fontFamily: fonts.heading }}>Appearance</List.Subheader>
                 </View>
-                <View style={[styles.card, { backgroundColor: theme.colors.surface, padding: spacing.md }]}>
+                <GlassCard padding={spacing.md} borderRadius={bentoRadius.card}>
                     <Text style={[styles.sectionSubtitle, { color: theme.colors.onSurfaceVariant }]}>
                         Choose your preferred display mode
                     </Text>
@@ -355,14 +360,14 @@ export function SettingsScreen() {
                             },
                         ]}
                     />
-                </View>
+                </GlassCard>
             </List.Section>
 
             {/* ─── Color Theme Grid ─── */}
             <List.Section style={styles.section}>
                 <View style={styles.sectionHeaderRow}>
                     <Ionicons name="color-palette" size={16} color={theme.colors.primary} />
-                    <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>Color Theme</List.Subheader>
+                    <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700', fontFamily: fonts.heading }}>Color Theme</List.Subheader>
                 </View>
                 <Text style={[styles.sectionSubtitle, { color: theme.colors.onSurfaceVariant, marginBottom: spacing.md, marginLeft: 2 }]}>
                     Pick a palette that matches your style
@@ -385,9 +390,9 @@ export function SettingsScreen() {
             <List.Section style={styles.section}>
                 <View style={styles.sectionHeaderRow}>
                     <Ionicons name="server" size={16} color={theme.colors.primary} />
-                    <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>Data & Storage</List.Subheader>
+                    <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700', fontFamily: fonts.heading }}>Data & Storage</List.Subheader>
                 </View>
-                <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
+                <GlassCard padding={0} borderRadius={bentoRadius.card}>
                     <List.Item
                         title="Clear Cache"
                         description="Free up space and clear saved preferences"
@@ -401,16 +406,16 @@ export function SettingsScreen() {
                         descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
                         disabled={isClearing}
                     />
-                </View>
+                </GlassCard>
             </List.Section>
 
             {/* ─── Support & Feedback ─── */}
             <List.Section style={styles.section}>
                 <View style={styles.sectionHeaderRow}>
                     <Ionicons name="chatbubbles" size={16} color={theme.colors.primary} />
-                    <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>Support</List.Subheader>
+                    <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700', fontFamily: fonts.heading }}>Support</List.Subheader>
                 </View>
-                <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
+                <GlassCard padding={0} borderRadius={bentoRadius.card}>
                     <List.Item
                         title="Send Feedback"
                         description="Report bugs or request new features"
@@ -419,16 +424,16 @@ export function SettingsScreen() {
                         titleStyle={{ color: theme.colors.onSurface, fontWeight: '600' }}
                         descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
                     />
-                </View>
+                </GlassCard>
             </List.Section>
 
             {/* ─── App Info ─── */}
             <List.Section style={styles.section}>
                 <View style={styles.sectionHeaderRow}>
                     <Ionicons name="information-circle" size={16} color={theme.colors.primary} />
-                    <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700' }}>App Info</List.Subheader>
+                    <List.Subheader style={{ color: theme.colors.primary, fontWeight: '700', fontFamily: fonts.heading }}>App Info</List.Subheader>
                 </View>
-                <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
+                <GlassCard padding={0} borderRadius={bentoRadius.card}>
                     <List.Item
                         title="Version"
                         description={Constants.expoConfig?.version || require('../../package.json').version || '1.0.0'}
@@ -449,10 +454,11 @@ export function SettingsScreen() {
                         descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
                         disabled={isCheckingUpdate}
                     />
-                </View>
+                </GlassCard>
             </List.Section>
 
         </ScrollView>
+        </GradientBackground>
     );
 }
 

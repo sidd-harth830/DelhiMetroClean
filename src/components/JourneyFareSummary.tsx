@@ -5,6 +5,7 @@ import type { JourneyFareWithRoute } from '../types';
 import { useAppTheme } from '../theme/ThemeContext';
 import { spacing } from '../theme';
 import { bentoRadius } from '../theme/colors';
+import { GlassCard } from './GlassCard';
 
 interface Props {
   fare: JourneyFareWithRoute;
@@ -25,15 +26,12 @@ function FareCard({
   const { isDark } = useAppTheme();
 
   return (
-    <View
+    <GlassCard
+      padding={spacing.md}
+      borderRadius={bentoRadius.card}
       style={[
         styles.fareCard,
-        {
-          backgroundColor: theme.colors.surface,
-          borderWidth: 1,
-          borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
-          overflow: 'hidden',
-        },
+        { overflow: 'hidden' }
       ]}
     >
       <View
@@ -76,7 +74,7 @@ function FareCard({
           transform: [{ rotate: '-15deg' }],
         }}
       />
-    </View>
+    </GlassCard>
   );
 }
 
@@ -129,8 +127,6 @@ const styles = StyleSheet.create({
   },
   fareCard: {
     flex: 1,
-    borderRadius: bentoRadius.card,
-    padding: spacing.md,
   },
   iconWrapper: {
     width: 40,

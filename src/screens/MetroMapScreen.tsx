@@ -10,7 +10,7 @@ import { useMapFamilyPrimaryQuery } from '../hooks/useMapQueries';
 import { useAppTheme } from '../theme/ThemeContext';
 import { spacing } from '../theme';
 import { bentoRadius } from '../theme/colors';
-
+import { GradientBackground } from '../components/GradientBackground';
 import { getApiKey, API_KEY_HEADER } from '../config/apiKeyProvider';
 import { env } from '../config/env';
 
@@ -44,7 +44,7 @@ async function isCachedMapValid(): Promise<boolean> {
 
 export function MetroMapScreen() {
   const theme = useTheme();
-  const { isDark } = useAppTheme();
+  const { isDark, fonts } = useAppTheme();
   const insets = useSafeAreaInsets();
 
   
@@ -139,9 +139,10 @@ export function MetroMapScreen() {
 
   if (error) {
     return (
-      <View style={[styles.center, { backgroundColor: theme.colors.background }]}>
+      <GradientBackground>
+      <View style={styles.center}>
         <Ionicons name="warning-outline" size={48} color={theme.colors.error} />
-        <Text variant="titleMedium" style={{ color: theme.colors.error, marginTop: spacing.md, textAlign: 'center' }}>
+        <Text variant="titleMedium" style={{ color: theme.colors.error, marginTop: spacing.md, textAlign: 'center', fontFamily: fonts.heading }}>
           {error}
         </Text>
         <Button
@@ -155,17 +156,20 @@ export function MetroMapScreen() {
           Try Again
         </Button>
       </View>
+      </GradientBackground>
     );
   }
 
   if (!svgContent) {
     return (
-      <View style={[styles.center, { backgroundColor: theme.colors.background }]}>
+      <GradientBackground>
+      <View style={styles.center}>
         <ActivityIndicator size="large" />
         <Text variant="bodyMedium" style={{ marginTop: spacing.md, color: theme.colors.onSurfaceVariant }}>
           Rendering interactive map...
         </Text>
       </View>
+      </GradientBackground>
     );
   }
 
@@ -228,7 +232,8 @@ export function MetroMapScreen() {
   `;
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background, paddingTop: insets.top }]}>
+    <GradientBackground>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={[styles.mapContainer, { backgroundColor: theme.colors.surface }]}>
         <WebView
           ref={webviewRef}
@@ -289,7 +294,7 @@ export function MetroMapScreen() {
           contentContainerStyle={[styles.modal, { backgroundColor: isDark ? 'rgba(30,30,30,0.95)' : 'rgba(255,255,255,0.95)', maxHeight: '80%', padding: 0, overflow: 'hidden' }]}
         >
           <ScrollView contentContainerStyle={{ padding: spacing.xl }}>
-          <Text variant="titleLarge" style={{ fontWeight: 'bold', marginBottom: spacing.md, color: theme.colors.onSurface }}>
+          <Text variant="titleLarge" style={{ fontWeight: 'bold', marginBottom: spacing.md, color: theme.colors.onSurface, fontFamily: fonts.heading }}>
             Map Legend
           </Text>
           <View style={styles.legendRow}>
@@ -363,6 +368,7 @@ export function MetroMapScreen() {
         </Modal>
       </Portal>
     </View>
+    </GradientBackground>
   );
 }
 

@@ -4,6 +4,13 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { StatusBar } from 'expo-status-bar';
 import { PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useFonts } from 'expo-font';
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+} from '@expo-google-fonts/inter';
 
 import { apiClient } from './src/api/client';
 import { queryClient } from './src/api/queryClient';
@@ -83,6 +90,27 @@ function AppInner() {
 }
 
 export default Sentry.wrap(function App() {
+  const [fontsLoaded] = useFonts({
+    // Acorn — heading / display font
+    'Acorn-Regular': require('./assets/fonts/Acorn-Regular.ttf'),
+    'Acorn-Medium': require('./assets/fonts/Acorn-Medium.ttf'),
+    'Acorn-SemiBold': require('./assets/fonts/Acorn-SemiBold.ttf'),
+    'Acorn-Bold': require('./assets/fonts/Acorn-Bold.ttf'),
+    // Inter — body / UI font
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+  });
+
+  if (!fontsLoaded) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D0D0D' }}>
+        <ActivityIndicator size="large" color="#BEFF6C" />
+      </View>
+    );
+  }
+
   return (
     <ErrorBoundary>
       <SafeAreaProvider>

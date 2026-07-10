@@ -12,6 +12,12 @@ export const spacing = {
   bentoGap: 12,
   /** Larger gap between major sections */
   sectionGap: 20,
+  /** Hero-level gap between featured cards */
+  heroGap: 24,
+  /** Screen-level horizontal padding */
+  screenPadding: 20,
+  /** Internal card padding (generous for glass cards) */
+  cardPadding: 20,
   /** Bottom padding to clear floating tab bar */
   tabBarClearance: 100,
 } as const;

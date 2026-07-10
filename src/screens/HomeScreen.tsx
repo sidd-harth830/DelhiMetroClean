@@ -10,10 +10,13 @@ import type { SelectedStation } from '../hooks/useStationPicker';
 import { StationPicker } from '../components/StationPicker';
 import { NmrcStationPicker } from '../components/NmrcStationPicker';
 import { SectionHeader } from '../components/SectionHeader';
+import { GlassCard } from '../components/GlassCard';
+import { FloatingButton } from '../components/FloatingButton';
+import { GradientBackground } from '../components/GradientBackground';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useAppTheme } from '../theme/ThemeContext';
 import type { HomeStackParamList } from '../navigation/types';
-import { spacing } from '../theme';
+import { spacing, fontFamily } from '../theme';
 import { bentoRadius } from '../theme/colors';
 import { FavoritesStorage, FavoriteStation, SavedRoute } from '../storage/favorites';
 
@@ -33,7 +36,7 @@ export function HomeScreen() {
   const navigation = useNavigation<Nav>();
   const insets = useSafeAreaInsets();
   const theme = useTheme();
-  const { semantic, isDark } = useAppTheme();
+  const { semantic, isDark, shadows, fonts, gradients } = useAppTheme();
 
   const greeting = useMemo(() => getGreeting(), []);
 
@@ -138,28 +141,40 @@ export function HomeScreen() {
   const nmrcBadgeBg = isDark ? 'rgba(0,209,209,0.15)' : 'rgba(13,148,136,0.10)';
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      {/* ─── Header (no theme toggle — that's in Settings) ─── */}
+    <GradientBackground>
+      {/* ─── Header ─── */}
       <Appbar.Header
         elevated={false}
-        style={{ backgroundColor: theme.colors.background, borderBottomWidth: 0 }}
+        style={{ backgroundColor: 'transparent', borderBottomWidth: 0 }}
       >
         <Appbar.Content
           title="Metro Planner"
-          titleStyle={{ fontWeight: '800', fontSize: 22, letterSpacing: -0.3 }}
+          titleStyle={{
+            fontFamily: fonts.heading,
+            fontWeight: '800',
+            fontSize: 24,
+            letterSpacing: -0.5,
+          }}
         />
       </Appbar.Header>
 
       {/* ─── Greeting banner ─── */}
-      <View style={[styles.greetingBanner, { backgroundColor: isDark ? `${theme.colors.primary}0C` : `${theme.colors.primary}06` }]}>
-        <Ionicons name={greeting.icon as any} size={16} color={theme.colors.primary} />
-        <Text style={[styles.greetingText, { color: theme.colors.primary }]}>
-          {greeting.text}
-        </Text>
-        <Text style={[styles.greetingSubtext, { color: theme.colors.onSurfaceVariant }]}>
-          Delhi & Noida Metro
-        </Text>
-      </View>
+      <GlassCard
+        borderRadius={bentoRadius.large}
+        padding={spacing.md}
+        animated={false}
+        style={{ marginHorizontal: spacing.screenPadding, marginBottom: spacing.sm }}
+      >
+        <View style={styles.greetingInner}>
+          <Ionicons name={greeting.icon as any} size={18} color={theme.colors.primary} />
+          <Text style={[styles.greetingText, { color: theme.colors.primary, fontFamily: fonts.headingSemiBold }]}>
+            {greeting.text}
+          </Text>
+          <Text style={[styles.greetingSubtext, { color: theme.colors.onSurfaceVariant, fontFamily: fonts.body }]}>
+            Delhi & Noida Metro
+          </Text>
+        </View>
+      </GlassCard>
       
       <ScrollView
         style={{ flex: 1 }}
@@ -175,7 +190,7 @@ export function HomeScreen() {
               onPress={() => { setDepartureDate(undefined); setSelectedChip('now'); }}
               mode="outlined"
               style={{ borderRadius: bentoRadius.pill, backgroundColor: selectedChip === 'now' ? chipBgActive : 'transparent', borderColor: selectedChip === 'now' ? chipBgActive : theme.colors.outline }}
-              textStyle={{ fontSize: 13, color: selectedChip === 'now' ? chipTextActive : theme.colors.onSurfaceVariant, fontWeight: selectedChip === 'now' ? '700' : '500' }}
+              textStyle={{ fontSize: 13, color: selectedChip === 'now' ? chipTextActive : theme.colors.onSurfaceVariant, fontWeight: selectedChip === 'now' ? '700' : '500', fontFamily: fonts.bodyMedium }}
             >
               Now
             </Chip>
@@ -185,7 +200,7 @@ export function HomeScreen() {
               onPress={() => { setDepartureDate(new Date(Date.now() + 15 * 60000)); setSelectedChip('15m'); }}
               mode="outlined"
               style={{ borderRadius: bentoRadius.pill, backgroundColor: selectedChip === '15m' ? chipBgActive : 'transparent', borderColor: selectedChip === '15m' ? chipBgActive : theme.colors.outline }}
-              textStyle={{ fontSize: 13, color: selectedChip === '15m' ? chipTextActive : theme.colors.onSurfaceVariant, fontWeight: selectedChip === '15m' ? '700' : '500' }}
+              textStyle={{ fontSize: 13, color: selectedChip === '15m' ? chipTextActive : theme.colors.onSurfaceVariant, fontWeight: selectedChip === '15m' ? '700' : '500', fontFamily: fonts.bodyMedium }}
             >
               +15m
             </Chip>
@@ -195,15 +210,17 @@ export function HomeScreen() {
               onPress={() => { setDepartureDate(new Date(Date.now() + 30 * 60000)); setSelectedChip('30m'); }}
               mode="outlined"
               style={{ borderRadius: bentoRadius.pill, backgroundColor: selectedChip === '30m' ? chipBgActive : 'transparent', borderColor: selectedChip === '30m' ? chipBgActive : theme.colors.outline }}
-              textStyle={{ fontSize: 13, color: selectedChip === '30m' ? chipTextActive : theme.colors.onSurfaceVariant, fontWeight: selectedChip === '30m' ? '700' : '500' }}
+              textStyle={{ fontSize: 13, color: selectedChip === '30m' ? chipTextActive : theme.colors.onSurfaceVariant, fontWeight: selectedChip === '30m' ? '700' : '500', fontFamily: fonts.bodyMedium }}
             >
               +30m
             </Chip>
+
             <Chip
               icon="calendar"
               onPress={() => { setPickerMode('date'); setShowPicker(true); }}
               mode="outlined"
               style={{ borderRadius: bentoRadius.pill, backgroundColor: selectedChip === 'custom' && pickerMode === 'date' ? theme.colors.primaryContainer : 'transparent' }}
+              textStyle={{ fontFamily: fonts.bodyMedium }}
             >
               {departureDate && selectedChip === 'custom' ? departureDate.toLocaleDateString() : 'Date'}
             </Chip>
@@ -212,6 +229,7 @@ export function HomeScreen() {
               onPress={() => { setPickerMode('time'); setShowPicker(true); }}
               mode="outlined"
               style={{ borderRadius: bentoRadius.pill }}
+              textStyle={{ fontFamily: fonts.bodyMedium }}
             >
               {departureDate && selectedChip === 'custom' ? departureDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Time'}
             </Chip>
@@ -228,22 +246,13 @@ export function HomeScreen() {
           />
         )}
 
-        {/* ─── DMRC Planner Card ─── */}
-        <View
-          style={[
-            styles.plannerCard,
-            {
-              backgroundColor: isDark ? `${theme.colors.primary}0A` : `${theme.colors.primary}05`,
-              borderWidth: 1,
-              borderColor: isDark ? `${theme.colors.primary}18` : `${theme.colors.primary}10`,
-            },
-          ]}
-        >
+        {/* ─── DMRC Planner Card (Glass) ─── */}
+        <GlassCard borderRadius={bentoRadius.heroCard} padding={spacing.cardPadding}>
           <View style={[styles.cardHeaderRow, { backgroundColor: isDark ? `${theme.colors.primary}15` : `${theme.colors.primary}0C` }]}>
             <View style={[styles.cardHeaderIcon, { backgroundColor: theme.colors.primary }]}>
               <Ionicons name="subway" size={16} color={theme.colors.onPrimary} />
             </View>
-            <Text style={[styles.cardHeaderTitle, { color: theme.colors.primary }]}>Delhi Metro (DMRC)</Text>
+            <Text style={[styles.cardHeaderTitle, { color: theme.colors.primary, fontFamily: fonts.heading }]}>Delhi Metro (DMRC)</Text>
           </View>
           
           <View style={styles.stationsBlock}>
@@ -256,69 +265,56 @@ export function HomeScreen() {
             <View style={styles.inputsColumn}>
               <Pressable
                 style={[styles.stationInput, {
-                  backgroundColor: isDark ? theme.colors.surfaceVariant : theme.colors.surface,
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.65)',
                   borderWidth: 1,
-                  borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                  borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
                 }]}
                 onPress={fromPickerDmrc.open}
               >
                 <View style={[styles.inputDot, { backgroundColor: semantic.success }]} />
-                <Text style={[{ flex: 1, color: fromPickerDmrc.station ? theme.colors.onSurface : theme.colors.onSurfaceVariant, fontWeight: fromPickerDmrc.station ? '700' : '500' }]} numberOfLines={1}>
+                <Text style={[{ flex: 1, color: fromPickerDmrc.station ? theme.colors.onSurface : theme.colors.onSurfaceVariant, fontWeight: fromPickerDmrc.station ? '700' : '500', fontFamily: fromPickerDmrc.station ? fonts.bodySemiBold : fonts.body }]} numberOfLines={1}>
                   {fromPickerDmrc.station?.name ?? 'Where from?'}
                 </Text>
               </Pressable>
 
               <Pressable
                 style={[styles.stationInput, {
-                  backgroundColor: isDark ? theme.colors.surfaceVariant : theme.colors.surface,
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.65)',
                   borderWidth: 1,
-                  borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                  borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
                 }]}
                 onPress={toPickerDmrc.open}
               >
                 <View style={[styles.inputDot, { backgroundColor: semantic.error }]} />
-                <Text style={[{ flex: 1, color: toPickerDmrc.station ? theme.colors.onSurface : theme.colors.onSurfaceVariant, fontWeight: toPickerDmrc.station ? '700' : '500' }]} numberOfLines={1}>
+                <Text style={[{ flex: 1, color: toPickerDmrc.station ? theme.colors.onSurface : theme.colors.onSurfaceVariant, fontWeight: toPickerDmrc.station ? '700' : '500', fontFamily: toPickerDmrc.station ? fonts.bodySemiBold : fonts.body }]} numberOfLines={1}>
                   {toPickerDmrc.station?.name ?? 'Where to?'}
                 </Text>
               </Pressable>
             </View>
 
-            <Pressable style={[styles.swapBtn, { backgroundColor: theme.colors.primary }]} onPress={handleSwapDmrc}>
+            <Pressable style={[styles.swapBtn, { backgroundColor: theme.colors.primary, ...shadows.soft }]} onPress={handleSwapDmrc}>
               <Ionicons name="swap-vertical" size={18} color={theme.colors.onPrimary} />
             </Pressable>
           </View>
 
-          <Button
-            mode="contained"
+          <FloatingButton
+            label="Find DMRC Route"
             onPress={handleFindRouteDmrc}
             disabled={!canSearchDmrc}
-            icon="navigation"
-            style={[styles.findButton, { opacity: canSearchDmrc ? 1 : 0.5 }]}
-            contentStyle={{ paddingVertical: 8 }}
-            labelStyle={{ fontSize: 16, fontWeight: '700' }}
-          >
-            Find DMRC Route
-          </Button>
-        </View>
+            icon="navigate"
+            style={{ marginTop: spacing.md }}
+          />
+        </GlassCard>
 
-        {/* ─── NMRC Planner Card ─── */}
-        <View
-          style={[
-            styles.plannerCard,
-            {
-              backgroundColor: nmrcAccentBg,
-              borderWidth: 1,
-              borderColor: nmrcAccentBorder,
-            },
-          ]}
-        >
+        {/* ─── NMRC Planner Card (Glass) ─── */}
+        <GlassCard borderRadius={bentoRadius.heroCard} padding={spacing.cardPadding}>
           <View style={[styles.cardHeaderRow, { backgroundColor: isDark ? 'rgba(0,209,209,0.12)' : 'rgba(13,148,136,0.08)' }]}>
             <View style={[styles.cardHeaderIcon, { backgroundColor: nmrcAccent }]}>
               <Ionicons name="subway" size={16} color="#FFFFFF" />
             </View>
-            <Text style={[styles.cardHeaderTitle, { color: nmrcAccent }]}>Noida Metro (NMRC)</Text>
+            <Text style={[styles.cardHeaderTitle, { color: nmrcAccent, fontFamily: fonts.heading }]}>Noida Metro (NMRC)</Text>
             <View style={[styles.networkBadge, { backgroundColor: nmrcBadgeBg }]}>
-              <Text style={{ fontSize: 10, fontWeight: '700', color: nmrcAccent }}>Aqua Line</Text>
+              <Text style={{ fontSize: 10, fontWeight: '700', color: nmrcAccent, fontFamily: fonts.bodySemiBold }}>Aqua Line</Text>
             </View>
           </View>
           
@@ -332,52 +328,47 @@ export function HomeScreen() {
             <View style={styles.inputsColumn}>
               <Pressable
                 style={[styles.stationInput, {
-                  backgroundColor: isDark ? theme.colors.surfaceVariant : theme.colors.surface,
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.65)',
                   borderWidth: 1,
-                  borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                  borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
                 }]}
                 onPress={fromPickerNmrc.open}
               >
                 <View style={[styles.inputDot, { backgroundColor: semantic.success }]} />
-                <Text style={[{ flex: 1, color: fromPickerNmrc.station ? theme.colors.onSurface : theme.colors.onSurfaceVariant, fontWeight: fromPickerNmrc.station ? '700' : '500' }]} numberOfLines={1}>
+                <Text style={[{ flex: 1, color: fromPickerNmrc.station ? theme.colors.onSurface : theme.colors.onSurfaceVariant, fontWeight: fromPickerNmrc.station ? '700' : '500', fontFamily: fromPickerNmrc.station ? fonts.bodySemiBold : fonts.body }]} numberOfLines={1}>
                   {fromPickerNmrc.station?.name ?? 'Where from?'}
                 </Text>
               </Pressable>
 
               <Pressable
                 style={[styles.stationInput, {
-                  backgroundColor: isDark ? theme.colors.surfaceVariant : theme.colors.surface,
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.65)',
                   borderWidth: 1,
-                  borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                  borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
                 }]}
                 onPress={toPickerNmrc.open}
               >
                 <View style={[styles.inputDot, { backgroundColor: semantic.error }]} />
-                <Text style={[{ flex: 1, color: toPickerNmrc.station ? theme.colors.onSurface : theme.colors.onSurfaceVariant, fontWeight: toPickerNmrc.station ? '700' : '500' }]} numberOfLines={1}>
+                <Text style={[{ flex: 1, color: toPickerNmrc.station ? theme.colors.onSurface : theme.colors.onSurfaceVariant, fontWeight: toPickerNmrc.station ? '700' : '500', fontFamily: toPickerNmrc.station ? fonts.bodySemiBold : fonts.body }]} numberOfLines={1}>
                   {toPickerNmrc.station?.name ?? 'Where to?'}
                 </Text>
               </Pressable>
             </View>
 
-            <Pressable style={[styles.swapBtn, { backgroundColor: nmrcAccent }]} onPress={handleSwapNmrc}>
+            <Pressable style={[styles.swapBtn, { backgroundColor: nmrcAccent, ...shadows.soft }]} onPress={handleSwapNmrc}>
               <Ionicons name="swap-vertical" size={18} color="#FFFFFF" />
             </Pressable>
           </View>
 
-          <Button
-            mode="contained"
+          <FloatingButton
+            label="Find NMRC Route"
             onPress={handleFindRouteNmrc}
             disabled={!canSearchNmrc}
-            icon="navigation"
-            style={[styles.findButton, { opacity: canSearchNmrc ? 1 : 0.5 }]}
-            contentStyle={{ paddingVertical: 8 }}
-            labelStyle={{ fontSize: 16, fontWeight: '700' }}
-            buttonColor={nmrcAccent}
-            textColor="#FFFFFF"
-          >
-            Find NMRC Route
-          </Button>
-        </View>
+            icon="navigate"
+            gradient={[nmrcAccent, isDark ? '#38BDF8' : '#0284C7']}
+            style={{ marginTop: spacing.md }}
+          />
+        </GlassCard>
 
         {/* ─── Saved Routes Section ─── */}
         {savedRoutes.length > 0 && (
@@ -387,22 +378,23 @@ export function HomeScreen() {
               {savedRoutes.map((route) => (
                 <Pressable
                   key={`${route.fromCode}-${route.toCode}`}
-                  style={[
-                    styles.popularCard,
-                    {
-                      backgroundColor: theme.colors.surface,
-                      borderWidth: 1,
-                      borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-                    },
-                  ]}
                   onPress={() => handleSavedRoute(route.fromCode, route.toCode, route.fromName, route.toName)}
                 >
-                  <View style={[styles.popularIcon, { backgroundColor: isDark ? `${semantic.blue_line}20` : `${semantic.blue_line}12` }]}>
-                    <Ionicons name="train" size={16} color={semantic.blue_line} />
-                  </View>
-                  <Text style={{ fontWeight: '700', color: theme.colors.onSurface, fontSize: 13, flex: 1, flexWrap: 'wrap' }}>
-                    {route.fromName} → {route.toName}
-                  </Text>
+                  <GlassCard
+                    borderRadius={bentoRadius.card}
+                    padding={spacing.md}
+                    animated={false}
+                    style={{ width: '100%' }}
+                  >
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                      <View style={[styles.popularIcon, { backgroundColor: isDark ? `${semantic.blue_line}20` : `${semantic.blue_line}12` }]}>
+                        <Ionicons name="train" size={16} color={semantic.blue_line} />
+                      </View>
+                      <Text style={{ fontWeight: '700', color: theme.colors.onSurface, fontSize: 13, flex: 1, flexWrap: 'wrap', fontFamily: fonts.bodySemiBold }}>
+                        {route.fromName} → {route.toName}
+                      </Text>
+                    </View>
+                  </GlassCard>
                 </Pressable>
               ))}
             </View>
@@ -417,22 +409,23 @@ export function HomeScreen() {
               {favoriteStations.map((station) => (
                 <Pressable
                   key={station.code}
-                  style={[
-                    styles.popularCard,
-                    {
-                      backgroundColor: theme.colors.surface,
-                      borderWidth: 1,
-                      borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-                    },
-                  ]}
                   onPress={() => navigation.navigate('StationDetail', { stationCode: station.code, stationName: station.name })}
                 >
-                  <View style={[styles.popularIcon, { backgroundColor: isDark ? `${semantic.warning}20` : `${semantic.warning}12` }]}>
-                    <Ionicons name="star" size={16} color={semantic.warning} />
-                  </View>
-                  <Text style={{ fontWeight: '700', color: theme.colors.onSurface, fontSize: 13 }} numberOfLines={1}>
-                    {station.name}
-                  </Text>
+                  <GlassCard
+                    borderRadius={bentoRadius.card}
+                    padding={spacing.md}
+                    animated={false}
+                    style={{ width: '100%' }}
+                  >
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                      <View style={[styles.popularIcon, { backgroundColor: isDark ? `${semantic.warning}20` : `${semantic.warning}12` }]}>
+                        <Ionicons name="star" size={16} color={semantic.warning} />
+                      </View>
+                      <Text style={{ fontWeight: '700', color: theme.colors.onSurface, fontSize: 13, fontFamily: fonts.bodySemiBold }} numberOfLines={1}>
+                        {station.name}
+                      </Text>
+                    </View>
+                  </GlassCard>
                 </Pressable>
               ))}
             </View>
@@ -444,28 +437,23 @@ export function HomeScreen() {
         <NmrcStationPicker visible={fromPickerNmrc.visible} onSelect={fromPickerNmrc.select as any} onClose={fromPickerNmrc.close} title="NMRC Departure" />
         <NmrcStationPicker visible={toPickerNmrc.visible} onSelect={toPickerNmrc.select as any} onClose={toPickerNmrc.close} title="NMRC Destination" />
       </ScrollView>
-    </View>
+    </GradientBackground>
   );
 }
 
 const styles = StyleSheet.create({
   content: {
-    padding: spacing.base,
-    gap: spacing.sectionGap,
+    padding: spacing.screenPadding,
+    gap: spacing.heroGap,
   },
-  greetingBanner: {
+  greetingInner: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: spacing.base,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: bentoRadius.badge,
     gap: spacing.sm,
-    marginBottom: spacing.xs,
   },
   greetingText: {
     fontWeight: '700',
-    fontSize: 14,
+    fontSize: 15,
   },
   greetingSubtext: {
     fontSize: 12,
@@ -475,12 +463,6 @@ const styles = StyleSheet.create({
   timeSection: {
     marginBottom: 0,
   },
-  plannerCard: {
-    borderRadius: bentoRadius.heroCard,
-    padding: spacing.lg,
-    gap: spacing.md,
-    overflow: 'hidden',
-  },
   cardHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -489,18 +471,18 @@ const styles = StyleSheet.create({
     borderRadius: bentoRadius.badge,
     alignSelf: 'flex-start',
     gap: 8,
-    marginBottom: 4,
+    marginBottom: spacing.sm,
   },
   cardHeaderIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     justifyContent: 'center',
     alignItems: 'center',
   },
   cardHeaderTitle: {
     fontWeight: '800',
-    fontSize: 14,
+    fontSize: 15,
   },
   networkBadge: {
     paddingHorizontal: 8,
@@ -550,26 +532,14 @@ const styles = StyleSheet.create({
   swapBtn: {
     width: 44,
     height: 44,
-    borderRadius: bentoRadius.icon,
+    borderRadius: bentoRadius.card,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  findButton: {
-    borderRadius: bentoRadius.button,
-    marginTop: spacing.md,
   },
   popularGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.bentoGap,
-    paddingHorizontal: spacing.base,
-  },
-  popularCard: {
-    width: '47%',
-    padding: spacing.md,
-    borderRadius: bentoRadius.card,
-    gap: spacing.sm,
-    alignItems: 'center',
   },
   popularIcon: {
     width: 36,
