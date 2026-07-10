@@ -41,7 +41,7 @@ export function ApiPortalScreen() {
   const [selectedTheme, setSelectedTheme] = useState<PortalThemeDefinition | null>(null);
   const [availableThemes, setAvailableThemes] = useState<PortalThemeDefinition[]>([]);
 
-  const isAdmin = user?.email === 'leocarnivas@gmail.com';
+  const isAdmin = user?.email && user.email === process.env.EXPO_PUBLIC_ADMIN_EMAIL;
 
   // Load themes and API status
   useEffect(() => {

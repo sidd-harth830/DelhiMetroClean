@@ -6,7 +6,11 @@ import { Client, Account, Databases, OAuthProvider } from 'react-native-appwrite
 import { Platform } from 'react-native';
 
 const endpoint = process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT || 'https://cloud.appwrite.io/v1';
-const projectId = process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID || '6a2ce46a003230dcf661';
+const projectId = process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID;
+
+if (!projectId) {
+    throw new Error('Missing EXPO_PUBLIC_APPWRITE_PROJECT_ID environment variable.');
+}
 
 export const client = new Client()
     .setProject(projectId)

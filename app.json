@@ -5,20 +5,18 @@
     "scheme": "com.siddharth.dmrc",
     "version": "1.1.0",
     "orientation": "portrait",
-    "icon": "./assets/new-icon.svg",
+    "icon": "./assets/new-icon.png",
     "userInterfaceStyle": "light",
     "jsEngine": "hermes",
-    "main": "index.ts",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.siddharth.dmrc"
     },
     "android": {
       "package": "com.siddharth.dmrc",
-      "usesCleartextTraffic": true,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/new-icon.svg"
+        "foregroundImage": "./assets/new-icon.png"
       },
       "predictiveBackGestureEnabled": false
     },
@@ -58,10 +56,11 @@
           "organization": "siddharth-4t"
         }
       ],
-      "expo-font"
+      "expo-font",
+      "@sentry/react-native"
     ],
     "splash": {
-      "image": "./assets/new-splash-icon.svg",
+      "image": "./assets/new-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#0D0D0D"
     }

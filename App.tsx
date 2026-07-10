@@ -74,7 +74,7 @@ function AppInner() {
   const { paperTheme, navTheme } = useAppTheme();
 
   React.useEffect(() => {
-    startKeepAlive();
+    return startKeepAlive();
   }, []);
 
   return (
@@ -88,6 +88,10 @@ function AppInner() {
     </PaperProvider>
   );
 }
+
+import * as SplashScreen from 'expo-splash-screen';
+
+SplashScreen.preventAutoHideAsync();
 
 export default Sentry.wrap(function App() {
   const [fontsLoaded] = useFonts({
@@ -103,12 +107,14 @@ export default Sentry.wrap(function App() {
     Inter_700Bold,
   });
 
+  React.useEffect(() => {
+    if (fontsLoaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
+
   if (!fontsLoaded) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D0D0D' }}>
-        <ActivityIndicator size="large" color="#BEFF6C" />
-      </View>
-    );
+    return null;
   }
 
   return (
