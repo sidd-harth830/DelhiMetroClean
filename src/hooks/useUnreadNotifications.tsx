@@ -6,7 +6,6 @@ import { useNotificationsQuery } from './useDmrcQueries';
 // Setup notification handler for foreground notifications
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: false,
     shouldShowBanner: true,
